@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\View;
 
-use Closure;
 use Prosopo\Views\Interfaces\ObjectPropertyManagerInterface;
 use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
 use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
@@ -23,16 +22,24 @@ class ViewFactory implements ViewFactoryInterface
         $this->templateProvider = $templateProvider;
     }
 
-    public function makeView(string $viewClass, ?Closure $setupCallback = null): ViewInterface
+    public function makeView(string $viewClass): ViewInterface
     {
-        $viewInstance = new $viewClass($this->templateProvider);
+        $viewInstance = $this->makeViewInstance($viewClass);
 
         $this->objectPropertyManager->setDefaultValues($viewInstance);
 
-        if (null !== $setupCallback) {
-            $setupCallback($viewInstance);
-        }
-
         return $viewInstance;
+    }
+
+    /**
+     * @template T of ViewInterface
+     *
+     * @param class-string<T> $viewClass
+     *
+     * @return T
+     */
+    protected function makeViewInstance(string $viewClass): ViewInterface
+    {
+        return new $viewClass($this->templateProvider);
     }
 }

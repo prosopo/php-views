@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\Blade;
 
+use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
+use Prosopo\Views\Interfaces\Template\TemplateErrorDispatcherInterface;
 use Prosopo\Views\Interfaces\Template\TemplateErrorInterface;
+use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 
 class BladeRendererConfig
 {
+    //// Optional settings:
+
     /**
      * @var callable(TemplateErrorInterface $templateError): void|null
      */
@@ -26,6 +31,13 @@ class BladeRendererConfig
      */
     private $compilerExtensionCallback;
 
+    //// Custom modules (set them when you need to override the default classes):
+
+    private ?TemplateErrorDispatcherInterface $templateErrorDispatcher;
+    private ?TemplateRendererInterface $templateRenderer;
+    private ?TemplateCompilerInterface $templateCompiler;
+    private ?TemplateRendererInterface $templateRendererWithCustomEscape;
+
     public function __construct()
     {
         $this->templateErrorHandler = null;
@@ -33,7 +45,13 @@ class BladeRendererConfig
         $this->globalVariables = [];
         $this->escapeVariableName = 'escape';
         $this->compilerExtensionCallback = null;
+        $this->templateErrorDispatcher = null;
+        $this->templateRenderer = null;
+        $this->templateCompiler = null;
+        $this->templateRendererWithCustomEscape = null;
     }
+
+    //// Getters.
 
     /**
      * @return callable(TemplateErrorInterface $templateError): void|null
@@ -72,6 +90,28 @@ class BladeRendererConfig
         return $this->compilerExtensionCallback;
     }
 
+    public function getTemplateErrorDispatcher(): ?TemplateErrorDispatcherInterface
+    {
+        return $this->templateErrorDispatcher;
+    }
+
+    public function getTemplateRenderer(): ?TemplateRendererInterface
+    {
+        return $this->templateRenderer;
+    }
+
+    public function getTemplateCompiler(): ?TemplateCompilerInterface
+    {
+        return $this->templateCompiler;
+    }
+
+    public function getTemplateRendererWithCustomEscape(): ?TemplateRendererInterface
+    {
+        return $this->templateRendererWithCustomEscape;
+    }
+
+    //// Setters.
+
     /**
      * @param callable(string $template): string|null $compilerExtensionCallback
      */
@@ -104,5 +144,26 @@ class BladeRendererConfig
     public function setEscapeVariableName(string $escapeVariableName): void
     {
         $this->escapeVariableName = $escapeVariableName;
+    }
+
+    public function setTemplateErrorDispatcher(?TemplateErrorDispatcherInterface $templateErrorDispatcher): void
+    {
+        $this->templateErrorDispatcher = $templateErrorDispatcher;
+    }
+
+    public function setTemplateRenderer(?TemplateRendererInterface $templateRenderer): void
+    {
+        $this->templateRenderer = $templateRenderer;
+    }
+
+    public function setTemplateCompiler(?TemplateCompilerInterface $templateCompiler): void
+    {
+        $this->templateCompiler = $templateCompiler;
+    }
+
+    public function setTemplateRendererWithCustomEscape(
+        ?TemplateRendererInterface $templateRendererWithCustomEscape
+    ): void {
+        $this->templateRendererWithCustomEscape = $templateRendererWithCustomEscape;
     }
 }

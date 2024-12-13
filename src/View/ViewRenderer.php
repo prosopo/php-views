@@ -29,12 +29,16 @@ class ViewRenderer implements ViewRendererInterface
 
     public function renderView($viewOrClass, ?Closure $setupCallback = null, bool $doPrint = false): string
     {
-        $component = true === is_string($viewOrClass) ?
-            $this->viewFactory->makeView($viewOrClass, $setupCallback) :
+        $view = true === is_string($viewOrClass) ?
+            $this->viewFactory->makeView($viewOrClass) :
             $viewOrClass;
 
-        $template  = $component->getTemplate();
-        $variables = $this->objectPropertyManager->getVariables($component);
+        if (null !== $setupCallback) {
+            $setupCallback($view);
+        }
+
+        $template  = $view->getTemplate();
+        $variables = $this->objectPropertyManager->getVariables($view);
 
         $variables = $this->renderNestedViews($variables);
 
