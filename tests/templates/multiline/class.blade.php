@@ -1,0 +1,2 @@
+@class(['first',
+'second' => $var])

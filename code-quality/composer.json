@@ -1,0 +1,18 @@
+{
+  "require-dev": {
+    "phpstan/phpstan": "^2.0",
+    "phpstan/phpstan-strict-rules": "^2.0",
+    "squizlabs/php_codesniffer": "^3.11",
+    "slevomat/coding-standard": "^8.15"
+  },
+  "scripts": {
+    "phpstan": "php ./vendor/bin/phpstan analys -c ./phpstan.neon",
+    "phpcs": "php ./vendor/bin/phpcs --standard=phpcs.xml ../src",
+    "phpcbf": "php ./vendor/bin/phpcbf --standard=phpcs.xml ../src"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  }
+}

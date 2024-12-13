@@ -1,0 +1,1 @@
+<?php if ( $var ) echo "selected=\"\""; ?>

@@ -1,0 +1,22 @@
+{
+  "require-dev": {
+    "pestphp/pest": "^3.7",
+    "mockery/mockery": "^1.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "Tests\\": "pest/"
+    }
+  },
+  "scripts": {
+    "pest": "./vendor/bin/pest"
+  },
+  "config": {
+    "platform": {
+      "php": "8.2"
+    },
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
+}
