@@ -18,7 +18,7 @@ final class ViewsConfig
     private string $templatesRootPath;
     private string $viewsRootNamespace;
     private string $templateFileExtension;
-    private ModulesCollection $modulesCollection;
+    private Modules $modulesCollection;
 
     //// Optional settings:
 
@@ -31,6 +31,8 @@ final class ViewsConfig
     {
         // Defaults are not set for required modules.
         // This is intentional to ensure an Exception is thrown if their getters are called without providing values.
+
+        $this->modulesCollection = new Modules();
 
         $this->defaultPropertyValues = array(
             'array'  => array(),
@@ -58,11 +60,6 @@ final class ViewsConfig
         return $this->templateFileExtension;
     }
 
-    public function setModulesCollection(ModulesCollection $modulesCollection): void
-    {
-        $this->modulesCollection = $modulesCollection;
-    }
-
     /**
      * @return array<string,mixed>
      */
@@ -71,33 +68,48 @@ final class ViewsConfig
         return $this->defaultPropertyValues;
     }
 
+    public function getModules(): Modules
+    {
+        return $this->modulesCollection;
+    }
+
     //// Setters.
 
-    public function setTemplatesRootPath(string $templatesRootPath): void
+    public function setTemplatesRootPath(string $templatesRootPath): self
     {
         $this->templatesRootPath = $templatesRootPath;
+
+        return $this;
     }
 
-    public function setViewsRootNamespace(string $viewsRootNamespace): void
+    public function setViewsRootNamespace(string $viewsRootNamespace): self
     {
         $this->viewsRootNamespace = $viewsRootNamespace;
+
+        return $this;
     }
 
-    public function setTemplateFileExtension(string $templateFileExtension): void
+    public function setTemplateFileExtension(string $templateFileExtension): self
     {
         $this->templateFileExtension = $templateFileExtension;
+
+        return $this;
     }
 
     /**
      * @param array<string,mixed> $defaultPropertyValues
      */
-    public function setDefaultPropertyValues(array $defaultPropertyValues): void
+    public function setDefaultPropertyValues(array $defaultPropertyValues): self
     {
         $this->defaultPropertyValues = $defaultPropertyValues;
+
+        return $this;
     }
 
-    public function getModulesCollection(): ModulesCollection
+    public function setModules(Modules $modulesCollection): self
     {
-        return $this->modulesCollection;
+        $this->modulesCollection = $modulesCollection;
+
+        return $this;
     }
 }

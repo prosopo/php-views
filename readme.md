@@ -6,7 +6,8 @@ Benefits:
 
 * Zero Dependencies: Lightweight and easy to integrate into any project.
 * Wide Compatibility: PHP 7.4+, 8.0+
-* [SOLID principles](https://en.wikipedia.org/wiki/SOLID): Built with maintainability and scalability in mind.
+* Adherence to the [SOLID principles](https://en.wikipedia.org/wiki/SOLID): You can override any module without
+  affecting the rest of the system.
 * Test Coverage: Covered by [Pest](https://pestphp.com/) Unit and Feature tests.
 * Static Analysis: Checked by [PHPStan](https://phpstan.org/).
 
@@ -18,150 +19,13 @@ You're free to use the package in your own way:
 * Employ it as a standalone [Blade](https://laravel.com/docs/11.x/blade) implementation for your templates.
 * Leverage its object Models wrapper for any template engine (e.g., [Twig](https://twig.symfony.com/)).
 
-## 1. Template Renderer
+## 1. Model-driven approach
 
-### 1.1) Blade standalone (build-in)
+Similar to many frameworks, such as Laravel, this package embraces a model-driven approach to templates. Each template
+is paired with its own Model, where the Model's public properties and methods act as arguments available within the
+template.
 
-[Blade](https://laravel.com/docs/11.x/blade) is an elegant and powerful template engine originally designed
-for [Laravel](https://laravel.com/).
-
-However, since it isn't available as a
-standalone package, this package includes its own Blade compiler.
-
-It provides full support for [Blade's key features](https://laravel.com/docs/11.x/blade)
-while remaining completely independent of Laravel.
-
-#### Zero setup
-
-```php
-use Prosopo\Views\Blade\BladeTemplateRenderer;
-use Prosopo\Views\Blade\BladeRendererConfig;
-
-$bladeRenderer = new BladeTemplateRenderer(new BladeRendererConfig());
-
-echo $bladeRenderer->renderTemplate('@if($var)The variable is set.@endif', [
-    'var' => true
-]);
-```
-
-#### Blade Renderer settings
-
-```php
-use Prosopo\Views\Blade\BladeRendererConfig;
-use Prosopo\Views\Blade\BladeTemplateRenderer;
-use Prosopo\Views\Interfaces\Template\TemplateErrorInterface;
-
-$bladeConfig = new BladeRendererConfig();
-
-// Template error handler, can be used for logging, notifying, etc.
-$bladeConfig->setTemplateErrorHandler(function (TemplateErrorInterface $templateError): void {
-    $templateError->getTemplate();
-    $templateError->getCompiledPhpTemplate();
-    $templateError->getLine();
-    $templateError->getMessage();
-    $templateError->getVariables();
-});
-
-// Custom output escape callback.
-$bladeConfig->setCustomOutputEscapeCallback(function ($variable): string {
-    if (
-        false === is_string($variable) &&
-        false === is_numeric($variable)
-    ) {
-        return '';
-    }
-
-    // htmlspecialchars is the default one.
-    return htmlentities((string)$variable, ENT_QUOTES, 'UTF-8', false);
-});
-
-// Global functions and variables which will be available inside all the blade templates.
-$bladeConfig->setGlobalVariables([
-    'sum' => function (int $a, int $b): string {
-        return (string)($a + $b);
-    },
-    'variable' => 'value',
-]);
-
-// Escape variable name. Wraps output in the compiled PHP template, like '$escape()'.
-$bladeConfig->setEscapeVariableName('escape');
-
-// Compiler extension callback, so you can add your own directives.
-$bladeConfig->setCompilerExtensionCallback(function (string $template): string {
-    // note: just an example, @use is supported by default.
-    $template = (string)preg_replace('/@use\s*\((["\'])(.*?)\1\)/s', '<?php use $2; ?>', $template);
-    
-    return $template;
-});
-
-
-```
-
-#### Custom Blade modules (advanced usage)
-
-By default, the `BladeTemplateRenderer` creates module instances using classes from the current package.
-
-If you need to override the default module behavior, you can define your custom implementation in the
-configuration. The `BladeTemplateRenderer` will automatically use your specified implementation.
-
-For example:
-
-```php
-use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
-
-class CustomBladeCompiler implements TemplateCompilerInterface {
-    public function compile(string $template): string {
-      // todo your own compiler implementation.
-    }
-}
-
-$bladeConfig->setTemplateCompiler(new CustomBladeCompiler());
-```
-
-Note: Carefully review the `bladeConfig` settings before creating a custom implementation.
-
-For example, in the case of the `BladeCompiler`, it includes the `compilerExtensionCallback` setting, which allows you
-to add custom directives without the need to build a custom compiler from scratch.
-
-#### Standalone Blade note
-
-You may have come across packages that attempt to adapt the official Blade engine by creating
-stubs for its Laravel dependencies, such as the [jenssegers/blade](https://github.com/jenssegers/blade) package.
-However, we chose not to adopt this approach for several reasons:
-
-* PHP Version Requirements: It mandates PHP 8.2 or higher.
-* External Dependencies: It introduces additional external dependencies.
-* Potential Breakage: It can become unstable with future Laravel updates (as demonstrated
-  by [past incidents](https://github.com/jenssegers/blade/issues/74).
-* Limited Flexibility: Since it wasn’t designed as a standalone component, it lacks features like a customizable
-  template error handler.
-
-Thanks to great Blade's conceptual design, our compiler implementation required fewer than 200 lines of code.
-
-### 1.2) Custom template renderer provider (e.g. Twig)
-
-```php
-use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
-
-class TwigTemplateRenderer implements TemplateRendererInterface {
-    private $twig;
-    
-    public function __construct() {
-        // todo init Twig or another engine.
-    }
-
-      /**
-     * @param array<string,mixed> $variables
-     */
-    public function renderTemplate(string $template, array $variables, bool $doPrint = false): string {
-        $this->twig->render($template, $variables, $doPrint);
-    }
-}
-```
-
-## 2. View model
-
-### 2.1) Flat setup
+Model class:
 
 ```php
 namespace MyPackage\Views;
@@ -183,7 +47,22 @@ class MyView extends \Prosopo\Views\View\View
 }
 ```
 
-Model benefits:
+Model template (Blade is used in this example):
+
+```php
+<p>
+Your month income is {{ $total() }}, 
+from which {{ $salary }} is a salary, and {{ $bonus }} is a bonus.
+</p>
+
+{!! $innerComponent !!}
+
+<p>Company info:</p>
+
+{!! $company !!}
+```
+
+### 1.2) Benefits of the model-driven approach
 
 1. Typed variables: Eliminate the hassle of type matching and renaming associated with array-driven variables.
 2. Reduced Routine: During object creation, public fields of the model without default values are automatically
@@ -195,28 +74,37 @@ Model benefits:
 The `View` class implements the `View_Interface`. During rendering, any inner objects that also implement
 `View_Interface` will be automatically rendered and passed into the template as strings.
 
-Note: In the `View` class, in order to satisfy the Model creator, the constructor is marked as final. If you need to set
-custom default values, consider using one of the following approaches:
+### 1.3) Custom property defaults
+
+Note: In the `View` class, in order to satisfy the Model creator, the constructor is marked as final. If you need to
+set custom default values, consider using one of the following approaches:
 
 ```php
 namespace MyPackage\Views;
 
 class MyView extends \Prosopo\Views\View\View
 {
-    // approach for plain field types
-    public int $varWithCustomValue = 'custom default value';
+    // approach for plain field types.
+    public int $varWithCustomDefaultValue = 'custom default value';
+    public Company $company;
 
     protected function setCustomDefaults(){
-        // approach for object field types
+        // approach for object field types.
         $this->company = new Company();
     }
 }
 ```
 
-### 2.2) Custom Models (advanced usage)
+> Tip: If your app Models require additional object dependencies, you can override the `InstancePropertyProvider`
+> module to
+> integrate with a Dependency Injection container like [PHP-DI](https://php-di.org/). This allows class properties to be
+> automatically resolved
+> while object creation by your application's DI system.
 
-The only requirement for a component is to implement the `ViewInterface`. This means you can transform any class into a
-`View` without needing to extend a specific base class, allowing for maximum flexibility and customization.
+### 1.4) Custom Model implementation (advanced usage)
+
+The only requirement for a View class is to implement the `ViewInterface`. This means you can transform any class into a
+`View` without needing to extend a specific base class, allowing for maximum flexibility and customization:
 
 ```php
 namespace MyPackage\Views;
@@ -240,9 +128,12 @@ class MyView implements ViewInterface {
 }
 ```
 
-## 3. Views
+## 2. Views
 
-### 3.1) Setup
+Views is the core class of this package, responsible for initializing all modules, including the `TemplateProvider`,
+which automates the linking of Models to their respective templates.
+
+### 2.1) Flat setup
 
 ```php
 use Prosopo\Views\Blade\BladeRendererConfig;
@@ -250,23 +141,61 @@ use Prosopo\Views\Blade\BladeTemplateRenderer;
 use Prosopo\Views\ViewsConfig;
 use Prosopo\Views\Views;
 
-// You can use the build-in Blade Renderer, 
-// or wrap any template engine as shown in the first chapter.
-$renderer = new BladeTemplateRenderer(new BladeRendererConfig());
+$viewsConfig = (new ViewsConfig())
+    ->setTemplatesRootPath(__DIR__ . './templates')
+    ->setViewsRootNamespace('MyPackage\Views')
+    ->setTemplateFileExtension('.blade.php');
 
-$viewsConfig = new ViewsConfig();
-
-$viewsConfig->setTemplatesRootPath(__DIR__ . './templates');
-$viewsConfig->setViewsRootNamespace('MyPackage\Views');
-$viewsConfig->setTemplateFileExtension('.blade.php');
-$viewsConfig->setTemplateRenderer($renderer);
+$viewsConfig->getModules()
+    // You can use the build-in Blade Renderer, or wrap any template engine as shown in the Custom Modules chapter below.
+    ->setTemplateRenderer(new BladeTemplateRenderer(new BladeRendererConfig()));
 
 // fixme add errorHandler that contains the View object.
 
 $views = new Views($viewsConfig);
 ```
 
-### 3.2) Automated templates matching
+### 2.2) Single-step Model creation and rendering
+
+You can create, set values, and render a Model in a single step using the callback argument of the `renderView` method,
+as
+shown below:
+
+```php
+echo $views->getRenderer()
+    ->renderView(MyView::class, function (MyView $view) use ($salary, $bonus) {
+        $view->salary = $salary;
+        $view->bonus = $bonus;
+    });
+
+// Tip: pass true to the third renderView() argument to print it without echo.
+```
+
+This approach enables a functional programming style when working with Models.
+
+### 2.3) Multi-step creation and rendering
+
+When you need split creation, use the factory to create the model, and then render later when you need it.
+
+```php
+$view = $views->getFactory()
+    ->makeView(MyView::class);
+
+// ...
+
+$view->salary = $salary;
+$view->bonus = $bonus;
+
+// ...
+
+echo $views->getRenderer()
+    ->renderView($view);
+
+// Tip: you can still pass the callback as the second renderView() argument
+// to customize the Model properties before rendering. 
+```
+
+### 2.4) Automated templates matching
 
 The built-in `TemplateProvider` automatically matches templates based on the Model names and their relative namespaces.
 This automates the process of associating templates with their corresponding Models.
@@ -286,70 +215,175 @@ Example:
 **Naming Note:** Use dashes in template names, as camelCase in Model names is automatically converted to dash-separated
 names.
 
-### 3.3) Custom modules (advanced usage)
+### 2.5) Custom Modules
 
-By default, the `Views` creates module instances using classes from the current package.
+By default, the `Views` class creates module instances using classes from the current package.
 
 If you need to override the default module behavior, you can define your custom implementation in the
-configuration. The `Views` will automatically use your specified implementation.
+configuration. The `Views` class will use your specified implementation.
 
-For example:
+> Tip: You can see the full list of the modules in the `Modules` class.
+
+#### Example: Using Twig as a Template Renderer (instead of the built-in Blade Renderer)
 
 ```php
 use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
 
-class CustomTemplateProvider implements TemplateProviderInterface {
-    public function getTemplate(ViewInterface $view): string {
-      // todo your own implementation.
+class TwigRenderer implements TemplateRendererInterface {
+    private $twig;
+    
+    public function __construct() {
+        // todo init Twig or another engine.
+    }
+
+      /**
+     * @param array<string,mixed> $variables
+     */
+    public function renderTemplate(string $template, array $variables, bool $doPrint = false): string {
+        $this->twig->render($template, $variables, $doPrint);
     }
 }
 
-$viewsConfig->setViewFactory(new CustomViewFactory());
+$viewsConfig = (new ViewsConfig())
+    ->setTemplatesRootPath(__DIR__ . './templates')
+    ->setViewsRootNamespace('MyPackage\Views')
+    ->setTemplateFileExtension('.twig');
+
+$viewsConfig->getModules()
+    ->setTemplateRenderer(new TwigRenderer());
+
+$views = new Views($viewsConfig)
 ```
 
-Note: Carefully review the `viewsConfig` settings before creating a custom implementation.
+> Note: The package includes only the Blade implementation. If you wish to use a different template engine, you will
+> need to install its Composer package and create a facade object, as demonstrated above.
 
-For example, in the case of the `TemplateProvider`, it includes the `templateFileExtension` setting, which allows you
-to define a custom template file extension without the need to build a custom provider from scratch.
+## 3. Build-in standalone Blade
 
-### 3.3) Single-step creation and rendering
+[Blade](https://laravel.com/docs/11.x/blade) is an elegant and powerful template engine originally designed
+for [Laravel](https://laravel.com/).
 
-You can create, set values, and render a Model in a single step using the callback argument of the `renderView` method, as
-shown below:
+However, since it isn't available as a
+standalone package, this package includes its own Blade compiler.
+
+It provides full support for [Blade's key features](https://laravel.com/docs/11.x/blade)
+while remaining completely independent of Laravel.
+
+### 3.1) Supported features
+
+The following Blade tokens are supported:
+
+1. Displaying: `{{ $var }}` and `{!! $var }}`
+2. IF Conditions: `@if`, `@else`, `@elseif`, `@endif`
+3. Switch conditions: `@switch`, `@case`, `@break`, `@default`, `@endswitch`.
+4. Loops: `@foreach`, `@endforeach`, `@for`, `@endfor`, `@break`.
+5. Helpers: `@selected`, `@checked`, `@class`.
+6. PHP-related: `@use`, `@php`, `@endphp`.
+
+Visit the [official Blade docs](https://laravel.com/docs/11.x/blade) to learn about their usage.
+
+### 3.2) Flat setup
 
 ```php
-echo $views->getRenderer()
-    ->renderView(MyView::class, function (MyView $view) use ($salary, $bonus) {
-        $view->salary = $salary;
-        $view->bonus = $bonus;
-    });
+use Prosopo\Views\Blade\BladeTemplateRenderer;
+use Prosopo\Views\Blade\BladeRendererConfig;
 
-// Pro tip: pass true to the third renderView() argument to print it without echo.
+$bladeRenderer = new BladeTemplateRenderer(new BladeRendererConfig());
+
+echo $bladeRenderer->renderTemplate('@if($var)The variable is set.@endif', [
+    'var' => true
+]);
 ```
 
-This approach enables a functional programming style when working with Models.
+> Tip: The built-in Blade implementation is fully standalone and independent of the `Views` class. This means that even
+> if
+> you’re unable to use the model-driven approach, you can still utilize it as an independent Blade compiler.
 
-### 3.4) Multi-step creation and rendering
+### 3.3) Available Blade Renderer settings
 
-When you need split creation, use the factory to create the model, and then render later when you need it.
+The built-in Blade implementation includes a variety of settings that let you customize features such as escaping,
+error handling, and more:
 
 ```php
-$view = $views->getFactory()
-    ->makeView(MyView::class);
+use Prosopo\Views\Blade\BladeRendererConfig;
+use Prosopo\Views\Interfaces\Template\TemplateErrorInterface;
+
+$bladeRendererConfig = (new BladeRendererConfig())
+->setTemplateErrorHandler(function (TemplateErrorInterface $templateError): void {
+    // Can be used for logging, notifying, etc.
+    $templateError->getTemplate();
+    $templateError->getCompiledPhpTemplate();
+    $templateError->getLine();
+    $templateError->getMessage();
+    $templateError->getVariables();
+})
+->setCustomOutputEscapeCallback(function ($variable): string {
+    if (
+        false === is_string($variable) &&
+        false === is_numeric($variable)
+    ) {
+        return '';
+    }
+
+    // htmlspecialchars is the default one.
+    return htmlentities((string)$variable, ENT_QUOTES, 'UTF-8', false);
+})
+->setGlobalVariables([
+    'sum' => function (int $a, int $b): string {
+        return (string)($a + $b);
+    },
+    'variable' => 'value',
+    ])
+->setEscapeVariableName('escape')
+->setCompilerExtensionCallback(function (string $template): string {
+    // note: just an example, @use is supported by default.
+    return (string)preg_replace('/@use\s*\((["\'])(.*?)\1\)/s', '<?php use $2; ?>', $template);
+});
+```
+
+### 3.4) Notes on the standalone Blade implementation
+
+You may have come across packages that attempt to adapt the official Blade engine by creating
+stubs for its Laravel dependencies, such as the [jenssegers/blade](https://github.com/jenssegers/blade) package.
+However, we chose not to adopt this approach for several reasons:
+
+* PHP Version Requirements: It mandates PHP 8.2 or higher.
+* External Dependencies: It introduces additional external dependencies.
+* Potential Breakage: It can become unstable with future Laravel updates (as demonstrated
+  by [past incidents](https://github.com/jenssegers/blade/issues/74).
+* Limited Flexibility: Since it wasn’t designed as a standalone component, it lacks some of the customization abilities.
+
+Thanks to great Blade's conceptual design, our compiler implementation required fewer than 200 lines of code.
+
+### 3.5) Custom Blade Renderer modules
+
+By default, the `BladeTemplateRenderer` creates module instances using classes from the current package.
+
+If you need to override the default module behavior, you can define your custom implementation in the
+configuration. The `BladeTemplateRenderer` will use your specified implementation.
+
+> Tip: You can see the full list of the modules in the `BladeRendererModules` class.
+
+#### Example: Defining a custom Blade compiler
+
+```php
+use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
+
+class MyBladeCompiler implements TemplateCompilerInterface {
+    public function compile(string $template): string {
+       // todo your custom compiler.
+    }
+}
 
 // ...
 
-$view->salary = $salary;
-$view->bonus = $bonus;
-
-// ...
-
-echo $views->getRenderer()
-    ->renderView($view);
-
-// Pro tip: you can still pass the callback as the second renderView() argument
-// to customize the Model properties before rendering. 
+$bladeRendererConfig->getModules()
+    ->setTemplateCompiler(new TwigTemplateRenderer());
 ```
+
+> Note: Carefully review the `BladeRendererConfig` settings before creating a custom implementation. For example, in the
+> case of the `BladeComplier`, it includes the `compilerExtensionCallback` setting, which allows you to implement a
+> custom directive without the need to build a custom compiler from scratch.
 
 ## Contribution
 

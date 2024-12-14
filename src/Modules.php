@@ -18,7 +18,7 @@ use Prosopo\Views\Interfaces\View\ViewRendererInterface;
  * We opt to use a class instead of an interface because it allows for the addition of new (optional) settings,
  * without breaking existing setups.
  */
-final class ModulesCollection
+final class Modules
 {
     // Required modules:
 
@@ -92,43 +92,60 @@ final class ModulesCollection
 
     //// Setters.
 
-    public function setTemplateRenderer(TemplateRendererInterface $templateRenderer): void
+    public function setTemplateRenderer(TemplateRendererInterface $templateRenderer): self
     {
         $this->templateRenderer = $templateRenderer;
+
+        return $this;
     }
 
-    public function setViewFactory(?ViewFactoryInterface $viewFactory): void
+    public function setViewFactory(?ViewFactoryInterface $viewFactory): self
     {
         $this->viewFactory = $viewFactory;
+
+        return $this;
     }
 
-    public function setViewFactoryWithPropertyInitialization(?ViewFactoryInterface $viewFactoryWithPropertyInitialization): void
-    {
+    public function setViewFactoryWithPropertyInitialization(
+        ?ViewFactoryInterface $viewFactoryWithPropertyInitialization
+    ): self {
         $this->viewFactoryWithPropertyInitialization = $viewFactoryWithPropertyInitialization;
+
+        return $this;
     }
 
-    public function setTemplateProvider(?TemplateProviderInterface $templateProvider): void
+    public function setTemplateProvider(?TemplateProviderInterface $templateProvider): self
     {
         $this->templateProvider = $templateProvider;
+
+        return $this;
     }
 
-    public function setObjectPropertyManager(?ObjectPropertyManagerInterface $objectPropertyManager): void
+    public function setObjectPropertyManager(?ObjectPropertyManagerInterface $objectPropertyManager): self
     {
         $this->objectPropertyManager = $objectPropertyManager;
+
+        return $this;
     }
 
-    public function setPropertyValueProvider(?PropertyValueProviderInterface $propertyValueProvider): void
+    public function setPropertyValueProvider(?PropertyValueProviderInterface $propertyValueProvider): self
     {
         $this->propertyValueProvider = $propertyValueProvider;
+
+        return $this;
     }
 
-    public function setInstancePropertyProvider(?PropertyValueProviderInterface $instancePropertyProvider): void
+    public function setInstancePropertyProvider(?PropertyValueProviderInterface $instancePropertyProvider): self
     {
         $this->instancePropertyProvider = $instancePropertyProvider;
+
+        return $this;
     }
 
-    public function setViewRenderer(?ViewRendererInterface $viewRenderer): void
+    public function setViewRenderer(?ViewRendererInterface $viewRenderer): self
     {
         $this->viewRenderer = $viewRenderer;
+
+        return $this;
     }
 }

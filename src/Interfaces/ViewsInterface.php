@@ -6,7 +6,7 @@ namespace Prosopo\Views\Interfaces;
 
 use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
 use Prosopo\Views\Interfaces\View\ViewRendererInterface;
-use Prosopo\Views\ModulesCollection;
+use Prosopo\Views\Modules;
 
 interface ViewsInterface
 {
@@ -14,5 +14,5 @@ interface ViewsInterface
 
     public function getRenderer(): ViewRendererInterface;
 
-    public function getModules(): ModulesCollection;
+    public function getModules(): Modules;
 }

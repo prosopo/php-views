@@ -30,19 +30,16 @@ final class BladeTemplateRenderer implements TemplateRendererInterface
         $templateErrorDispatcher = null === $templateErrorDispatcher ?
             $this->makeTemplateErrorDispatcher($config->getTemplateErrorHandler()) :
             $templateErrorDispatcher;
-        $modules->setTemplateErrorDispatcher($templateErrorDispatcher);
 
         $templateCompiler = $modules->getTemplateCompiler();
         $templateCompiler = null === $templateCompiler ?
             $this->makeTemplateCompiler($config->getEscapeVariableName(), $config->getCompilerExtensionCallback()) :
             $templateCompiler;
-        $modules->setTemplateCompiler($templateCompiler);
 
         $templateRenderer = $modules->getTemplateRenderer();
         $templateRenderer = null === $templateRenderer ?
             $this->makeTemplateRenderer($templateCompiler, $templateErrorDispatcher, $config->getGlobalVariables()) :
             $templateRenderer;
-        $modules->setTemplateRenderer($templateRenderer);
 
         $templateRendererWithCustomEscape = $modules->getTemplateRendererWithCustomEscape();
         $templateRendererWithCustomEscape = null === $templateRendererWithCustomEscape ?
@@ -52,6 +49,11 @@ final class BladeTemplateRenderer implements TemplateRendererInterface
                 $config->getEscapeVariableName()
             ) :
             $templateRendererWithCustomEscape;
+
+        $modules->setTemplateErrorDispatcher($templateErrorDispatcher)
+                ->setTemplateCompiler($templateCompiler)
+                ->setTemplateRenderer($templateRenderer)
+                ->setTemplateRendererWithCustomEscape($templateRendererWithCustomEscape);
 
         $this->templateRenderer = $templateRendererWithCustomEscape;
         $this->modules = $modules;

@@ -32,6 +32,8 @@ final class BladeRendererModules
         $this->templateRendererWithCustomEscape = null;
     }
 
+    //// Getters.
+
     public function getTemplateErrorDispatcher(): ?TemplateErrorDispatcherInterface
     {
         return $this->templateErrorDispatcher;
@@ -52,24 +54,34 @@ final class BladeRendererModules
         return $this->templateRendererWithCustomEscape;
     }
 
-    public function setTemplateErrorDispatcher(?TemplateErrorDispatcherInterface $templateErrorDispatcher): void
+    //// Setters.
+
+    public function setTemplateErrorDispatcher(?TemplateErrorDispatcherInterface $templateErrorDispatcher): self
     {
         $this->templateErrorDispatcher = $templateErrorDispatcher;
+
+        return $this;
     }
 
-    public function setTemplateRenderer(?TemplateRendererInterface $templateRenderer): void
+    public function setTemplateRenderer(?TemplateRendererInterface $templateRenderer): self
     {
         $this->templateRenderer = $templateRenderer;
+
+        return $this;
     }
 
-    public function setTemplateCompiler(?TemplateCompilerInterface $templateCompiler): void
+    public function setTemplateCompiler(?TemplateCompilerInterface $templateCompiler): self
     {
         $this->templateCompiler = $templateCompiler;
+
+        return $this;
     }
 
     public function setTemplateRendererWithCustomEscape(
         ?TemplateRendererInterface $templateRendererWithCustomEscape
-    ): void {
+    ): self {
         $this->templateRendererWithCustomEscape = $templateRendererWithCustomEscape;
+
+        return $this;
     }
 }

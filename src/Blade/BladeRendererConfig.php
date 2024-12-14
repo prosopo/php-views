@@ -95,39 +95,51 @@ final class BladeRendererConfig
     /**
      * @param callable(string $template): string|null $compilerExtensionCallback
      */
-    public function setCompilerExtensionCallback(?callable $compilerExtensionCallback): void
+    public function setCompilerExtensionCallback(?callable $compilerExtensionCallback): self
     {
         $this->compilerExtensionCallback = $compilerExtensionCallback;
+
+        return $this;
     }
 
     /**
      * @param callable(TemplateErrorInterface $templateError): void|null $templateErrorHandler
      */
-    public function setTemplateErrorHandler(?callable $templateErrorHandler): void
+    public function setTemplateErrorHandler(?callable $templateErrorHandler): self
     {
         $this->templateErrorHandler = $templateErrorHandler;
+
+        return $this;
     }
 
-    public function setCustomOutputEscapeCallback(?callable $customOutputEscapeCallback): void
+    public function setCustomOutputEscapeCallback(?callable $customOutputEscapeCallback): self
     {
         $this->customOutputEscapeCallback = $customOutputEscapeCallback;
+
+        return $this;
     }
 
     /**
      * @param array<string,mixed> $globalVariables
      */
-    public function setGlobalVariables(array $globalVariables): void
+    public function setGlobalVariables(array $globalVariables): self
     {
         $this->globalVariables = $globalVariables;
+
+        return $this;
     }
 
-    public function setEscapeVariableName(string $escapeVariableName): void
+    public function setEscapeVariableName(string $escapeVariableName): self
     {
         $this->escapeVariableName = $escapeVariableName;
+
+        return $this;
     }
 
-    public function setModules(BladeRendererModules $modules): void
+    public function setModules(BladeRendererModules $modules): self
     {
         $this->modules = $modules;
+
+        return $this;
     }
 }

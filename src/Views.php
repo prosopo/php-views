@@ -27,17 +27,16 @@ final class Views implements ViewsInterface
 {
     private ViewRendererInterface $viewRenderer;
     private ViewFactoryInterface $viewFactory;
-    private ModulesCollection $modules;
+    private Modules $modules;
 
     public function __construct(ViewsConfig $config)
     {
-        $modules = clone $config->getModulesCollection();
+        $modules = clone $config->getModules();
 
         $objectPropertyManager = $modules->getObjectPropertyManager();
         $objectPropertyManager = null === $objectPropertyManager ?
             $this->makeObjectPropertyManager() :
             $objectPropertyManager;
-        $modules->setObjectPropertyManager($objectPropertyManager);
 
         $templateProvider = $modules->getTemplateProvider();
         $templateProvider = null === $templateProvider ?
@@ -47,25 +46,21 @@ final class Views implements ViewsInterface
                 $config->getTemplateFileExtension()
             ) :
             $templateProvider;
-        $modules->setTemplateProvider($templateProvider);
 
         $viewFactory = $modules->getViewFactory();
         $viewFactory = null === $viewFactory ?
             $this->makeViewFactory($templateProvider) :
             $viewFactory;
-        $modules->setViewFactory($viewFactory);
 
         $instancePropertyProvider = $modules->getInstancePropertyProvider();
         $instancePropertyProvider = null === $instancePropertyProvider ?
             $this->makeInstancePropertyProvider($viewFactory) :
             $instancePropertyProvider;
-        $modules->setInstancePropertyProvider($instancePropertyProvider);
 
         $propertyValueProvider = $modules->getPropertyValueProvider();
         $propertyValueProvider = null === $propertyValueProvider ?
             $this->makePropertyValueProvider($instancePropertyProvider, $config->getDefaultPropertyValues()) :
             $propertyValueProvider;
-        $modules->setPropertyValueProvider($propertyValueProvider);
 
         $viewFactoryWithPropertyInitialization = $modules->getViewFactoryWithPropertyInitialization();
         $viewFactoryWithPropertyInitialization = null === $viewFactoryWithPropertyInitialization ?
@@ -75,13 +70,19 @@ final class Views implements ViewsInterface
                 $propertyValueProvider
             ) :
             $viewFactoryWithPropertyInitialization;
-        $modules->setViewFactoryWithPropertyInitialization($viewFactoryWithPropertyInitialization);
 
         $viewRenderer = $modules->getViewRenderer();
         $viewRenderer = null === $viewRenderer ?
             $this->makeViewRenderer($modules->getTemplateRenderer(), $viewFactory, $objectPropertyManager) :
             $viewRenderer;
-        $modules->setViewRenderer($viewRenderer);
+
+        $modules->setObjectPropertyManager($objectPropertyManager)
+                ->setTemplateProvider($templateProvider)
+                ->setViewFactory($viewFactory)
+                ->setInstancePropertyProvider($instancePropertyProvider)
+                ->setPropertyValueProvider($propertyValueProvider)
+                ->setViewFactoryWithPropertyInitialization($viewFactoryWithPropertyInitialization)
+                ->setViewRenderer($viewRenderer);
 
         $this->viewFactory = $viewFactoryWithPropertyInitialization;
         $this->viewRenderer = $viewRenderer;
@@ -98,7 +99,7 @@ final class Views implements ViewsInterface
         return $this->viewRenderer;
     }
 
-    public function getModules(): ModulesCollection
+    public function getModules(): Modules
     {
         return $this->modules;
     }
