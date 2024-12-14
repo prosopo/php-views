@@ -11,7 +11,7 @@ namespace Prosopo\Views;
  * We opt to use a class instead of an interface because it allows for the addition of new (optional) settings,
  * without breaking existing setups.
  */
-final class ViewsConfig
+final class NamespaceConfig
 {
     //// Required settings:
 

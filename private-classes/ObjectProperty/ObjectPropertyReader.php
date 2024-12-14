@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\ObjectProperty;
 
-use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyManagerInterface;
-use Prosopo\Views\Interfaces\ObjectProperty\PropertyValueProviderInterface;
+use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyReaderInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -14,39 +13,11 @@ use ReflectionProperty;
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
  * We reserve the right to change its name and implementation.
  */
-final class ObjectPropertyManager implements ObjectPropertyManagerInterface
+final class ObjectPropertyReader implements ObjectPropertyReaderInterface
 {
-    public function setDefaultValues(
-        object $instance,
-        ?PropertyValueProviderInterface $propertyValueProvider = null
-    ): void {
-        $reflectionClass       = $this->getReflectionClass($instance);
-        $publicTypedVariables = $this->getPublicTypedVariables($reflectionClass);
-
-        array_map(
-            function (ReflectionProperty $reflectionProperty) use ($instance, $propertyValueProvider) {
-                if (true === $reflectionProperty->isInitialized($instance)) {
-                    return;
-                }
-
-                $isDefaultValueSet = null !== $propertyValueProvider &&
-                    $this->setDefaultValueForSupportedType(
-                        $instance,
-                        $propertyValueProvider,
-                        $reflectionProperty
-                    );
-
-                if (false === $isDefaultValueSet) {
-                    $this->setNullForNullableProperty($reflectionProperty);
-                }
-            },
-            $publicTypedVariables
-        );
-    }
-
     public function getVariables(object $instance): array
     {
-        $reflectionClass = $this->getReflectionClass($instance);
+        $reflectionClass = new ReflectionClass($instance);
 
         $publicTypedVariables = $this->getPublicTypedVariables($reflectionClass);
         $variableValues        = $this->getPropertyValues($instance, $publicTypedVariables);
@@ -72,43 +43,6 @@ final class ObjectPropertyManager implements ObjectPropertyManagerInterface
         return $this->getTypedProperties($publicProperties);
     }
 
-    protected function setDefaultValueForSupportedType(
-        object $instance,
-        PropertyValueProviderInterface $propertyValueProvider,
-        ReflectionProperty $reflectionProperty
-    ): bool {
-        $type = $reflectionProperty->getType();
-
-        $typeName = null !== $type ?
-            // @phpstan-ignore-next-line
-            $type->getName() :
-            '';
-
-        if (false === $propertyValueProvider->supports($typeName)) {
-            return false;
-        }
-
-        $value = $reflectionProperty->getValue($instance);
-
-        $reflectionProperty->setValue($value);
-
-        return true;
-    }
-
-    protected function setNullForNullableProperty(ReflectionProperty $reflectionProperty): void
-    {
-        $type = $reflectionProperty->getType();
-
-        if (
-            null === $type ||
-            false === $type->allowsNull()
-        ) {
-            return;
-        }
-
-        $reflectionProperty->setValue(null);
-    }
-
     /**
      * @param ReflectionClass<object> $reflection_class
      *
@@ -122,14 +56,6 @@ final class ObjectPropertyManager implements ObjectPropertyManagerInterface
             $this->extractMethodNames($publicMethods),
             array( '__construct' )
         );
-    }
-
-    /**
-     * @return ReflectionClass<object>
-     */
-    protected function getReflectionClass(object $instance): ReflectionClass
-    {
-        return new ReflectionClass($instance);
     }
 
     /**

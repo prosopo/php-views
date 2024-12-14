@@ -6,7 +6,7 @@ namespace Prosopo\Views\PrivateClasses\ObjectProperty;
 
 use Prosopo\Views\Interfaces\ObjectProperty\PropertyValueProviderInterface;
 use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
-use Prosopo\Views\View\View;
+use Prosopo\Views\View;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.

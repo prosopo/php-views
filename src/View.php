@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\View;
+namespace Prosopo\Views;
 
 use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
 use Prosopo\Views\Interfaces\View\ViewInterface;

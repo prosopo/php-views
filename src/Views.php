@@ -4,160 +4,139 @@ declare(strict_types=1);
 
 namespace Prosopo\Views;
 
-use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyManagerInterface;
-use Prosopo\Views\Interfaces\ObjectProperty\PropertyValueProviderInterface;
-use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
-use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
+use Closure;
+use Exception;
 use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
 use Prosopo\Views\Interfaces\View\ViewRendererInterface;
 use Prosopo\Views\Interfaces\ViewsInterface;
-use Prosopo\Views\PrivateClasses\ObjectProperty\InstancePropertyProvider;
-use Prosopo\Views\PrivateClasses\ObjectProperty\ObjectPropertyManager;
-use Prosopo\Views\PrivateClasses\ObjectProperty\PropertyValueProvider;
-use Prosopo\Views\PrivateClasses\Template\TemplateProvider;
-use Prosopo\Views\PrivateClasses\View\ViewFactory;
-use Prosopo\Views\PrivateClasses\View\ViewFactoryWithPropertyInitialization;
-use Prosopo\Views\PrivateClasses\View\ViewRenderer;
+use Prosopo\Views\Interfaces\ViewsNamespaceInterface;
+use Prosopo\Views\PrivateClasses\ViewsNamespace;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
- * We reserve the right to change its private and protected methods and properties, and introduce new public ones.
+ * We reserve the right to change its private and protected methods and properties.
  */
-final class Views implements ViewsInterface
+final class Views implements ViewsInterface, ViewFactoryInterface, ViewRendererInterface
 {
-    private ViewRendererInterface $viewRenderer;
-    private ViewFactoryInterface $viewFactory;
-    private Modules $modules;
+    /**
+     * @var array<string, ViewFactoryInterface> namespace => ViewRendererInterface
+     */
+    private array $factories;
+    /**
+     * @var array<string, ViewRendererInterface> namespace => ViewFactoryInterface
+     */
+    private array $renderers;
+    private string $notFoundErrorMessage;
 
-    public function __construct(ViewsConfig $config)
+    public function __construct(string $notFoundErrorMessage = 'Namespace for the given View class is not registered')
     {
-        $modules = clone $config->getModules();
+        $this->renderers = [];
+        $this->factories = [];
 
-        $objectPropertyManager = $modules->getObjectPropertyManager();
-        $objectPropertyManager = null === $objectPropertyManager ?
-            $this->makeObjectPropertyManager() :
-            $objectPropertyManager;
-
-        $templateProvider = $modules->getTemplateProvider();
-        $templateProvider = null === $templateProvider ?
-            $this->makeTemplateProvider(
-                $config->getTemplatesRootPath(),
-                $config->getViewsRootNamespace(),
-                $config->getTemplateFileExtension()
-            ) :
-            $templateProvider;
-
-        $viewFactory = $modules->getViewFactory();
-        $viewFactory = null === $viewFactory ?
-            $this->makeViewFactory($templateProvider) :
-            $viewFactory;
-
-        $instancePropertyProvider = $modules->getInstancePropertyProvider();
-        $instancePropertyProvider = null === $instancePropertyProvider ?
-            $this->makeInstancePropertyProvider($viewFactory) :
-            $instancePropertyProvider;
-
-        $propertyValueProvider = $modules->getPropertyValueProvider();
-        $propertyValueProvider = null === $propertyValueProvider ?
-            $this->makePropertyValueProvider($instancePropertyProvider, $config->getDefaultPropertyValues()) :
-            $propertyValueProvider;
-
-        $viewFactoryWithPropertyInitialization = $modules->getViewFactoryWithPropertyInitialization();
-        $viewFactoryWithPropertyInitialization = null === $viewFactoryWithPropertyInitialization ?
-            $this->makeViewFactoryWithPropertyInitialization(
-                $viewFactory,
-                $objectPropertyManager,
-                $propertyValueProvider
-            ) :
-            $viewFactoryWithPropertyInitialization;
-
-        $viewRenderer = $modules->getViewRenderer();
-        $viewRenderer = null === $viewRenderer ?
-            $this->makeViewRenderer($modules->getTemplateRenderer(), $viewFactory, $objectPropertyManager) :
-            $viewRenderer;
-
-        $modules->setObjectPropertyManager($objectPropertyManager)
-                ->setTemplateProvider($templateProvider)
-                ->setViewFactory($viewFactory)
-                ->setInstancePropertyProvider($instancePropertyProvider)
-                ->setPropertyValueProvider($propertyValueProvider)
-                ->setViewFactoryWithPropertyInitialization($viewFactoryWithPropertyInitialization)
-                ->setViewRenderer($viewRenderer);
-
-        $this->viewFactory = $viewFactoryWithPropertyInitialization;
-        $this->viewRenderer = $viewRenderer;
-        $this->modules = $modules;
+        $this->notFoundErrorMessage = $notFoundErrorMessage;
     }
 
-    public function getFactory(): ViewFactoryInterface
+    public function addNamespace(NamespaceConfig $config): Modules
     {
-        return $this->viewFactory;
+        $viewsNamespace = $this->makeViewsNamespace($config);
+
+        $namespaceModules = $viewsNamespace->getModules();
+
+        $namespaceFactory = $namespaceModules->getViewFactory();
+        $namespaceRenderer = $namespaceModules->getViewRenderer();
+
+        if (
+            null === $namespaceFactory ||
+            null === $namespaceRenderer
+        ) {
+            return $namespaceModules;
+        }
+
+        // Save the original Factory and Renderer.
+
+        $this->factories[$config->getViewsRootNamespace()] = $namespaceFactory;
+        $this->renderers[$config->getViewsRootNamespace()] = $namespaceRenderer;
+
+        // Sort to ensure the rule is followed: more specific namespaces take precedence.
+        // For example, /My/Package/Blade will be processed before the more generic /My/Package.
+
+        $this->factories = $this->sortArrayByKeyLengthDesc($this->factories);
+        $this->renderers = $this->sortArrayByKeyLengthDesc($this->renderers);
+
+        return $namespaceModules;
     }
 
-    public function getRenderer(): ViewRendererInterface
+    public function makeView(string $viewClass)
     {
-        return $this->viewRenderer;
+        $factory = $this->getItemByClassName($viewClass, $this->factories);
+
+        if (null === $factory) {
+            throw $this->makeNamespaceNotRegisteredException($viewClass);
+        }
+
+        return $factory->makeView($viewClass);
     }
 
-    public function getModules(): Modules
+    public function renderView($viewOrClass, Closure $setupCallback = null, bool $doPrint = false): string
     {
-        return $this->modules;
+        $viewClass = false === is_string($viewOrClass) ?
+            get_class($viewOrClass) :
+            $viewOrClass;
+
+        $renderer = $this->getItemByClassName($viewClass, $this->renderers);
+
+        if (null === $renderer) {
+            throw $this->makeNamespaceNotRegisteredException($viewClass);
+        }
+
+        return $renderer->renderView($viewOrClass, $setupCallback, $doPrint);
     }
 
-    protected function makeInstancePropertyProvider(ViewFactoryInterface $viewFactory): PropertyValueProviderInterface
+    protected function makeViewsNamespace(NamespaceConfig $config): ViewsNamespaceInterface
     {
-        return new InstancePropertyProvider($viewFactory);
+        return new ViewsNamespace($config, $this, $this);
     }
 
-    protected function makeObjectPropertyManager(): ObjectPropertyManagerInterface
+    protected function makeNamespaceNotRegisteredException(string $viewClass): Exception
     {
-        return new ObjectPropertyManager();
+        $message = sprintf('%s : %s', $this->notFoundErrorMessage, $viewClass);
+
+        return new Exception($message);
     }
 
     /**
-     * @param array<string,mixed> $defaultPropertyValues
+     * @template T
+     *
+     * @param array<string, T> $array
+     *
+     * @return array<string, T>
      */
-    protected function makePropertyValueProvider(
-        PropertyValueProviderInterface $instancePropertyProvider,
-        array $defaultPropertyValues
-    ): PropertyValueProviderInterface {
-        return new PropertyValueProvider($instancePropertyProvider, $defaultPropertyValues);
-    }
-
-    protected function makeViewFactory(TemplateProviderInterface $templateProvider): ViewFactoryInterface
+    protected function sortArrayByKeyLengthDesc(array $array): array
     {
-        return new ViewFactory($templateProvider);
+        uksort($array, function (string $key1, string $key2): int {
+            return strlen($key2) <=> strlen($key1);
+        });
+
+        return $array;
     }
 
-    protected function makeViewFactoryWithPropertyInitialization(
-        ViewFactoryInterface $viewFactory,
-        ObjectPropertyManagerInterface $objectPropertyManager,
-        PropertyValueProviderInterface $propertyValueProvider
-    ): ViewFactoryInterface {
-        return new ViewFactoryWithPropertyInitialization($viewFactory, $objectPropertyManager, $propertyValueProvider);
-    }
+    /**
+     * @template T
+     *
+     * @param class-string $className
+     * @param array<string, T> $items
+     *
+     * @return T|null
+     */
+    protected function getItemByClassName(string $className, array $items)
+    {
+        $matchedItems = array_filter($items, function (
+            $item,
+            string $viewsRootNamespace
+        ) use ($className) {
+            return 0 === strpos($viewsRootNamespace, $className);
+        }, ARRAY_FILTER_USE_BOTH);
 
-    protected function makeTemplateProvider(
-        string $templatesRootPath,
-        string $viewsRootNamespace,
-        string $templateFileExtension
-    ): TemplateProviderInterface {
-        return new TemplateProvider(
-            $templatesRootPath,
-            $viewsRootNamespace,
-            $templateFileExtension
-        );
-    }
-
-    protected function makeViewRenderer(
-        TemplateRendererInterface $templateRenderer,
-        ViewFactoryInterface $viewFactory,
-        ObjectPropertyManagerInterface $objectPropertyManager
-    ): ViewRendererInterface {
-        return new ViewRenderer(
-            $templateRenderer,
-            $viewFactory,
-            $objectPropertyManager
-        );
+        return array_pop($matchedItems);
     }
 }

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\View;
 
-use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyManagerInterface;
+use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyReaderInterface;
+use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyWriterInterface;
 use Prosopo\Views\Interfaces\ObjectProperty\PropertyValueProviderInterface;
 use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
 use Prosopo\Views\Interfaces\View\ViewInterface;
@@ -16,16 +17,19 @@ use Prosopo\Views\Interfaces\View\ViewInterface;
 class ViewFactoryWithPropertyInitialization implements ViewFactoryInterface
 {
     private ViewFactoryInterface $viewFactory;
-    private ObjectPropertyManagerInterface $objectPropertyManager;
+    private ObjectPropertyReaderInterface $objectPropertyReader;
+    private ObjectPropertyWriterInterface $objectPropertyWriter;
     private PropertyValueProviderInterface $propertyValueProvider;
 
     public function __construct(
         ViewFactoryInterface $viewFactory,
-        ObjectPropertyManagerInterface $objectPropertyManager,
+        ObjectPropertyReaderInterface $objectPropertyReader,
+        ObjectPropertyWriterInterface $objectPropertyWriter,
         PropertyValueProviderInterface $propertyValueProvider
     ) {
         $this->viewFactory = $viewFactory;
-        $this->objectPropertyManager = $objectPropertyManager;
+        $this->objectPropertyReader = $objectPropertyReader;
+        $this->objectPropertyWriter = $objectPropertyWriter;
         $this->propertyValueProvider = $propertyValueProvider;
     }
 
@@ -33,39 +37,29 @@ class ViewFactoryWithPropertyInitialization implements ViewFactoryInterface
     {
         $view = $this->viewFactory->makeView($viewClass);
 
-        $this->setDefaultValuesRecursively($view, $this->propertyValueProvider, $this->objectPropertyManager);
+        $this->setDefaultValuesRecursively($view);
 
         return $view;
     }
 
-    protected function setDefaultValuesRecursively(
-        ViewInterface $view,
-        PropertyValueProviderInterface $propertyValueProvider,
-        ObjectPropertyManagerInterface $objectPropertyManager
-    ): void {
-        $this->setDefaultValues($view, $propertyValueProvider);
+    protected function setDefaultValuesRecursively(ViewInterface $view): void
+    {
+        $this->objectPropertyWriter->setDefaultValues($view, $this->propertyValueProvider);
 
-        $innerViews = $this->getInnerViews($view, $objectPropertyManager);
+        $innerViews = $this->getInnerViews($this->objectPropertyReader->getVariables($view));
 
-        array_map(function (ViewInterface $innerView) use ($propertyValueProvider, $objectPropertyManager) {
-            $this->setDefaultValuesRecursively($innerView, $propertyValueProvider, $objectPropertyManager);
+        array_map(function (ViewInterface $innerView) {
+            $this->setDefaultValuesRecursively($innerView);
         }, $innerViews);
     }
 
-    protected function setDefaultValues(
-        ViewInterface $view,
-        PropertyValueProviderInterface $propertyValueProvider
-    ): void {
-        $this->objectPropertyManager->setDefaultValues($view, $propertyValueProvider);
-    }
-
     /**
+     * @param array<string,mixed> $variables
+     *
      * @return ViewInterface[]
      */
-    protected function getInnerViews(ViewInterface $view, ObjectPropertyManagerInterface $objectPropertyManager): array
+    protected function getInnerViews(array $variables): array
     {
-        $variables = $objectPropertyManager->getVariables($view);
-
         return array_filter($variables, function ($item) {
             return true === ($item instanceof ViewInterface);
         });

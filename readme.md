@@ -1,23 +1,27 @@
 # PHP Views
 
-Blazing fast PHP Views with object Models and standalone Blade as a default template engine.
+Blazing fast PHP Views with model-driven approach and built-in [Blade](https://laravel.com/docs/11.x/blade)
+implementation as a default template engine.
 
-Benefits:
+### Benefits
 
 * Zero Dependencies: Lightweight and easy to integrate into any project.
 * Wide Compatibility: PHP 7.4+, 8.0+
 * Adherence to the [SOLID principles](https://en.wikipedia.org/wiki/SOLID): You can override any module without
   affecting the rest of the system.
+* Namespace Support: Manage different templates seamlessly under a unified structure.
 * Test Coverage: Covered by [Pest](https://pestphp.com/) Unit and Feature tests.
 * Static Analysis: Checked by [PHPStan](https://phpstan.org/).
 
-Flexible Usage;
+### Flexible Usage
 
 You're free to use the package in your own way:
 
-* Use it as a Views provider, combining object Models with the standalone Blade.
-* Employ it as a standalone [Blade](https://laravel.com/docs/11.x/blade) implementation for your templates.
-* Leverage its object Models wrapper for any template engine (e.g., [Twig](https://twig.symfony.com/)).
+* Use it as your Views provider, combining model-driven approach with the built-in Blade.
+* Employ its standalone [Blade](https://laravel.com/docs/11.x/blade) implementation as a template engine for your
+  Blade templates.
+* Leverage its model-driven approach for any template engine (e.g., [Twig](https://twig.symfony.com/)).
+* Use it as a connector for templates that utilize different template engines.
 
 ## 1. Model-driven approach
 
@@ -31,8 +35,9 @@ Model class:
 namespace MyPackage\Views;
 
 use Prosopo\Views\Interfaces\View\ViewInterface;
+use Prosopo\Views\View;
 
-class MyView extends \Prosopo\Views\View\View
+class MyView extends View
 {
     public int $salary;
     public int $bonus;
@@ -82,7 +87,9 @@ set custom default values, consider using one of the following approaches:
 ```php
 namespace MyPackage\Views;
 
-class MyView extends \Prosopo\Views\View\View
+use Prosopo\Views\View;
+
+class MyView extends View
 {
     // approach for plain field types.
     public int $varWithCustomDefaultValue = 'custom default value';
@@ -130,7 +137,7 @@ class MyView implements ViewInterface {
 
 ## 2. Views
 
-Views is the core class of this package, responsible for initializing all modules, including the `TemplateProvider`,
+`Views` is the root class of this package, responsible for initializing all modules, including the `TemplateProvider`,
 which automates the linking of Models to their respective templates.
 
 ### 2.1) Flat setup
@@ -138,21 +145,22 @@ which automates the linking of Models to their respective templates.
 ```php
 use Prosopo\Views\Blade\BladeRendererConfig;
 use Prosopo\Views\Blade\BladeTemplateRenderer;
-use Prosopo\Views\ViewsConfig;
 use Prosopo\Views\Views;
+use Prosopo\Views\NamespaceConfig;
 
-$viewsConfig = (new ViewsConfig())
+$namespaceConfig = (new NamespaceConfig())
     ->setTemplatesRootPath(__DIR__ . './templates')
     ->setViewsRootNamespace('MyPackage\Views')
     ->setTemplateFileExtension('.blade.php');
 
-$viewsConfig->getModules()
+$namespaceConfig->getModules()
     // You can use the build-in Blade Renderer, or wrap any template engine as shown in the Custom Modules chapter below.
     ->setTemplateRenderer(new BladeTemplateRenderer(new BladeRendererConfig()));
 
 // fixme add errorHandler that contains the View object.
 
-$views = new Views($viewsConfig);
+$views = new Views();
+$views->addNamespace($namespaceConfig);
 ```
 
 ### 2.2) Single-step Model creation and rendering
@@ -215,7 +223,7 @@ Example:
 **Naming Note:** Use dashes in template names, as camelCase in Model names is automatically converted to dash-separated
 names.
 
-### 2.5) Custom Modules
+### 2.5) Custom modules
 
 By default, the `Views` class creates module instances using classes from the current package.
 
@@ -258,13 +266,26 @@ $views = new Views($viewsConfig)
 > Note: The package includes only the Blade implementation. If you wish to use a different template engine, you will
 > need to install its Composer package and create a facade object, as demonstrated above.
 
-## 3. Build-in standalone Blade
+### 2.6) Namespace mixing
+
+> Fun Fact: The `Views` class not only supporting multiple namespaces, but also enabling you to use Models from one
+> namespace within another, regardless of their setup.
+
+Example of multi-namespace usage:
+
+Suppose you have a namespace for Blade templates, including a `Button` model and a `button.blade.php` template.
+
+Additionally, you have a namespace for Twig templates, with a `Popup` model and a `popup.twig` template.
+
+Here’s the cool part: you can safely use `Button` as a property of the `Popup` model. The package will first render the
+`Button` using Twig, converting it to a string, and then pass it seamlessly into the Blade template of the `Popup`.
+
+## 3. Build-in standalone Blade implementation
 
 [Blade](https://laravel.com/docs/11.x/blade) is an elegant and powerful template engine originally designed
 for [Laravel](https://laravel.com/).
 
-However, since it isn't available as a
-standalone package, this package includes its own Blade compiler.
+However, since it isn't available as a standalone package, this package includes its own Blade compiler.
 
 It provides full support for [Blade's key features](https://laravel.com/docs/11.x/blade)
 while remaining completely independent of Laravel.

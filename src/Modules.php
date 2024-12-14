@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Prosopo\Views;
 
-use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyManagerInterface;
+use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyReaderInterface;
+use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyWriterInterface;
 use Prosopo\Views\Interfaces\ObjectProperty\PropertyValueProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
@@ -29,7 +30,9 @@ final class Modules
     private ?ViewFactoryInterface $viewFactory;
     private ?ViewFactoryInterface $viewFactoryWithPropertyInitialization;
     private ?TemplateProviderInterface $templateProvider;
-    private ?ObjectPropertyManagerInterface $objectPropertyManager;
+    private ?ObjectPropertyReaderInterface $objectPropertyReader;
+    private ?ObjectPropertyWriterInterface $objectPropertyWriter;
+    private ?ObjectPropertyReaderInterface $objectPropertyReaderWithRendering;
     private ?PropertyValueProviderInterface $propertyValueProvider;
     private ?PropertyValueProviderInterface $instancePropertyProvider;
     private ?ViewRendererInterface $viewRenderer;
@@ -42,7 +45,9 @@ final class Modules
         $this->viewFactory = null;
         $this->viewFactoryWithPropertyInitialization = null;
         $this->templateProvider = null;
-        $this->objectPropertyManager = null;
+        $this->objectPropertyReader = null;
+        $this->objectPropertyWriter = null;
+        $this->objectPropertyReaderWithRendering = null;
         $this->propertyValueProvider = null;
         $this->instancePropertyProvider = null;
         $this->viewRenderer = null;
@@ -70,9 +75,19 @@ final class Modules
         return $this->templateProvider;
     }
 
-    public function getObjectPropertyManager(): ?ObjectPropertyManagerInterface
+    public function getObjectPropertyReader(): ?ObjectPropertyReaderInterface
     {
-        return $this->objectPropertyManager;
+        return $this->objectPropertyReader;
+    }
+
+    public function getObjectPropertyWriter(): ?ObjectPropertyWriterInterface
+    {
+        return $this->objectPropertyWriter;
+    }
+
+    public function getObjectPropertyReaderWithRendering(): ?ObjectPropertyReaderInterface
+    {
+        return $this->objectPropertyReaderWithRendering;
     }
 
     public function getPropertyValueProvider(): ?PropertyValueProviderInterface
@@ -121,9 +136,24 @@ final class Modules
         return $this;
     }
 
-    public function setObjectPropertyManager(?ObjectPropertyManagerInterface $objectPropertyManager): self
+    public function setObjectPropertyReader(?ObjectPropertyReaderInterface $objectPropertyReader): self
     {
-        $this->objectPropertyManager = $objectPropertyManager;
+        $this->objectPropertyReader = $objectPropertyReader;
+
+        return $this;
+    }
+
+    public function setObjectPropertyWriter(?ObjectPropertyWriterInterface $objectPropertyWriter): self
+    {
+        $this->objectPropertyWriter = $objectPropertyWriter;
+
+        return $this;
+    }
+
+    public function setObjectPropertyReaderWithRendering(
+        ?ObjectPropertyReaderInterface $objectPropertyReaderWithRendering
+    ): self {
+        $this->objectPropertyReaderWithRendering = $objectPropertyReaderWithRendering;
 
         return $this;
     }
