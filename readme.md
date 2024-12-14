@@ -28,8 +28,8 @@ You're free to use the package in your own way:
 - [1. Model-driven approach](#1-model-driven-approach)
 - [2. Views](#2-views)
 - [3. Built-in standalone Blade implementation](#3-built-in-standalone-blade-implementation)
-- [Contribution](#contribution)
-- [Credits](#credits)
+- [4. Contribution](#4-contribution)
+- [5. Credits](#5-credits)
 
 ## 1. Model-driven approach
 
@@ -415,12 +415,12 @@ $bladeRendererConfig->getModules()
 > case of the `BladeComplier`, it includes the `compilerExtensionCallback` setting, which allows you to implement a
 > custom directive without the need to build a custom compiler from scratch.
 
-## Contribution
+## 4. Contribution
 
 We would be excited if you decide to contribute! Please read the `for-devs.md` file for project guidelines and
 agreements.
 
-## Credits
+## 5. Credits
 
 This package was created by [Maxim Akimov](https://github.com/light-source/) during the development of
 the [WordPress integration for Prosopo Procaptcha](https://wordpress.org/plugins/prosopo-procaptcha/).
