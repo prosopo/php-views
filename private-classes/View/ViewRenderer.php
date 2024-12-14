@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\View;
+namespace Prosopo\Views\PrivateClasses\View;
 
 use Closure;
 use Prosopo\Views\Interfaces\ObjectPropertyManagerInterface;
@@ -11,7 +11,11 @@ use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
 use Prosopo\Views\Interfaces\View\ViewInterface;
 use Prosopo\Views\Interfaces\View\ViewRendererInterface;
 
-class ViewRenderer implements ViewRendererInterface
+/**
+ * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
+ * We reserve the right to change its name and implementation.
+ */
+final class ViewRenderer implements ViewRendererInterface
 {
     private TemplateRendererInterface $templateRenderer;
     private ViewFactoryInterface $viewFactory;

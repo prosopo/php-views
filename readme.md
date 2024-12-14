@@ -101,7 +101,7 @@ $bladeConfig->setCompilerExtensionCallback(function (string $template): string {
 
 By default, the `BladeTemplateRenderer` creates module instances using classes from the current package.
 
-If you need to override or extend the default module behavior, you can define your custom implementation in the
+If you need to override the default module behavior, you can define your custom implementation in the
 configuration. The `BladeTemplateRenderer` will automatically use your specified implementation.
 
 For example:
@@ -290,7 +290,7 @@ names.
 
 By default, the `Views` creates module instances using classes from the current package.
 
-If you need to override or extend the default module behavior, you can define your custom implementation in the
+If you need to override the default module behavior, you can define your custom implementation in the
 configuration. The `Views` will automatically use your specified implementation.
 
 For example:

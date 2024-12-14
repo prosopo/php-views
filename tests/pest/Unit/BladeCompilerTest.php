@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use PHPUnit\Framework\Attributes\DataProvider;
-use Prosopo\Views\Blade\BladeCompiler;
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
+use Prosopo\Views\PrivateClasses\Blade\BladeCompiler;
 use Tests\Helpers\TemplatesHelper;
 use Tests\TestCase;
 

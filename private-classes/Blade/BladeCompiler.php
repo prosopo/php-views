@@ -2,11 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\Blade;
+namespace Prosopo\Views\PrivateClasses\Blade;
 
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
 
-class BladeCompiler implements TemplateCompilerInterface
+/**
+ * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
+ * We reserve the right to change its name and implementation.
+ */
+final class BladeCompiler implements TemplateCompilerInterface
 {
     private string $escapeVariableName;
     /**

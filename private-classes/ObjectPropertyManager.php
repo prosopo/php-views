@@ -2,24 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views;
+namespace Prosopo\Views\PrivateClasses;
 
 use Prosopo\Views\Interfaces\ObjectPropertyManagerInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
 
-class ObjectPropertyManager implements ObjectPropertyManagerInterface
+/**
+ * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
+ * We reserve the right to change its name and implementation.
+ */
+final class ObjectPropertyManager implements ObjectPropertyManagerInterface
 {
-    public const DEFAULT_VALUES = array(
-        'array'  => array(),
-        'bool'   => false,
-        'float'  => 0.0,
-        'int'    => 0,
-        'object' => null,
-        'string' => '',
-    );
-
     /**
      * @var array<string,mixed> $defaultValues type => default_value
      */
@@ -28,7 +23,7 @@ class ObjectPropertyManager implements ObjectPropertyManagerInterface
     /**
      * @param array<string,mixed> $defaultValues type => default_value
      */
-    public function __construct(array $defaultValues = self::DEFAULT_VALUES)
+    public function __construct(array $defaultValues)
     {
         $this->defaultValues = $defaultValues;
     }

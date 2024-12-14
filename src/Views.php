@@ -10,11 +10,16 @@ use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
 use Prosopo\Views\Interfaces\View\ViewRendererInterface;
 use Prosopo\Views\Interfaces\ViewsInterface;
-use Prosopo\Views\Template\TemplateProvider;
-use Prosopo\Views\View\ViewFactory;
-use Prosopo\Views\View\ViewRenderer;
+use Prosopo\Views\PrivateClasses\ObjectPropertyManager;
+use Prosopo\Views\PrivateClasses\Template\TemplateProvider;
+use Prosopo\Views\PrivateClasses\View\ViewFactory;
+use Prosopo\Views\PrivateClasses\View\ViewRenderer;
 
-class Views implements ViewsInterface
+/**
+ * This class is marked as a final to prevent anyone from extending it.
+ * We reserve the right to change its private and protected methods and properties, or introduce new ones.
+ */
+final class Views implements ViewsInterface
 {
     private ViewRendererInterface $renderer;
     private ViewFactoryInterface $factory;
@@ -59,7 +64,7 @@ class Views implements ViewsInterface
             return $config->getObjectPropertyManager();
         }
 
-        return $this->makeObjectPropertyManager();
+        return $this->makeObjectPropertyManager($config->getDefaultPropertyValues());
     }
 
     protected function getOrMakeTemplateProvider(ViewsConfig $config): TemplateProviderInterface
@@ -93,9 +98,12 @@ class Views implements ViewsInterface
 
     //// Default instance creators:
 
-    protected function makeObjectPropertyManager(): ObjectPropertyManagerInterface
+    /**
+     * @param array<string,mixed> $defaultPropertyValues
+     */
+    protected function makeObjectPropertyManager(array $defaultPropertyValues): ObjectPropertyManagerInterface
     {
-        return new ObjectPropertyManager();
+        return new ObjectPropertyManager($defaultPropertyValues);
     }
 
     protected function makeFactory(

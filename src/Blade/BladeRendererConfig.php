@@ -9,7 +9,14 @@ use Prosopo\Views\Interfaces\Template\TemplateErrorDispatcherInterface;
 use Prosopo\Views\Interfaces\Template\TemplateErrorInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 
-class BladeRendererConfig
+/**
+ * This class is marked as a final to prevent anyone from extending it.
+ * We reserve the right to change its private and protected methods and properties, or introduce new ones.
+ *
+ * We chose to use a class instead of an interface because it allows for the addition of new (optional) settings,
+ * without breaking existing implementations.
+ */
+final class BladeRendererConfig
 {
     //// Optional settings:
 

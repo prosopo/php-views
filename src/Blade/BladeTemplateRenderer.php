@@ -8,11 +8,16 @@ use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
 use Prosopo\Views\Interfaces\Template\TemplateErrorDispatcherInterface;
 use Prosopo\Views\Interfaces\Template\TemplateErrorInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
-use Prosopo\Views\Template\TemplateErrorDispatcher;
-use Prosopo\Views\Template\TemplateRenderer;
-use Prosopo\Views\Template\TemplateRendererWithCustomEscape;
+use Prosopo\Views\PrivateClasses\Blade\BladeCompiler;
+use Prosopo\Views\PrivateClasses\Template\TemplateErrorDispatcher;
+use Prosopo\Views\PrivateClasses\Template\TemplateRenderer;
+use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithCustomEscape;
 
-class BladeTemplateRenderer implements TemplateRendererInterface
+/**
+ * This class is marked as a final to prevent anyone from extending it.
+ * We reserve the right to change its private and protected methods and properties, or introduce new ones.
+ */
+final class BladeTemplateRenderer implements TemplateRendererInterface
 {
     private TemplateRendererInterface $templateRenderer;
 

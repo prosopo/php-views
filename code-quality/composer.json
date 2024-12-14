@@ -7,8 +7,8 @@
   },
   "scripts": {
     "phpstan": "php ./vendor/bin/phpstan analys -c ./phpstan.neon",
-    "phpcs": "php ./vendor/bin/phpcs --standard=phpcs.xml ../src",
-    "phpcbf": "php ./vendor/bin/phpcbf --standard=phpcs.xml ../src"
+    "phpcs": "php ./vendor/bin/phpcs --standard=phpcs.xml ../src ../private-classes",
+    "phpcbf": "php ./vendor/bin/phpcbf --standard=phpcs.xml ../src ../private-classes"
   },
   "config": {
     "allow-plugins": {

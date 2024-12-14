@@ -2,14 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\View;
+namespace Prosopo\Views\PrivateClasses\View;
 
 use Prosopo\Views\Interfaces\ObjectPropertyManagerInterface;
 use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
 use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
 use Prosopo\Views\Interfaces\View\ViewInterface;
 
-class ViewFactory implements ViewFactoryInterface
+/**
+ * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
+ * We reserve the right to change its name and implementation.
+ */
+final class ViewFactory implements ViewFactoryInterface
 {
     private ObjectPropertyManagerInterface $objectPropertyManager;
     private TemplateProviderInterface $templateProvider;
@@ -38,7 +42,7 @@ class ViewFactory implements ViewFactoryInterface
      *
      * @return T
      */
-    protected function makeViewInstance(string $viewClass): ViewInterface
+    protected function makeViewInstance(string $viewClass)
     {
         return new $viewClass($this->templateProvider);
     }

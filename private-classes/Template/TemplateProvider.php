@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\Template;
+namespace Prosopo\Views\PrivateClasses\Template;
 
 use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
 use Prosopo\Views\Interfaces\View\ViewInterface;
 
-class TemplateProvider implements TemplateProviderInterface
+/**
+ * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
+ * We reserve the right to change its name and implementation.
+ */
+final class TemplateProvider implements TemplateProviderInterface
 {
     private string $templatesRootPath;
     private string $viewsRootNamespace;

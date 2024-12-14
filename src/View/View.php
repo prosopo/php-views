@@ -11,6 +11,16 @@ class View implements ViewInterface
 {
     private TemplateProviderInterface $templateProvider;
 
+    /**
+     * The constructor is marked as final to prevent accidental argument overrides.
+     * This is essential for the ViewFactory, which automatically creates instances.
+     *
+     * To set custom default values, use the `setCustomDefaults()` method.
+     *
+     * Note: If your app Models require additional dependencies in the constructor, consider:
+     * - Overriding the ViewFactory module.
+     * - Creating a custom parent View class that implements ViewInterface without a final constructor.
+     */
     final public function __construct(TemplateProviderInterface $template_provider)
     {
         $this->templateProvider = $template_provider;

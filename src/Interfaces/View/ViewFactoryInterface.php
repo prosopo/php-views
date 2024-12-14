@@ -13,5 +13,5 @@ interface ViewFactoryInterface
      *
      * @return T
      */
-    public function makeView(string $viewClass): ViewInterface;
+    public function makeView(string $viewClass);
 }
