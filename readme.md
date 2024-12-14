@@ -1,7 +1,7 @@
 # PHP Views
 
-Blazing fast PHP Views with model-driven approach and built-in [Blade](https://laravel.com/docs/11.x/blade)
-implementation as a default template engine.
+Blazing fast PHP Views with model-driven approach, multi-namespace support and
+built-in [Blade](https://laravel.com/docs/11.x/blade) implementation as a default template engine.
 
 ### Benefits
 
@@ -22,6 +22,14 @@ You're free to use the package in your own way:
   Blade templates.
 * Leverage its model-driven approach for any template engine (e.g., [Twig](https://twig.symfony.com/)).
 * Use it as a connector for templates that utilize different template engines.
+
+## Table of Contents
+
+- [1. Model-driven approach](#1-model-driven-approach)
+- [2. Views](#2-views)
+- [3. Built-in standalone Blade implementation](#3-built-in-standalone-blade-implementation)
+- [Contribution](#contribution)
+- [Credits](#credits)
 
 ## 1. Model-driven approach
 
@@ -154,7 +162,8 @@ $namespaceConfig = (new NamespaceConfig())
     ->setTemplateFileExtension('.blade.php');
 
 $namespaceConfig->getModules()
-    // You can use the build-in Blade Renderer, or wrap any template engine as shown in the Custom Modules chapter below.
+    // You can use the build-in Blade Renderer,
+    // or wrap any template engine as shown in the Custom Modules chapter below.
     ->setTemplateRenderer(new BladeTemplateRenderer(new BladeRendererConfig()));
 
 // fixme add errorHandler that contains the View object.
@@ -280,7 +289,7 @@ Additionally, you have a namespace for Twig templates, with a `Popup` model and 
 Here’s the cool part: you can safely use `Button` as a property of the `Popup` model. The package will first render the
 `Button` using Twig, converting it to a string, and then pass it seamlessly into the Blade template of the `Popup`.
 
-## 3. Build-in standalone Blade implementation
+## 3. Built-in standalone Blade implementation
 
 [Blade](https://laravel.com/docs/11.x/blade) is an elegant and powerful template engine originally designed
 for [Laravel](https://laravel.com/).
@@ -411,7 +420,7 @@ $bladeRendererConfig->getModules()
 We would be excited if you decide to contribute! Please read the `for-devs.md` file for project guidelines and
 agreements.
 
-## Credentials
+## Credits
 
 This package was created by [Maxim Akimov](https://github.com/light-source/) during the development of
 the [WordPress integration for Prosopo Procaptcha](https://wordpress.org/plugins/prosopo-procaptcha/).
