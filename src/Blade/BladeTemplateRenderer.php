@@ -15,15 +15,46 @@ use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithCustomEscape;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
- * We reserve the right to change its private and protected methods and properties, or introduce new ones.
+ * We reserve the right to change its private and protected methods and properties, or introduce new public ones.
  */
 final class BladeTemplateRenderer implements TemplateRendererInterface
 {
     private TemplateRendererInterface $templateRenderer;
+    private BladeRendererModules $modules;
 
     public function __construct(BladeRendererConfig $config)
     {
-        $this->templateRenderer = $this->getOrMakeTemplateRendererWithCustomEscape($config);
+        $modules = clone $config->getModules();
+
+        $templateErrorDispatcher = $modules->getTemplateErrorDispatcher();
+        $templateErrorDispatcher = null === $templateErrorDispatcher ?
+            $this->makeTemplateErrorDispatcher($config->getTemplateErrorHandler()) :
+            $templateErrorDispatcher;
+        $modules->setTemplateErrorDispatcher($templateErrorDispatcher);
+
+        $templateCompiler = $modules->getTemplateCompiler();
+        $templateCompiler = null === $templateCompiler ?
+            $this->makeTemplateCompiler($config->getEscapeVariableName(), $config->getCompilerExtensionCallback()) :
+            $templateCompiler;
+        $modules->setTemplateCompiler($templateCompiler);
+
+        $templateRenderer = $modules->getTemplateRenderer();
+        $templateRenderer = null === $templateRenderer ?
+            $this->makeTemplateRenderer($templateCompiler, $templateErrorDispatcher, $config->getGlobalVariables()) :
+            $templateRenderer;
+        $modules->setTemplateRenderer($templateRenderer);
+
+        $templateRendererWithCustomEscape = $modules->getTemplateRendererWithCustomEscape();
+        $templateRendererWithCustomEscape = null === $templateRendererWithCustomEscape ?
+            $this->makeTemplateRendererWithCustomEscape(
+                $templateRenderer,
+                $config->getCustomOutputEscapeCallback(),
+                $config->getEscapeVariableName()
+            ) :
+            $templateRendererWithCustomEscape;
+
+        $this->templateRenderer = $templateRendererWithCustomEscape;
+        $this->modules = $modules;
     }
 
     public function renderTemplate(string $template, array $variables, bool $doPrint = false): string
@@ -31,63 +62,10 @@ final class BladeTemplateRenderer implements TemplateRendererInterface
         return $this->templateRenderer->renderTemplate($template, $variables, $doPrint);
     }
 
-    //// Conditional instance retrievals:
-
-    protected function getOrMakeTemplateRendererWithCustomEscape(BladeRendererConfig $config): TemplateRendererInterface
+    public function getModules(): BladeRendererModules
     {
-        $templateRendererWithCustomEscape = $config->getTemplateRendererWithCustomEscape();
-
-        if (null !== $templateRendererWithCustomEscape) {
-            return $templateRendererWithCustomEscape;
-        }
-
-        $templateRenderer = $this->getOrMakeTemplateRenderer($config);
-
-        return $this->makeTemplateRendererWithCustomEscape(
-            $templateRenderer,
-            $config->getCustomOutputEscapeCallback(),
-            $config->getEscapeVariableName()
-        );
+        return $this->modules;
     }
-
-    protected function getOrMakeTemplateRenderer(BladeRendererConfig $config): TemplateRendererInterface
-    {
-        $templateRenderer = $config->getTemplateRenderer();
-
-        if (null !== $templateRenderer) {
-            return $templateRenderer;
-        }
-
-        $templateCompiler = $this->getOrMakeTemplateCompiler($config);
-        $templateErrorDispatcher = $this->getOrMakeTemplateErrorDispatcher($config);
-        $globalVariables = $config->getGlobalVariables();
-
-        return $this->makeTemplateRenderer($templateCompiler, $templateErrorDispatcher, $globalVariables);
-    }
-
-    protected function getOrMakeTemplateCompiler(BladeRendererConfig $config): TemplateCompilerInterface
-    {
-        $templateCompiler = $config->getTemplateCompiler();
-
-        if (null !== $templateCompiler) {
-            return $templateCompiler;
-        }
-
-        return $this->makeTemplateCompiler($config->getEscapeVariableName(), $config->getCompilerExtensionCallback());
-    }
-
-    protected function getOrMakeTemplateErrorDispatcher(BladeRendererConfig $config): TemplateErrorDispatcherInterface
-    {
-        $templateErrorDispatcher = $config->getTemplateErrorDispatcher();
-
-        if (null !== $templateErrorDispatcher) {
-            return $templateErrorDispatcher;
-        }
-
-        return $this->makeTemplateErrorDispatcher($config->getTemplateErrorHandler());
-    }
-
-    //// Default instance creators:
 
     /**
      * @param callable(TemplateErrorInterface $templateError): void|null $errorHandler
@@ -112,7 +90,7 @@ final class BladeTemplateRenderer implements TemplateRendererInterface
      */
     protected function makeTemplateRenderer(
         TemplateCompilerInterface $templateCompiler,
-        ?TemplateErrorDispatcherInterface $templateErrorDispatcher,
+        TemplateErrorDispatcherInterface $templateErrorDispatcher,
         array $globalVariables
     ): TemplateRendererInterface {
         return new TemplateRenderer(

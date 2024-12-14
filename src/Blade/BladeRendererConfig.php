@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\Blade;
 
-use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
-use Prosopo\Views\Interfaces\Template\TemplateErrorDispatcherInterface;
 use Prosopo\Views\Interfaces\Template\TemplateErrorInterface;
-use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods and properties, and introduce new public ones.
  *
  * We opt to use a class instead of an interface because it allows for the addition of new (optional) settings,
- *  without breaking existing setups.
+ * without breaking existing setups.
  */
 final class BladeRendererConfig
 {
@@ -37,14 +34,7 @@ final class BladeRendererConfig
      * @var callable(string $template): string|null
      */
     private $compilerExtensionCallback;
-
-    // fixme move away to BladeRendererModules.
-    //// Custom modules (define them when you need to override the default behavior):
-
-    private ?TemplateErrorDispatcherInterface $templateErrorDispatcher;
-    private ?TemplateRendererInterface $templateRenderer;
-    private ?TemplateCompilerInterface $templateCompiler;
-    private ?TemplateRendererInterface $templateRendererWithCustomEscape;
+    private BladeRendererModules $modules;
 
     public function __construct()
     {
@@ -53,10 +43,7 @@ final class BladeRendererConfig
         $this->globalVariables = [];
         $this->escapeVariableName = 'escape';
         $this->compilerExtensionCallback = null;
-        $this->templateErrorDispatcher = null;
-        $this->templateRenderer = null;
-        $this->templateCompiler = null;
-        $this->templateRendererWithCustomEscape = null;
+        $this->modules = new BladeRendererModules();
     }
 
     //// Getters.
@@ -98,24 +85,9 @@ final class BladeRendererConfig
         return $this->compilerExtensionCallback;
     }
 
-    public function getTemplateErrorDispatcher(): ?TemplateErrorDispatcherInterface
+    public function getModules(): BladeRendererModules
     {
-        return $this->templateErrorDispatcher;
-    }
-
-    public function getTemplateRenderer(): ?TemplateRendererInterface
-    {
-        return $this->templateRenderer;
-    }
-
-    public function getTemplateCompiler(): ?TemplateCompilerInterface
-    {
-        return $this->templateCompiler;
-    }
-
-    public function getTemplateRendererWithCustomEscape(): ?TemplateRendererInterface
-    {
-        return $this->templateRendererWithCustomEscape;
+        return $this->modules;
     }
 
     //// Setters.
@@ -154,24 +126,8 @@ final class BladeRendererConfig
         $this->escapeVariableName = $escapeVariableName;
     }
 
-    public function setTemplateErrorDispatcher(?TemplateErrorDispatcherInterface $templateErrorDispatcher): void
+    public function setModules(BladeRendererModules $modules): void
     {
-        $this->templateErrorDispatcher = $templateErrorDispatcher;
-    }
-
-    public function setTemplateRenderer(?TemplateRendererInterface $templateRenderer): void
-    {
-        $this->templateRenderer = $templateRenderer;
-    }
-
-    public function setTemplateCompiler(?TemplateCompilerInterface $templateCompiler): void
-    {
-        $this->templateCompiler = $templateCompiler;
-    }
-
-    public function setTemplateRendererWithCustomEscape(
-        ?TemplateRendererInterface $templateRendererWithCustomEscape
-    ): void {
-        $this->templateRendererWithCustomEscape = $templateRendererWithCustomEscape;
+        $this->modules = $modules;
     }
 }

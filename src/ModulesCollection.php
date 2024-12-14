@@ -27,7 +27,7 @@ final class ModulesCollection
     //// Custom modules: define them only when you need to override the default behavior:
 
     private ?ViewFactoryInterface $viewFactory;
-    private ?ViewFactoryInterface $viewFactoryWithDefaultsSetup;
+    private ?ViewFactoryInterface $viewFactoryWithPropertyInitialization;
     private ?TemplateProviderInterface $templateProvider;
     private ?ObjectPropertyManagerInterface $objectPropertyManager;
     private ?PropertyValueProviderInterface $propertyValueProvider;
@@ -40,7 +40,7 @@ final class ModulesCollection
         // This is intentional to ensure an Exception is thrown if their getters are called without providing values.
 
         $this->viewFactory = null;
-        $this->viewFactoryWithDefaultsSetup = null;
+        $this->viewFactoryWithPropertyInitialization = null;
         $this->templateProvider = null;
         $this->objectPropertyManager = null;
         $this->propertyValueProvider = null;
@@ -60,9 +60,9 @@ final class ModulesCollection
         return $this->viewFactory;
     }
 
-    public function getViewFactoryWithDefaultsSetup(): ?ViewFactoryInterface
+    public function getViewFactoryWithPropertyInitialization(): ?ViewFactoryInterface
     {
-        return $this->viewFactoryWithDefaultsSetup;
+        return $this->viewFactoryWithPropertyInitialization;
     }
 
     public function getTemplateProvider(): ?TemplateProviderInterface
@@ -102,9 +102,9 @@ final class ModulesCollection
         $this->viewFactory = $viewFactory;
     }
 
-    public function setViewFactoryWithDefaultsSetup(?ViewFactoryInterface $viewFactoryWithDefaultsSetup): void
+    public function setViewFactoryWithPropertyInitialization(?ViewFactoryInterface $viewFactoryWithPropertyInitialization): void
     {
-        $this->viewFactoryWithDefaultsSetup = $viewFactoryWithDefaultsSetup;
+        $this->viewFactoryWithPropertyInitialization = $viewFactoryWithPropertyInitialization;
     }
 
     public function setTemplateProvider(?TemplateProviderInterface $templateProvider): void

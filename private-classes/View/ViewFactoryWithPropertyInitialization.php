@@ -13,7 +13,7 @@ use Prosopo\Views\Interfaces\View\ViewInterface;
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
  * We reserve the right to change its name and implementation.
  */
-class ViewFactoryWithDefaultsSetup implements ViewFactoryInterface
+class ViewFactoryWithPropertyInitialization implements ViewFactoryInterface
 {
     private ViewFactoryInterface $viewFactory;
     private ObjectPropertyManagerInterface $objectPropertyManager;

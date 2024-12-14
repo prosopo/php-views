@@ -16,7 +16,7 @@ use Prosopo\Views\PrivateClasses\ObjectProperty\ObjectPropertyManager;
 use Prosopo\Views\PrivateClasses\ObjectProperty\PropertyValueProvider;
 use Prosopo\Views\PrivateClasses\Template\TemplateProvider;
 use Prosopo\Views\PrivateClasses\View\ViewFactory;
-use Prosopo\Views\PrivateClasses\View\ViewFactoryWithDefaultsSetup;
+use Prosopo\Views\PrivateClasses\View\ViewFactoryWithPropertyInitialization;
 use Prosopo\Views\PrivateClasses\View\ViewRenderer;
 
 /**
@@ -31,13 +31,61 @@ final class Views implements ViewsInterface
 
     public function __construct(ViewsConfig $config)
     {
-        $this->modules = clone $config->getModulesCollection();
+        $modules = clone $config->getModulesCollection();
 
-        // fixme use $this->modules when it needs.
-        $objectPropertyManager = $this->getOrMakeObjectPropertyManager($config);
+        $objectPropertyManager = $modules->getObjectPropertyManager();
+        $objectPropertyManager = null === $objectPropertyManager ?
+            $this->makeObjectPropertyManager() :
+            $objectPropertyManager;
+        $modules->setObjectPropertyManager($objectPropertyManager);
 
-        $this->viewFactory = $this->getOrMakeViewFactoryWithDefaultsSetup($config, $objectPropertyManager);
-        $this->viewRenderer = $this->getOrMakeViewRenderer($config, $this->viewFactory, $objectPropertyManager);
+        $templateProvider = $modules->getTemplateProvider();
+        $templateProvider = null === $templateProvider ?
+            $this->makeTemplateProvider(
+                $config->getTemplatesRootPath(),
+                $config->getViewsRootNamespace(),
+                $config->getTemplateFileExtension()
+            ) :
+            $templateProvider;
+        $modules->setTemplateProvider($templateProvider);
+
+        $viewFactory = $modules->getViewFactory();
+        $viewFactory = null === $viewFactory ?
+            $this->makeViewFactory($templateProvider) :
+            $viewFactory;
+        $modules->setViewFactory($viewFactory);
+
+        $instancePropertyProvider = $modules->getInstancePropertyProvider();
+        $instancePropertyProvider = null === $instancePropertyProvider ?
+            $this->makeInstancePropertyProvider($viewFactory) :
+            $instancePropertyProvider;
+        $modules->setInstancePropertyProvider($instancePropertyProvider);
+
+        $propertyValueProvider = $modules->getPropertyValueProvider();
+        $propertyValueProvider = null === $propertyValueProvider ?
+            $this->makePropertyValueProvider($instancePropertyProvider, $config->getDefaultPropertyValues()) :
+            $propertyValueProvider;
+        $modules->setPropertyValueProvider($propertyValueProvider);
+
+        $viewFactoryWithPropertyInitialization = $modules->getViewFactoryWithPropertyInitialization();
+        $viewFactoryWithPropertyInitialization = null === $viewFactoryWithPropertyInitialization ?
+            $this->makeViewFactoryWithPropertyInitialization(
+                $viewFactory,
+                $objectPropertyManager,
+                $propertyValueProvider
+            ) :
+            $viewFactoryWithPropertyInitialization;
+        $modules->setViewFactoryWithPropertyInitialization($viewFactoryWithPropertyInitialization);
+
+        $viewRenderer = $modules->getViewRenderer();
+        $viewRenderer = null === $viewRenderer ?
+            $this->makeViewRenderer($modules->getTemplateRenderer(), $viewFactory, $objectPropertyManager) :
+            $viewRenderer;
+        $modules->setViewRenderer($viewRenderer);
+
+        $this->viewFactory = $viewFactoryWithPropertyInitialization;
+        $this->viewRenderer = $viewRenderer;
+        $this->modules = $modules;
     }
 
     public function getFactory(): ViewFactoryInterface
@@ -54,105 +102,6 @@ final class Views implements ViewsInterface
     {
         return $this->modules;
     }
-
-    //// Conditional instance retrievals:
-
-    protected function getOrMakeViewFactoryWithDefaultsSetup(
-        ViewsConfig $config,
-        ObjectPropertyManagerInterface $objectPropertyManager
-    ): ViewFactoryInterface {
-        $viewFactoryWithDefaultsSetup = $config->getViewFactoryWithDefaultsSetup();
-
-        if (null !== $viewFactoryWithDefaultsSetup) {
-            return $viewFactoryWithDefaultsSetup;
-        }
-
-        $viewFactory = $this->getOrMakeViewFactory($config);
-        $instancePropertyProvider = $this->getOrMakeInstancePropertyProvider($config, $viewFactory);
-        $propertyValueProvider = $this->getOrMakePropertyValueProvider($config, $instancePropertyProvider);
-
-        return $this->makeViewFactoryWithDefaultsSetup($viewFactory, $objectPropertyManager, $propertyValueProvider);
-    }
-
-    protected function getOrMakeViewFactory(
-        ViewsConfig $config
-    ): ViewFactoryInterface {
-        $viewFactory = $config->getViewFactory();
-
-        if (null !== $viewFactory) {
-            return $viewFactory;
-        }
-
-        $templateProvider = $this->getOrMakeTemplateProvider($config);
-
-        return $this->makeViewFactory($templateProvider);
-    }
-
-    protected function getOrMakeObjectPropertyManager(ViewsConfig $config): ObjectPropertyManagerInterface
-    {
-        if (null !== $config->getObjectPropertyManager()) {
-            return $config->getObjectPropertyManager();
-        }
-
-        return $this->makeObjectPropertyManager();
-    }
-
-    protected function getOrMakePropertyValueProvider(
-        ViewsConfig $config,
-        PropertyValueProviderInterface $instancePropertyProvider
-    ): PropertyValueProviderInterface {
-        $propertyValueProvider = $config->getPropertyValueProvider();
-
-        if (null !== $propertyValueProvider) {
-            return $propertyValueProvider;
-        }
-
-        return $this->makePropertyValueProvider($instancePropertyProvider, $config->getDefaultPropertyValues());
-    }
-
-    protected function getOrMakeTemplateProvider(ViewsConfig $config): TemplateProviderInterface
-    {
-        $templateProvider = $config->getTemplateProvider();
-
-        if (null !== $templateProvider) {
-            return $templateProvider;
-        }
-
-        return $this->makeTemplateProvider(
-            $config->getTemplatesRootPath(),
-            $config->getViewsRootNamespace(),
-            $config->getTemplateFileExtension()
-        );
-    }
-
-    protected function getOrMakeViewRenderer(
-        ViewsConfig $config,
-        ViewFactoryInterface $viewFactory,
-        ObjectPropertyManagerInterface $objectPropertyManager
-    ): ViewRendererInterface {
-        $viewRenderer = $config->getViewRenderer();
-
-        if (null !== $viewRenderer) {
-            return $viewRenderer;
-        }
-
-        return $this->makeViewRenderer($config->getTemplateRenderer(), $viewFactory, $objectPropertyManager);
-    }
-
-    protected function getOrMakeInstancePropertyProvider(
-        ViewsConfig $config,
-        ViewFactoryInterface $viewFactory
-    ): PropertyValueProviderInterface {
-        $instancePropertyProvider = $config->getInstancePropertyProvider();
-
-        if (null !== $instancePropertyProvider) {
-            return $instancePropertyProvider;
-        }
-
-        return $this->makeInstancePropertyProvider($viewFactory);
-    }
-
-    //// Default instance creators:
 
     protected function makeInstancePropertyProvider(ViewFactoryInterface $viewFactory): PropertyValueProviderInterface
     {
@@ -179,12 +128,12 @@ final class Views implements ViewsInterface
         return new ViewFactory($templateProvider);
     }
 
-    protected function makeViewFactoryWithDefaultsSetup(
+    protected function makeViewFactoryWithPropertyInitialization(
         ViewFactoryInterface $viewFactory,
         ObjectPropertyManagerInterface $objectPropertyManager,
         PropertyValueProviderInterface $propertyValueProvider
     ): ViewFactoryInterface {
-        return new ViewFactoryWithDefaultsSetup($viewFactory, $objectPropertyManager, $propertyValueProvider);
+        return new ViewFactoryWithPropertyInitialization($viewFactory, $objectPropertyManager, $propertyValueProvider);
     }
 
     protected function makeTemplateProvider(
