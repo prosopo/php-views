@@ -21,7 +21,7 @@ final class TemplateErrorDispatcher implements TemplateErrorDispatcherInterface
     /**
      * @param callable(TemplateErrorInterface $templateError): void|null $errorHandler
      */
-    public function __construct(callable $errorHandler = null)
+    public function __construct(?callable $errorHandler)
     {
         $this->errorHandler = $errorHandler;
     }

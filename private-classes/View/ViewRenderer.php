@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Prosopo\Views\PrivateClasses\View;
 
 use Closure;
-use Prosopo\Views\Interfaces\ObjectPropertyManagerInterface;
+use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyManagerInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
 use Prosopo\Views\Interfaces\View\ViewInterface;

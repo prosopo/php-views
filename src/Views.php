@@ -4,47 +4,77 @@ declare(strict_types=1);
 
 namespace Prosopo\Views;
 
-use Prosopo\Views\Interfaces\ObjectPropertyManagerInterface;
+use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyManagerInterface;
+use Prosopo\Views\Interfaces\ObjectProperty\PropertyValueProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
 use Prosopo\Views\Interfaces\View\ViewRendererInterface;
 use Prosopo\Views\Interfaces\ViewsInterface;
-use Prosopo\Views\PrivateClasses\ObjectPropertyManager;
+use Prosopo\Views\PrivateClasses\ObjectProperty\InstancePropertyProvider;
+use Prosopo\Views\PrivateClasses\ObjectProperty\ObjectPropertyManager;
+use Prosopo\Views\PrivateClasses\ObjectProperty\PropertyValueProvider;
 use Prosopo\Views\PrivateClasses\Template\TemplateProvider;
 use Prosopo\Views\PrivateClasses\View\ViewFactory;
+use Prosopo\Views\PrivateClasses\View\ViewFactoryWithDefaultsSetup;
 use Prosopo\Views\PrivateClasses\View\ViewRenderer;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
- * We reserve the right to change its private and protected methods and properties, or introduce new ones.
+ * We reserve the right to change its private and protected methods and properties, and introduce new public ones.
  */
 final class Views implements ViewsInterface
 {
-    private ViewRendererInterface $renderer;
-    private ViewFactoryInterface $factory;
+    private ViewRendererInterface $viewRenderer;
+    private ViewFactoryInterface $viewFactory;
+    private ModulesCollection $modules;
 
     public function __construct(ViewsConfig $config)
     {
+        $this->modules = clone $config->getModulesCollection();
+
+        // fixme use $this->modules when it needs.
         $objectPropertyManager = $this->getOrMakeObjectPropertyManager($config);
-        $this->factory = $this->getOrMakeFactory($objectPropertyManager, $config);
-        $this->renderer = $this->getOrMakeViewRenderer($config, $this->factory, $objectPropertyManager);
+
+        $this->viewFactory = $this->getOrMakeViewFactoryWithDefaultsSetup($config, $objectPropertyManager);
+        $this->viewRenderer = $this->getOrMakeViewRenderer($config, $this->viewFactory, $objectPropertyManager);
     }
 
     public function getFactory(): ViewFactoryInterface
     {
-        return $this->factory;
+        return $this->viewFactory;
     }
 
     public function getRenderer(): ViewRendererInterface
     {
-        return $this->renderer;
+        return $this->viewRenderer;
+    }
+
+    public function getModules(): ModulesCollection
+    {
+        return $this->modules;
     }
 
     //// Conditional instance retrievals:
 
-    protected function getOrMakeFactory(
-        ObjectPropertyManagerInterface $objectPropertyManager,
+    protected function getOrMakeViewFactoryWithDefaultsSetup(
+        ViewsConfig $config,
+        ObjectPropertyManagerInterface $objectPropertyManager
+    ): ViewFactoryInterface {
+        $viewFactoryWithDefaultsSetup = $config->getViewFactoryWithDefaultsSetup();
+
+        if (null !== $viewFactoryWithDefaultsSetup) {
+            return $viewFactoryWithDefaultsSetup;
+        }
+
+        $viewFactory = $this->getOrMakeViewFactory($config);
+        $instancePropertyProvider = $this->getOrMakeInstancePropertyProvider($config, $viewFactory);
+        $propertyValueProvider = $this->getOrMakePropertyValueProvider($config, $instancePropertyProvider);
+
+        return $this->makeViewFactoryWithDefaultsSetup($viewFactory, $objectPropertyManager, $propertyValueProvider);
+    }
+
+    protected function getOrMakeViewFactory(
         ViewsConfig $config
     ): ViewFactoryInterface {
         $viewFactory = $config->getViewFactory();
@@ -55,7 +85,7 @@ final class Views implements ViewsInterface
 
         $templateProvider = $this->getOrMakeTemplateProvider($config);
 
-        return $this->makeFactory($objectPropertyManager, $templateProvider);
+        return $this->makeViewFactory($templateProvider);
     }
 
     protected function getOrMakeObjectPropertyManager(ViewsConfig $config): ObjectPropertyManagerInterface
@@ -64,7 +94,20 @@ final class Views implements ViewsInterface
             return $config->getObjectPropertyManager();
         }
 
-        return $this->makeObjectPropertyManager($config->getDefaultPropertyValues());
+        return $this->makeObjectPropertyManager();
+    }
+
+    protected function getOrMakePropertyValueProvider(
+        ViewsConfig $config,
+        PropertyValueProviderInterface $instancePropertyProvider
+    ): PropertyValueProviderInterface {
+        $propertyValueProvider = $config->getPropertyValueProvider();
+
+        if (null !== $propertyValueProvider) {
+            return $propertyValueProvider;
+        }
+
+        return $this->makePropertyValueProvider($instancePropertyProvider, $config->getDefaultPropertyValues());
     }
 
     protected function getOrMakeTemplateProvider(ViewsConfig $config): TemplateProviderInterface
@@ -96,21 +139,52 @@ final class Views implements ViewsInterface
         return $this->makeViewRenderer($config->getTemplateRenderer(), $viewFactory, $objectPropertyManager);
     }
 
+    protected function getOrMakeInstancePropertyProvider(
+        ViewsConfig $config,
+        ViewFactoryInterface $viewFactory
+    ): PropertyValueProviderInterface {
+        $instancePropertyProvider = $config->getInstancePropertyProvider();
+
+        if (null !== $instancePropertyProvider) {
+            return $instancePropertyProvider;
+        }
+
+        return $this->makeInstancePropertyProvider($viewFactory);
+    }
+
     //// Default instance creators:
+
+    protected function makeInstancePropertyProvider(ViewFactoryInterface $viewFactory): PropertyValueProviderInterface
+    {
+        return new InstancePropertyProvider($viewFactory);
+    }
+
+    protected function makeObjectPropertyManager(): ObjectPropertyManagerInterface
+    {
+        return new ObjectPropertyManager();
+    }
 
     /**
      * @param array<string,mixed> $defaultPropertyValues
      */
-    protected function makeObjectPropertyManager(array $defaultPropertyValues): ObjectPropertyManagerInterface
-    {
-        return new ObjectPropertyManager($defaultPropertyValues);
+    protected function makePropertyValueProvider(
+        PropertyValueProviderInterface $instancePropertyProvider,
+        array $defaultPropertyValues
+    ): PropertyValueProviderInterface {
+        return new PropertyValueProvider($instancePropertyProvider, $defaultPropertyValues);
     }
 
-    protected function makeFactory(
+    protected function makeViewFactory(TemplateProviderInterface $templateProvider): ViewFactoryInterface
+    {
+        return new ViewFactory($templateProvider);
+    }
+
+    protected function makeViewFactoryWithDefaultsSetup(
+        ViewFactoryInterface $viewFactory,
         ObjectPropertyManagerInterface $objectPropertyManager,
-        TemplateProviderInterface $templateProvider
+        PropertyValueProviderInterface $propertyValueProvider
     ): ViewFactoryInterface {
-        return new ViewFactory($objectPropertyManager, $templateProvider);
+        return new ViewFactoryWithDefaultsSetup($viewFactory, $objectPropertyManager, $propertyValueProvider);
     }
 
     protected function makeTemplateProvider(

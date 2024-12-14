@@ -28,8 +28,8 @@ final class TemplateRenderer implements TemplateRendererInterface
      */
     public function __construct(
         TemplateCompilerInterface $template_engine,
-        ?TemplateErrorDispatcherInterface $errorDispatcher = null,
-        array $globalVariables = []
+        ?TemplateErrorDispatcherInterface $errorDispatcher,
+        array $globalVariables
     ) {
         $this->templateCompiler = $template_engine;
         $this->errorDispatcher = $errorDispatcher;

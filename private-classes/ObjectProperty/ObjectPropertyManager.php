@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\PrivateClasses;
+namespace Prosopo\Views\PrivateClasses\ObjectProperty;
 
-use Prosopo\Views\Interfaces\ObjectPropertyManagerInterface;
+use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyManagerInterface;
+use Prosopo\Views\Interfaces\ObjectProperty\PropertyValueProviderInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -15,31 +16,29 @@ use ReflectionProperty;
  */
 final class ObjectPropertyManager implements ObjectPropertyManagerInterface
 {
-    /**
-     * @var array<string,mixed> $defaultValues type => default_value
-     */
-    private array $defaultValues;
-
-    /**
-     * @param array<string,mixed> $defaultValues type => default_value
-     */
-    public function __construct(array $defaultValues)
-    {
-        $this->defaultValues = $defaultValues;
-    }
-
-    public function setDefaultValues(object $instance): void
-    {
+    public function setDefaultValues(
+        object $instance,
+        ?PropertyValueProviderInterface $propertyValueProvider = null
+    ): void {
         $reflectionClass       = $this->getReflectionClass($instance);
         $publicTypedVariables = $this->getPublicTypedVariables($reflectionClass);
 
         array_map(
-            function (ReflectionProperty $reflection_property) use ($instance) {
-                if (true === $reflection_property->isInitialized($instance)) {
+            function (ReflectionProperty $reflectionProperty) use ($instance, $propertyValueProvider) {
+                if (true === $reflectionProperty->isInitialized($instance)) {
                     return;
                 }
 
-                $this->setDefaultValueWhenTypeIsSupported($instance, $reflection_property);
+                $isDefaultValueSet = null !== $propertyValueProvider &&
+                    $this->setDefaultValueForSupportedType(
+                        $instance,
+                        $propertyValueProvider,
+                        $reflectionProperty
+                    );
+
+                if (false === $isDefaultValueSet) {
+                    $this->setNullForNullableProperty($reflectionProperty);
+                }
             },
             $publicTypedVariables
         );
@@ -71,6 +70,43 @@ final class ObjectPropertyManager implements ObjectPropertyManagerInterface
         $publicProperties = $reflection_class->getProperties(ReflectionProperty::IS_PUBLIC);
 
         return $this->getTypedProperties($publicProperties);
+    }
+
+    protected function setDefaultValueForSupportedType(
+        object $instance,
+        PropertyValueProviderInterface $propertyValueProvider,
+        ReflectionProperty $reflectionProperty
+    ): bool {
+        $type = $reflectionProperty->getType();
+
+        $typeName = null !== $type ?
+            // @phpstan-ignore-next-line
+            $type->getName() :
+            '';
+
+        if (false === $propertyValueProvider->supports($typeName)) {
+            return false;
+        }
+
+        $value = $reflectionProperty->getValue($instance);
+
+        $reflectionProperty->setValue($value);
+
+        return true;
+    }
+
+    protected function setNullForNullableProperty(ReflectionProperty $reflectionProperty): void
+    {
+        $type = $reflectionProperty->getType();
+
+        if (
+            null === $type ||
+            false === $type->allowsNull()
+        ) {
+            return;
+        }
+
+        $reflectionProperty->setValue(null);
     }
 
     /**
@@ -160,23 +196,5 @@ final class ObjectPropertyManager implements ObjectPropertyManagerInterface
             },
             array()
         );
-    }
-
-    protected function setDefaultValueWhenTypeIsSupported(
-        object $instance,
-        ReflectionProperty $reflectionProperty
-    ): void {
-        $type = $reflectionProperty->getType();
-
-        $typeName = null !== $type ?
-            // @phpstan-ignore-next-line
-            $type->getName() :
-            '';
-
-        if (false === key_exists($typeName, $this->defaultValues)) {
-            return;
-        }
-
-        $reflectionProperty->setValue($instance, $this->defaultValues[ $typeName ]);
     }
 }

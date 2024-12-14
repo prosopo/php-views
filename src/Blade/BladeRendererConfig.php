@@ -11,10 +11,10 @@ use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
- * We reserve the right to change its private and protected methods and properties, or introduce new ones.
+ * We reserve the right to change its private and protected methods and properties, and introduce new public ones.
  *
- * We chose to use a class instead of an interface because it allows for the addition of new (optional) settings,
- * without breaking existing implementations.
+ * We opt to use a class instead of an interface because it allows for the addition of new (optional) settings,
+ *  without breaking existing setups.
  */
 final class BladeRendererConfig
 {
@@ -38,7 +38,8 @@ final class BladeRendererConfig
      */
     private $compilerExtensionCallback;
 
-    //// Custom modules (set them when you need to override the default classes):
+    // fixme move away to BladeRendererModules.
+    //// Custom modules (define them when you need to override the default behavior):
 
     private ?TemplateErrorDispatcherInterface $templateErrorDispatcher;
     private ?TemplateRendererInterface $templateRenderer;

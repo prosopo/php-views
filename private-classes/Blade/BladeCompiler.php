@@ -21,7 +21,7 @@ final class BladeCompiler implements TemplateCompilerInterface
     /**
      * @param callable(string $template): string|null $extensionCallback
      */
-    public function __construct(string $escapeVariableName, ?callable $extensionCallback = null)
+    public function __construct(string $escapeVariableName, ?callable $extensionCallback)
     {
         $this->escapeVariableName = $escapeVariableName;
         $this->extensionCallback = $extensionCallback;

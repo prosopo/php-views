@@ -24,8 +24,8 @@ final class TemplateRendererWithCustomEscape implements TemplateRendererInterfac
      */
     public function __construct(
         TemplateRendererInterface $templateRenderer,
-        ?callable $customOutputEscapeCallback = null,
-        string $escapeVariableName = 'escape'
+        ?callable $customOutputEscapeCallback,
+        string $escapeVariableName
     ) {
         $this->templateRenderer = $templateRenderer;
         $this->customOutputEscapeCallback = $customOutputEscapeCallback;
