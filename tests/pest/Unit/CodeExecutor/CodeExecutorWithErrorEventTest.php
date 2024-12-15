@@ -11,6 +11,7 @@ use Prosopo\Views\Interfaces\CodeExecutorInterface;
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
 use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithErrorEvent;
 use Tests\TestCase;
+use Throwable;
 
 class CodeExecutorWithErrorEventTest extends TestCase
 {
@@ -41,18 +42,15 @@ class CodeExecutorWithErrorEventTest extends TestCase
 
     public function testCallsDispatcherOnError(): void
     {
-        $this->testCallsDispatcher(new Error('Error message'));
+        $this->testCallsDispatcher(new Error());
     }
 
     public function testCallsDispatcherOnException(): void
     {
-        $this->testCallsDispatcher(new Exception('Exception message'));
+        $this->testCallsDispatcher(new Exception());
     }
 
-    /**
-     * @param Error|Exception $errorOrException
-     */
-    protected function testCallsDispatcher($errorOrException): void
+    protected function testCallsDispatcher(Throwable $error): void
     {
         // given
         $codeExecutor = Mockery::mock(CodeExecutorInterface::class);
@@ -67,22 +65,20 @@ class CodeExecutorWithErrorEventTest extends TestCase
         $executeCode = fn() => $contestant->executeCode('wrong code', ['var' => 1]);
 
         // then
-        $codeExecutor->shouldReceive('executeCode')
+         $codeExecutor->shouldReceive('executeCode')
             ->once()
-            ->andThrow($errorOrException);
-        $errorKey = true === $errorOrException instanceof Error ?
-            'error' :
-            'exception';
-        $eventDispatcher->shouldReceive('dispatchEvent')
+            ->andThrow($error);
+
+         $eventDispatcher->shouldReceive('dispatchEvent')
             ->once()
             ->with(
                 'errorEventName',
                 [
-                    $errorKey => $errorOrException,
                     'arguments' => [
                         'var' => 1,
                     ],
                     'code' => 'wrong code',
+                    'error' => $error,
                 ]
             );
 

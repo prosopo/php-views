@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\CodeExecutor;
 
-use Error;
-use Exception;
 use Prosopo\Views\Interfaces\CodeExecutorInterface;
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
+use Throwable;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
@@ -37,26 +36,11 @@ final class CodeExecutorWithErrorEvent implements CodeExecutorInterface
         ];
 
         try {
-            // Catch all level-errors and turn into the generic error.
-            // @phpcs:ignore
-            set_error_handler(
-                function ($errno, $errstr) {
-                    // @phpcs:ignore
-                    throw new Error($errstr, $errno);
-                }
-            );
-
             $this->codeExecutor->executeCode($code, $arguments);
-        } catch (Error $error) {
+        } catch (Throwable $error) {
             $errorDetails['error'] = $error;
 
             $this->eventDispatcher->dispatchEvent($this->errorEventName, $errorDetails);
-        } catch (Exception $exception) {
-            $errorDetails['exception'] = $exception;
-
-            $this->eventDispatcher->dispatchEvent($this->errorEventName, $errorDetails);
-        } finally {
-            restore_error_handler();
         }
     }
 }
