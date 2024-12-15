@@ -41,7 +41,7 @@ abstract class View implements ViewInterface
 
     public function getTemplate(): string
     {
-        return $this->templateProvider->getTemplate($this);
+        return $this->templateProvider->getTemplate(get_class($this));
     }
 
     protected function setCustomDefaults(): void

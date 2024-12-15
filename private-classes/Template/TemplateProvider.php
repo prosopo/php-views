@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Prosopo\Views\PrivateClasses\Template;
 
 use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
-use Prosopo\Views\Interfaces\View\ViewInterface;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
@@ -24,9 +23,9 @@ final class TemplateProvider implements TemplateProviderInterface
         $this->extension = $extension;
     }
 
-    public function getTemplate(ViewInterface $view): string
+    public function getTemplate(string $viewClass): string
     {
-        $viewFileName = $this->getRelativeViewPath(get_class($view), $this->viewsRootNamespace);
+        $viewFileName = $this->getRelativeViewPath($viewClass, $this->viewsRootNamespace);
 
         $pathToView = $this->getAbsoluteViewPath($viewFileName);
 
