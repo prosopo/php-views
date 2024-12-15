@@ -31,7 +31,7 @@ final class CodeExecutorWithErrorEvent implements CodeExecutorInterface
 
     public function executeCode(string $code, array $arguments): void
     {
-        $errorContext = [
+        $errorDetails = [
             'arguments' => $arguments,
             'code' => $code,
         ];
@@ -48,13 +48,13 @@ final class CodeExecutorWithErrorEvent implements CodeExecutorInterface
 
             $this->codeExecutor->executeCode($code, $arguments);
         } catch (Error $error) {
-            $this->eventDispatcher->dispatchEvent($this->errorEventName, array_merge($errorContext, [
-                'error' => $error,
-            ]));
+            $errorDetails['error'] = $error;
+
+            $this->eventDispatcher->dispatchEvent($this->errorEventName, $errorDetails);
         } catch (Exception $exception) {
-            $this->eventDispatcher->dispatchEvent($this->errorEventName, array_merge($errorContext, [
-                'exception' => $exception,
-            ]));
+            $errorDetails['exception'] = $exception;
+
+            $this->eventDispatcher->dispatchEvent($this->errorEventName, $errorDetails);
         } finally {
             restore_error_handler();
         }

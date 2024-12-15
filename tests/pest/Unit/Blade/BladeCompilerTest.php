@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit;
+namespace Tests\Unit\Blade;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
@@ -25,9 +25,9 @@ class BladeCompilerTest extends TestCase
         $templatesHelper = self::getTemplatesHelper();
 
         $templates       = $templatesHelper->getTemplatesByExtension('.blade.php', [
-            __DIR__ . '/../../templates',
-            __DIR__ . '/../../templates/inline',
-            __DIR__ . '/../../templates/multiline',
+            __DIR__ . '/../../../templates',
+            __DIR__ . '/../../../templates/inline',
+            __DIR__ . '/../../../templates/multiline',
         ]);
 
         $testArguments   = array_map(function (string $template) {
@@ -59,6 +59,7 @@ class BladeCompilerTest extends TestCase
 
         $compiledPhp = $compiler->compileTemplate($bladeTemplate);
 
+        $this->assertNotEmpty($phpTemplate); // to make sure the path is right.
         $this->assertEquals(
             $phpTemplate,
             $compiledPhp,
@@ -66,8 +67,26 @@ class BladeCompilerTest extends TestCase
         );
     }
 
+    public function testExtensionCallbackIsCalled(): void
+    {
+        // given
+        $callbackCalled = false;
+        $extensionCallback = function (string $template) use (&$callbackCalled): string {
+            $callbackCalled = true;
+            return $template . ' extended';
+        };
+        $compiler = new BladeCompiler('escape', $extensionCallback);
+
+        // when
+        $result = $compiler->compileTemplate('original template');
+
+        // then
+        $this->assertTrue($callbackCalled);
+        $this->assertSame('original template extended', $result);
+    }
+
     protected function getCompiler(): TemplateCompilerInterface
     {
-        return new BladeCompiler('e');
+        return new BladeCompiler('e', null);
     }
 }
