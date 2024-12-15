@@ -7,7 +7,7 @@ namespace Prosopo\Views;
 use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
 use Prosopo\Views\Interfaces\View\ViewInterface;
 
-class View implements ViewInterface
+abstract class View implements ViewInterface
 {
     private TemplateProviderInterface $templateProvider;
 

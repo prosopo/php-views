@@ -36,7 +36,7 @@ final class ObjectPropertyWriter implements ObjectPropertyWriterInterface
                     );
 
                 if (false === $isDefaultValueSet) {
-                    $this->setNullForNullableProperty($reflectionProperty);
+                    $this->setNullForNullableProperty($instance, $reflectionProperty);
                 }
             },
             $publicTypedVariables
@@ -71,14 +71,14 @@ final class ObjectPropertyWriter implements ObjectPropertyWriterInterface
             return false;
         }
 
-        $value = $reflectionProperty->getValue($instance);
+        $value = $propertyValueProvider->getValue($typeName);
 
-        $reflectionProperty->setValue($value);
+        $reflectionProperty->setValue($instance, $value);
 
         return true;
     }
 
-    protected function setNullForNullableProperty(ReflectionProperty $reflectionProperty): void
+    protected function setNullForNullableProperty(object $instance, ReflectionProperty $reflectionProperty): void
     {
         $type = $reflectionProperty->getType();
 
@@ -89,7 +89,7 @@ final class ObjectPropertyWriter implements ObjectPropertyWriterInterface
             return;
         }
 
-        $reflectionProperty->setValue(null);
+        $reflectionProperty->setValue($instance, null);
     }
 
     /**
