@@ -27,7 +27,7 @@ final class BladeCompiler implements TemplateCompilerInterface
         $this->extensionCallback = $extensionCallback;
     }
 
-    public function compile(string $template): string
+    public function compileTemplate(string $template): string
     {
         $template = $this->removeComments($template);
 

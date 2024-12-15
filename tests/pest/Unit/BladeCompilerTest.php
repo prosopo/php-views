@@ -57,7 +57,7 @@ class BladeCompilerTest extends TestCase
         $phpTemplate     = $templatesHelper->getTemplate($template . '.php');
         $bladeTemplate   = $templatesHelper->getTemplate($template . '.blade.php');
 
-        $compiledPhp = $compiler->compile($bladeTemplate);
+        $compiledPhp = $compiler->compileTemplate($bladeTemplate);
 
         $this->assertEquals(
             $phpTemplate,

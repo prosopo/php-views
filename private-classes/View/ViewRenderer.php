@@ -43,6 +43,7 @@ final class ViewRenderer implements ViewRendererInterface
         $template  = $view->getTemplate();
         $variables = $this->objectPropertyReader->getVariables($view);
 
+        // fixme attachContext.
         return $this->templateRenderer->renderTemplate($template, $variables, $doPrint);
     }
 }

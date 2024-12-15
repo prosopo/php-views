@@ -153,22 +153,38 @@ which automates the linking of Models to their respective templates.
 ```php
 use Prosopo\Views\Blade\BladeRendererConfig;
 use Prosopo\Views\Blade\BladeTemplateRenderer;
-use Prosopo\Views\Views;
 use Prosopo\Views\NamespaceConfig;
+use Prosopo\Views\Views;
 
-$namespaceConfig = (new NamespaceConfig())
+// 1. Make the Template Renderer.
+// It can be the built-in Blade or any external one
+// (we'll show the external one in a separate chapter)
+
+$bladeRendererConfig = new BladeRendererConfig();
+$bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+
+// 2. Define the namespace config
+
+$namespaceConfig = (new NamespaceConfig($bladeRenderer))
+    // required settings:
     ->setTemplatesRootPath(__DIR__ . './templates')
     ->setViewsRootNamespace('MyPackage\Views')
-    ->setTemplateFileExtension('.blade.php');
+    ->setTemplateFileExtension('.blade.php')
+    // optional settings:
+    ->setTemplateErrorHandler(function (array $eventDetails) {
+        // logging, notifying, whatever.
+    });
 
+// This line is necessary only if you defined the templateErrorHandler
 $namespaceConfig->getModules()
-    // You can use the build-in Blade Renderer,
-    // or wrap any template engine as shown in the Custom Modules chapter below.
-    ->setTemplateRenderer(new BladeTemplateRenderer(new BladeRendererConfig()));
+    ->setEventDispatcher($bladeRenderer->getModules()->getEventDispatcher());
 
-// fixme add errorHandler that contains the View object.
+// 3. Make the Views:
 
 $views = new Views();
+
+// 4. Add the namespace (you can have multiple namespaces)
+
 $views->addNamespace($namespaceConfig);
 ```
 
@@ -236,40 +252,47 @@ names.
 
 By default, the `Views` class creates module instances using classes from the current package.
 
-If you need to override the default module behavior, you can define your custom implementation in the
-configuration. The `Views` class will use your specified implementation.
+If you need to override the default module behavior, you can define a custom implementation in the
+configuration. The `Views` class will use the specified implementation.
 
-> Tip: You can see the full list of the modules in the `Modules` class.
+> Tip: You can see the full list of the modules in the `ModulesInterface`.
 
 #### Example: Using Twig as a Template Renderer (instead of the built-in Blade Renderer)
 
 ```php
-use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
 
-class TwigRenderer implements TemplateRendererInterface {
+// 1. Make a facade (for Twig or another template engine)
+
+use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
+
+class TwigDecorator implements TemplateRendererInterface {
     private $twig;
-    
+
     public function __construct() {
         // todo init Twig or another engine.
     }
 
-      /**
-     * @param array<string,mixed> $variables
-     */
     public function renderTemplate(string $template, array $variables, bool $doPrint = false): string {
-        $this->twig->render($template, $variables, $doPrint);
+        return $this->twig->render($template, $variables, $doPrint);
     }
 }
 
-$viewsConfig = (new ViewsConfig())
+// 2. Define the namespace config with the facade instance
+
+$twigDecorator = new TwigDecorator();
+
+$namespaceConfig = (new NamespaceConfig($twigDecorator))
     ->setTemplatesRootPath(__DIR__ . './templates')
     ->setViewsRootNamespace('MyPackage\Views')
-    ->setTemplateFileExtension('.twig');
+    ->setTemplateFileExtension('.twig')
 
-$viewsConfig->getModules()
-    ->setTemplateRenderer(new TwigRenderer());
+// 3. Make the Views:
 
-$views = new Views($viewsConfig)
+$views = new Views();
+
+// 4. Add the namespace (you can have multiple namespaces)
+
+$views->addNamespace($namespaceConfig);
 ```
 
 > Note: The package includes only the Blade implementation. If you wish to use a different template engine, you will
@@ -339,13 +362,8 @@ use Prosopo\Views\Blade\BladeRendererConfig;
 use Prosopo\Views\Interfaces\Template\TemplateErrorInterface;
 
 $bladeRendererConfig = (new BladeRendererConfig())
-->setTemplateErrorHandler(function (TemplateErrorInterface $templateError): void {
+->setTemplateErrorHandler(function (array $eventDetails): void {
     // Can be used for logging, notifying, etc.
-    $templateError->getTemplate();
-    $templateError->getCompiledPhpTemplate();
-    $templateError->getLine();
-    $templateError->getMessage();
-    $templateError->getVariables();
 })
 ->setCustomOutputEscapeCallback(function ($variable): string {
     if (
@@ -389,17 +407,17 @@ Thanks to great Blade's conceptual design, our compiler implementation required 
 
 By default, the `BladeTemplateRenderer` creates module instances using classes from the current package.
 
-If you need to override the default module behavior, you can define your custom implementation in the
-configuration. The `BladeTemplateRenderer` will use your specified implementation.
+If you need to override the default module behavior, you can define a custom implementation in the
+configuration. The `BladeTemplateRenderer` will use the specified implementation.
 
-> Tip: You can see the full list of the modules in the `BladeRendererModules` class.
+> Tip: You can see the full list of the modules in the `RendererModulesInterface`.
 
 #### Example: Defining a custom Blade compiler
 
 ```php
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
 
-class MyBladeCompiler implements TemplateCompilerInterface {
+class MyOwnBladeCompiler implements TemplateCompilerInterface {
     public function compile(string $template): string {
        // todo your custom compiler.
     }
@@ -408,12 +426,12 @@ class MyBladeCompiler implements TemplateCompilerInterface {
 // ...
 
 $bladeRendererConfig->getModules()
-    ->setTemplateCompiler(new TwigTemplateRenderer());
+    ->setTemplateCompiler(new MyOwnBladeCompiler());
 ```
 
 > Note: Carefully review the `BladeRendererConfig` settings before creating a custom implementation. For example, in the
-> case of the `BladeComplier`, it includes the `compilerExtensionCallback` setting, which allows you to implement a
-> custom directive without the need to build a custom compiler from scratch.
+> case of the `BladeComplier`, it includes the `compilerExtensionCallback` setting, which allows you to add a
+> custom directive without the need to make the custom compiler from scratch.
 
 ## 4. Contribution
 

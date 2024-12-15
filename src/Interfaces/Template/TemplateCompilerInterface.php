@@ -6,5 +6,5 @@ namespace Prosopo\Views\Interfaces\Template;
 
 interface TemplateCompilerInterface
 {
-    public function compile(string $template): string;
+    public function compileTemplate(string $template): string;
 }

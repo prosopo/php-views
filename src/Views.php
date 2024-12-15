@@ -6,15 +6,17 @@ namespace Prosopo\Views;
 
 use Closure;
 use Exception;
+use Prosopo\Views\Interfaces\Config\NamespaceConfigInterface;
+use Prosopo\Views\Interfaces\Modules\ModulesInterface;
 use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
 use Prosopo\Views\Interfaces\View\ViewRendererInterface;
-use Prosopo\Views\Interfaces\ViewsInterface;
-use Prosopo\Views\Interfaces\ViewsNamespaceInterface;
+use Prosopo\Views\Interfaces\Views\ViewsInterface;
+use Prosopo\Views\Interfaces\Views\ViewsNamespaceInterface;
 use Prosopo\Views\PrivateClasses\ViewsNamespace;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
- * We reserve the right to change its private and protected methods and properties.
+ * We reserve the right to change its private and protected methods, properties and introduce new public ones.
  */
 final class Views implements ViewsInterface, ViewFactoryInterface, ViewRendererInterface
 {
@@ -36,7 +38,7 @@ final class Views implements ViewsInterface, ViewFactoryInterface, ViewRendererI
         $this->notFoundErrorMessage = $notFoundErrorMessage;
     }
 
-    public function addNamespace(NamespaceConfig $config): Modules
+    public function addNamespace(NamespaceConfigInterface $config): ModulesInterface
     {
         $viewsNamespace = $this->makeViewsNamespace($config);
 
@@ -92,7 +94,7 @@ final class Views implements ViewsInterface, ViewFactoryInterface, ViewRendererI
         return $renderer->renderView($viewOrClass, $setupCallback, $doPrint);
     }
 
-    protected function makeViewsNamespace(NamespaceConfig $config): ViewsNamespaceInterface
+    protected function makeViewsNamespace(NamespaceConfigInterface $config): ViewsNamespaceInterface
     {
         return new ViewsNamespace($config, $this, $this);
     }

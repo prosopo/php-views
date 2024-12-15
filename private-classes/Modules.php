@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views;
+namespace Prosopo\Views\PrivateClasses;
 
+use Prosopo\Views\Interfaces\EventDispatcherInterface;
+use Prosopo\Views\Interfaces\Modules\ModulesInterface;
 use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyReaderInterface;
 use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyWriterInterface;
 use Prosopo\Views\Interfaces\ObjectProperty\PropertyValueProviderInterface;
@@ -11,15 +13,13 @@ use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
 use Prosopo\Views\Interfaces\View\ViewRendererInterface;
+use Prosopo\Views\PrivateClasses\ObjectProperty\InstancePropertyProvider;
 
 /**
- * This class is marked as a final to prevent anyone from extending it.
- * We reserve the right to change its private and protected methods and properties, and introduce new public ones.
- *
- * We opt to use a class instead of an interface because it allows for the addition of new (optional) settings,
- * without breaking existing setups.
+ * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
+ * We reserve the right to change its name and implementation.
  */
-final class Modules
+final class Modules implements ModulesInterface
 {
     // Required modules:
 
@@ -28,29 +28,25 @@ final class Modules
     //// Custom modules: define them only when you need to override the default behavior:
 
     private ?ViewFactoryInterface $viewFactory;
-    private ?ViewFactoryInterface $viewFactoryWithPropertyInitialization;
     private ?TemplateProviderInterface $templateProvider;
     private ?ObjectPropertyReaderInterface $objectPropertyReader;
     private ?ObjectPropertyWriterInterface $objectPropertyWriter;
-    private ?ObjectPropertyReaderInterface $objectPropertyReaderWithRendering;
+    private ?InstancePropertyProvider $instancePropertyProvider;
     private ?PropertyValueProviderInterface $propertyValueProvider;
-    private ?PropertyValueProviderInterface $instancePropertyProvider;
     private ?ViewRendererInterface $viewRenderer;
+    private ?EventDispatcherInterface $eventDispatcher;
 
-    public function __construct()
+    public function __construct(TemplateRendererInterface $templateRenderer)
     {
-        // Defaults are not set for required modules.
-        // This is intentional to ensure an Exception is thrown if their getters are called without providing values.
-
+        $this->templateRenderer = $templateRenderer;
         $this->viewFactory = null;
-        $this->viewFactoryWithPropertyInitialization = null;
         $this->templateProvider = null;
         $this->objectPropertyReader = null;
         $this->objectPropertyWriter = null;
-        $this->objectPropertyReaderWithRendering = null;
-        $this->propertyValueProvider = null;
         $this->instancePropertyProvider = null;
+        $this->propertyValueProvider = null;
         $this->viewRenderer = null;
+        $this->eventDispatcher = null;
     }
 
     //// Getters.
@@ -63,11 +59,6 @@ final class Modules
     public function getViewFactory(): ?ViewFactoryInterface
     {
         return $this->viewFactory;
-    }
-
-    public function getViewFactoryWithPropertyInitialization(): ?ViewFactoryInterface
-    {
-        return $this->viewFactoryWithPropertyInitialization;
     }
 
     public function getTemplateProvider(): ?TemplateProviderInterface
@@ -85,9 +76,9 @@ final class Modules
         return $this->objectPropertyWriter;
     }
 
-    public function getObjectPropertyReaderWithRendering(): ?ObjectPropertyReaderInterface
+    public function getInstancePropertyProvider(): ?InstancePropertyProvider
     {
-        return $this->objectPropertyReaderWithRendering;
+        return $this->instancePropertyProvider;
     }
 
     public function getPropertyValueProvider(): ?PropertyValueProviderInterface
@@ -95,14 +86,14 @@ final class Modules
         return $this->propertyValueProvider;
     }
 
-    public function getInstancePropertyProvider(): ?PropertyValueProviderInterface
-    {
-        return $this->instancePropertyProvider;
-    }
-
     public function getViewRenderer(): ?ViewRendererInterface
     {
         return $this->viewRenderer;
+    }
+
+    public function getEventDispatcher(): ?EventDispatcherInterface
+    {
+        return $this->eventDispatcher;
     }
 
     //// Setters.
@@ -117,14 +108,6 @@ final class Modules
     public function setViewFactory(?ViewFactoryInterface $viewFactory): self
     {
         $this->viewFactory = $viewFactory;
-
-        return $this;
-    }
-
-    public function setViewFactoryWithPropertyInitialization(
-        ?ViewFactoryInterface $viewFactoryWithPropertyInitialization
-    ): self {
-        $this->viewFactoryWithPropertyInitialization = $viewFactoryWithPropertyInitialization;
 
         return $this;
     }
@@ -150,10 +133,9 @@ final class Modules
         return $this;
     }
 
-    public function setObjectPropertyReaderWithRendering(
-        ?ObjectPropertyReaderInterface $objectPropertyReaderWithRendering
-    ): self {
-        $this->objectPropertyReaderWithRendering = $objectPropertyReaderWithRendering;
+    public function setInstancePropertyProvider(?InstancePropertyProvider $instancePropertyProvider): self
+    {
+        $this->instancePropertyProvider = $instancePropertyProvider;
 
         return $this;
     }
@@ -165,16 +147,16 @@ final class Modules
         return $this;
     }
 
-    public function setInstancePropertyProvider(?PropertyValueProviderInterface $instancePropertyProvider): self
+    public function setViewRenderer(?ViewRendererInterface $viewRenderer): self
     {
-        $this->instancePropertyProvider = $instancePropertyProvider;
+        $this->viewRenderer = $viewRenderer;
 
         return $this;
     }
 
-    public function setViewRenderer(?ViewRendererInterface $viewRenderer): self
+    public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self
     {
-        $this->viewRenderer = $viewRenderer;
+        $this->eventDispatcher = $eventDispatcher;
 
         return $this;
     }

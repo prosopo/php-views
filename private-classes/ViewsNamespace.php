@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses;
 
-use Prosopo\Views\Interfaces\ObjectProperty\{ObjectPropertyReaderInterface,
-    ObjectPropertyWriterInterface,
-    PropertyValueProviderInterface};
-use Prosopo\Views\Interfaces\Template\{TemplateProviderInterface, TemplateRendererInterface};
-use Prosopo\Views\Interfaces\View\{ViewFactoryInterface, ViewRendererInterface};
-use Prosopo\Views\Interfaces\ViewsNamespaceInterface;
-use Prosopo\Views\Modules;
-use Prosopo\Views\NamespaceConfig;
+use Prosopo\Views\Interfaces\Config\NamespaceConfigInterface;
+use Prosopo\Views\Interfaces\Modules\ModulesInterface;
+use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
+use Prosopo\Views\Interfaces\View\ViewRendererInterface;
+use Prosopo\Views\Interfaces\Views\ViewsNamespaceInterface;
 use Prosopo\Views\PrivateClasses\ObjectProperty\{InstancePropertyProvider,
     ObjectPropertyReader,
     ObjectPropertyReaderWithRendering,
     ObjectPropertyWriter,
     PropertyValueProvider};
 use Prosopo\Views\PrivateClasses\Template\TemplateProvider;
-use Prosopo\Views\PrivateClasses\View\{ViewFactory, ViewFactoryWithPropertyInitialization, ViewRenderer};
+use Prosopo\Views\PrivateClasses\View\{ViewFactory,
+    ViewFactoryWithPropertyInitialization,
+    ViewRenderer,
+    ViewRendererWithEventDetails};
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
@@ -26,7 +26,7 @@ use Prosopo\Views\PrivateClasses\View\{ViewFactory, ViewFactoryWithPropertyIniti
  */
 final class ViewsNamespace implements ViewsNamespaceInterface
 {
-    private Modules $modules;
+    private ModulesInterface $modules;
 
     /**
      * Using the external ViewFactory and ViewRenderer enables us to seamlessly mix Models from different namespaces,
@@ -34,7 +34,7 @@ final class ViewsNamespace implements ViewsNamespaceInterface
      * (see the Views class)
      */
     public function __construct(
-        NamespaceConfig $config,
+        NamespaceConfigInterface $config,
         ViewFactoryInterface $viewFactoryWithNamespaces,
         ViewRendererInterface $viewRendererWithNamespaces
     ) {
@@ -42,24 +42,36 @@ final class ViewsNamespace implements ViewsNamespaceInterface
 
         //// 1. Modules creation:
 
+        $templateErrorEventName = $config->getTemplateErrorEventName();
+
+        $eventDispatcher = $modules->getEventDispatcher();
+        $eventDispatcher = null === $eventDispatcher ?
+            new EventDispatcher() :
+            $eventDispatcher;
+
+        $templateErrorHandler = $config->getTemplateErrorHandler();
+        if (null !== $templateErrorHandler) {
+            $eventDispatcher->addEventListener($templateErrorEventName, $templateErrorHandler);
+        }
+
         $objectPropertyReader = $modules->getObjectPropertyReader();
         $objectPropertyReader = null === $objectPropertyReader ?
-            $this->makeObjectPropertyReader() :
+            new ObjectPropertyReader() :
             $objectPropertyReader;
 
-        $objectPropertyReaderWithRendering = $modules->getObjectPropertyReaderWithRendering();
-        $objectPropertyReaderWithRendering = null === $objectPropertyReaderWithRendering ?
-            $this->makeObjectPropertyReaderWithRendering($objectPropertyReader, $viewRendererWithNamespaces) :
-            $objectPropertyReaderWithRendering;
+        $objectPropertyReader = new ObjectPropertyReaderWithRendering(
+            $objectPropertyReader,
+            $viewRendererWithNamespaces
+        );
 
         $objectPropertyWriter = $modules->getObjectPropertyWriter();
         $objectPropertyWriter = null === $objectPropertyWriter ?
-            $this->makeObjectPropertyWriter() :
+            new ObjectPropertyWriter() :
             $objectPropertyWriter;
 
         $templateProvider = $modules->getTemplateProvider();
         $templateProvider = null === $templateProvider ?
-            $this->makeTemplateProvider(
+            new TemplateProvider(
                 $config->getTemplatesRootPath(),
                 $config->getViewsRootNamespace(),
                 $config->getTemplateFileExtension()
@@ -68,133 +80,59 @@ final class ViewsNamespace implements ViewsNamespaceInterface
 
         $instancePropertyProvider = $modules->getInstancePropertyProvider();
         $instancePropertyProvider = null === $instancePropertyProvider ?
-            $this->makeInstancePropertyProvider($viewFactoryWithNamespaces) :
+            new InstancePropertyProvider($viewFactoryWithNamespaces) :
             $instancePropertyProvider;
 
         $propertyValueProvider = $modules->getPropertyValueProvider();
         $propertyValueProvider = null === $propertyValueProvider ?
-            $this->makePropertyValueProvider($instancePropertyProvider, $config->getDefaultPropertyValues()) :
+            new PropertyValueProvider($instancePropertyProvider, $config->getDefaultPropertyValues()) :
             $propertyValueProvider;
 
-        $viewFactoryWithPropertyInitialization = $modules->getViewFactoryWithPropertyInitialization();
-        $viewFactoryWithPropertyInitialization = null === $viewFactoryWithPropertyInitialization ?
-            $this->makeViewFactoryWithPropertyInitialization(
-                $viewFactoryWithNamespaces,
-                // Plain reader, without rendering.
-                $objectPropertyReader,
-                $objectPropertyWriter,
-                $propertyValueProvider
-            ) :
-            $viewFactoryWithPropertyInitialization;
-
-        //// 2. Real Factory and Renderer creation (used in the Views class):
-
-        $viewFactory = $modules->getViewFactory();
-        $viewFactory = null === $viewFactory ?
-            $this->makeViewFactory($templateProvider) :
-            $viewFactory;
-
-        $viewRenderer = $modules->getViewRenderer();
-        $viewRenderer = null === $viewRenderer ?
-            $this->makeViewRenderer(
-                $modules->getTemplateRenderer(),
-                $viewFactoryWithPropertyInitialization,
-                $objectPropertyReaderWithRendering
-            ) :
-            $viewRenderer;
-
-        //// 3. Now we can save the objects to the storage.
-
-        $modules->setObjectPropertyReader($objectPropertyReader)
-                ->setObjectPropertyReaderWithRendering($objectPropertyReaderWithRendering)
-                ->setObjectPropertyWriter($objectPropertyWriter)
-                ->setTemplateProvider($templateProvider)
-                ->setInstancePropertyProvider($instancePropertyProvider)
-                ->setPropertyValueProvider($propertyValueProvider)
-                ->setViewFactoryWithPropertyInitialization($viewFactoryWithPropertyInitialization)
-                ->setViewFactory($viewFactory)
-                ->setViewRenderer($viewRenderer);
-
-        $this->modules = $modules;
-    }
-
-    public function getModules(): Modules
-    {
-        return $this->modules;
-    }
-
-    protected function makeInstancePropertyProvider(ViewFactoryInterface $viewFactory): PropertyValueProviderInterface
-    {
-        return new InstancePropertyProvider($viewFactory);
-    }
-
-    protected function makeObjectPropertyReader(): ObjectPropertyReaderInterface
-    {
-        return new ObjectPropertyReader();
-    }
-
-    protected function makeObjectPropertyWriter(): ObjectPropertyWriterInterface
-    {
-        return new ObjectPropertyWriter();
-    }
-
-    protected function makeObjectPropertyReaderWithRendering(
-        ObjectPropertyReaderInterface $objectPropertyReader,
-        ViewRendererInterface $viewRenderer
-    ): ObjectPropertyReaderInterface {
-        return new ObjectPropertyReaderWithRendering($objectPropertyReader, $viewRenderer);
-    }
-
-    /**
-     * @param array<string,mixed> $defaultPropertyValues
-     */
-    protected function makePropertyValueProvider(
-        PropertyValueProviderInterface $instancePropertyProvider,
-        array $defaultPropertyValues
-    ): PropertyValueProviderInterface {
-        return new PropertyValueProvider($instancePropertyProvider, $defaultPropertyValues);
-    }
-
-    protected function makeViewFactory(TemplateProviderInterface $templateProvider): ViewFactoryInterface
-    {
-        return new ViewFactory($templateProvider);
-    }
-
-    protected function makeViewFactoryWithPropertyInitialization(
-        ViewFactoryInterface $viewFactory,
-        ObjectPropertyReaderInterface $objectPropertyReader,
-        ObjectPropertyWriterInterface $objectPropertyWriter,
-        PropertyValueProviderInterface $propertyValueProvider
-    ): ViewFactoryInterface {
-        return new ViewFactoryWithPropertyInitialization(
-            $viewFactory,
+        $viewFactory = new ViewFactoryWithPropertyInitialization(
+            $viewFactoryWithNamespaces,
+            // Plain reader, without rendering.
             $objectPropertyReader,
             $objectPropertyWriter,
             $propertyValueProvider
         );
+
+        //// 2. Real Factory and Renderer creation (used in the Views class):
+
+        $realViewFactory = $modules->getViewFactory();
+        $realViewFactory = null === $realViewFactory ?
+            new ViewFactory($templateProvider) :
+            $realViewFactory;
+
+        $realViewRenderer = $modules->getViewRenderer();
+        $realViewRenderer = null === $realViewRenderer ?
+            new ViewRenderer(
+                $modules->getTemplateRenderer(),
+                $viewFactory,
+                $objectPropertyReader
+            ) :
+            $realViewRenderer;
+
+        $realViewRenderer = new ViewRendererWithEventDetails(
+            $realViewRenderer,
+            $eventDispatcher,
+            $templateErrorEventName
+        );
+
+        //// 3. Now we can save the objects to the storage.
+
+        $modules->setObjectPropertyReader($objectPropertyReader)
+                ->setObjectPropertyWriter($objectPropertyWriter)
+                ->setTemplateProvider($templateProvider)
+                ->setInstancePropertyProvider($instancePropertyProvider)
+                ->setPropertyValueProvider($propertyValueProvider)
+                ->setViewFactory($realViewFactory)
+                ->setViewRenderer($realViewRenderer);
+
+        $this->modules = $modules;
     }
 
-    protected function makeTemplateProvider(
-        string $templatesRootPath,
-        string $viewsRootNamespace,
-        string $templateFileExtension
-    ): TemplateProviderInterface {
-        return new TemplateProvider(
-            $templatesRootPath,
-            $viewsRootNamespace,
-            $templateFileExtension
-        );
-    }
-
-    protected function makeViewRenderer(
-        TemplateRendererInterface $templateRenderer,
-        ViewFactoryInterface $viewFactory,
-        ObjectPropertyReaderInterface $objectPropertyReader
-    ): ViewRendererInterface {
-        return new ViewRenderer(
-            $templateRenderer,
-            $viewFactory,
-            $objectPropertyReader
-        );
+    public function getModules(): ModulesInterface
+    {
+        return $this->modules;
     }
 }

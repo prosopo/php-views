@@ -4,59 +4,78 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\Blade;
 
-use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
-use Prosopo\Views\Interfaces\Template\TemplateErrorDispatcherInterface;
-use Prosopo\Views\Interfaces\Template\TemplateErrorInterface;
+use Prosopo\Views\Interfaces\Config\BladeRendererConfigInterface;
+use Prosopo\Views\Interfaces\Modules\RendererModulesContainerInterface;
+use Prosopo\Views\Interfaces\Modules\RendererModulesInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\PrivateClasses\Blade\BladeCompiler;
-use Prosopo\Views\PrivateClasses\Template\TemplateErrorDispatcher;
+use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithErrorEvent;
+use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithGlobalArguments;
+use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithTemplateCompilation;
+use Prosopo\Views\PrivateClasses\CodeExecutor\PhpCodeExecutor;
+use Prosopo\Views\PrivateClasses\EventDispatcher;
 use Prosopo\Views\PrivateClasses\Template\TemplateRenderer;
 use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithCustomEscape;
+use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithEventDetails;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
- * We reserve the right to change its private and protected methods and properties, or introduce new public ones.
+ * We reserve the right to change its private and protected methods, properties, and introduce new public ones.
  */
-final class BladeTemplateRenderer implements TemplateRendererInterface
+final class BladeTemplateRenderer implements TemplateRendererInterface, RendererModulesContainerInterface
 {
     private TemplateRendererInterface $templateRenderer;
-    private BladeRendererModules $modules;
+    private RendererModulesInterface $modules;
 
-    public function __construct(BladeRendererConfig $config)
+    public function __construct(BladeRendererConfigInterface $config)
     {
         $modules = clone $config->getModules();
 
-        $templateErrorDispatcher = $modules->getTemplateErrorDispatcher();
-        $templateErrorDispatcher = null === $templateErrorDispatcher ?
-            $this->makeTemplateErrorDispatcher($config->getTemplateErrorHandler()) :
-            $templateErrorDispatcher;
+        $errorEventName = $config->getTemplateErrorEventName();
+
+        $eventDispatcher = $modules->getEventDispatcher();
+        $eventDispatcher = null === $eventDispatcher ?
+            new EventDispatcher() :
+            $eventDispatcher;
+
+        $templateErrorHandler = $config->getTemplateErrorHandler();
+        if (null !== $templateErrorHandler) {
+            $eventDispatcher->addEventListener($errorEventName, $templateErrorHandler);
+        }
 
         $templateCompiler = $modules->getTemplateCompiler();
         $templateCompiler = null === $templateCompiler ?
-            $this->makeTemplateCompiler($config->getEscapeVariableName(), $config->getCompilerExtensionCallback()) :
+            new BladeCompiler($config->getEscapeVariableName(), $config->getCompilerExtensionCallback()) :
             $templateCompiler;
+
+        $codeExecutor = $modules->getCodeExecutor();
+        $codeExecutor = null === $codeExecutor ?
+            new PhpCodeExecutor() :
+            $codeExecutor;
+
+        $codeExecutor = new CodeExecutorWithErrorEvent($codeExecutor, $eventDispatcher, $errorEventName);
+        $codeExecutor = new CodeExecutorWithGlobalArguments($codeExecutor, $config->getGlobalVariables());
+        $codeExecutor = new CodeExecutorWithTemplateCompilation($codeExecutor, $templateCompiler);
 
         $templateRenderer = $modules->getTemplateRenderer();
         $templateRenderer = null === $templateRenderer ?
-            $this->makeTemplateRenderer($templateCompiler, $templateErrorDispatcher, $config->getGlobalVariables()) :
+            new TemplateRenderer($codeExecutor) :
             $templateRenderer;
 
-        $templateRendererWithCustomEscape = $modules->getTemplateRendererWithCustomEscape();
-        $templateRendererWithCustomEscape = null === $templateRendererWithCustomEscape ?
-            $this->makeTemplateRendererWithCustomEscape(
-                $templateRenderer,
-                $config->getCustomOutputEscapeCallback(),
-                $config->getEscapeVariableName()
-            ) :
-            $templateRendererWithCustomEscape;
+        $templateRenderer = new TemplateRendererWithCustomEscape(
+            $templateRenderer,
+            $config->getCustomOutputEscapeCallback(),
+            $config->getEscapeVariableName()
+        );
+        $templateRenderer = new TemplateRendererWithEventDetails($templateRenderer, $eventDispatcher, $errorEventName);
 
-        $modules->setTemplateErrorDispatcher($templateErrorDispatcher)
+        $modules->setEventDispatcher($eventDispatcher)
                 ->setTemplateCompiler($templateCompiler)
                 ->setTemplateRenderer($templateRenderer)
-                ->setTemplateRendererWithCustomEscape($templateRendererWithCustomEscape);
+                ->setCodeExecutor($codeExecutor);
 
-        $this->templateRenderer = $templateRendererWithCustomEscape;
         $this->modules = $modules;
+        $this->templateRenderer = $templateRenderer;
     }
 
     public function renderTemplate(string $template, array $variables, bool $doPrint = false): string
@@ -64,56 +83,8 @@ final class BladeTemplateRenderer implements TemplateRendererInterface
         return $this->templateRenderer->renderTemplate($template, $variables, $doPrint);
     }
 
-    public function getModules(): BladeRendererModules
+    public function getModules(): RendererModulesInterface
     {
         return $this->modules;
-    }
-
-    /**
-     * @param callable(TemplateErrorInterface $templateError): void|null $errorHandler
-     */
-    protected function makeTemplateErrorDispatcher(?callable $errorHandler): TemplateErrorDispatcherInterface
-    {
-        return new TemplateErrorDispatcher($errorHandler);
-    }
-
-    /**
-     * @param callable(string $template): string|null $compilerExtensionCallback
-     */
-    protected function makeTemplateCompiler(
-        string $escapeVariableName,
-        ?callable $compilerExtensionCallback
-    ): TemplateCompilerInterface {
-        return new BladeCompiler($escapeVariableName, $compilerExtensionCallback);
-    }
-
-    /**
-     * @param array<string,mixed> $globalVariables
-     */
-    protected function makeTemplateRenderer(
-        TemplateCompilerInterface $templateCompiler,
-        TemplateErrorDispatcherInterface $templateErrorDispatcher,
-        array $globalVariables
-    ): TemplateRendererInterface {
-        return new TemplateRenderer(
-            $templateCompiler,
-            $templateErrorDispatcher,
-            $globalVariables
-        );
-    }
-
-    /**
-     * @param callable(mixed $variable): string|null $customOutputEscapeCallback $customOutputEscapeCallback
-     */
-    protected function makeTemplateRendererWithCustomEscape(
-        TemplateRendererInterface $templateRenderer,
-        ?callable $customOutputEscapeCallback,
-        string $escapeVariableName
-    ): TemplateRendererInterface {
-        return new TemplateRendererWithCustomEscape(
-            $templateRenderer,
-            $customOutputEscapeCallback,
-            $escapeVariableName
-        );
     }
 }

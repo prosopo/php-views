@@ -8,7 +8,7 @@ use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyReaderInterface;
 use Prosopo\Views\Interfaces\View\ViewInterface;
 use Prosopo\Views\Interfaces\View\ViewRendererInterface;
 
-class ObjectPropertyReaderWithRendering implements ObjectPropertyReaderInterface
+final class ObjectPropertyReaderWithRendering implements ObjectPropertyReaderInterface
 {
     private ObjectPropertyReaderInterface $objectPropertyReader;
     private ViewRendererInterface $viewRenderer;

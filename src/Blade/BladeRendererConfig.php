@@ -4,21 +4,20 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\Blade;
 
-use Prosopo\Views\Interfaces\Template\TemplateErrorInterface;
+use Prosopo\Views\Interfaces\Config\BladeRendererConfigInterface;
+use Prosopo\Views\Interfaces\Modules\RendererModulesInterface;
+use Prosopo\Views\PrivateClasses\Blade\BladeRendererModules;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
- * We reserve the right to change its private and protected methods and properties, and introduce new public ones.
- *
- * We opt to use a class instead of an interface because it allows for the addition of new (optional) settings,
- * without breaking existing setups.
+ * We reserve the right to change its private and protected methods, properties and introduce new public ones.
  */
-final class BladeRendererConfig
+final class BladeRendererConfig implements BladeRendererConfigInterface
 {
     //// Optional settings:
 
     /**
-     * @var callable(TemplateErrorInterface $templateError): void|null
+     * @var callable(array<string,mixed> $eventDetails):void|null
      */
     private $templateErrorHandler;
     /**
@@ -29,47 +28,45 @@ final class BladeRendererConfig
      * @var array<string,mixed>
      */
     private array $globalVariables;
-    private string $escapeVariableName;
+
     /**
      * @var callable(string $template): string|null
      */
     private $compilerExtensionCallback;
-    private BladeRendererModules $modules;
+    private string $escapeVariableName;
+    private string $templateErrorEventName;
+
+    //// Own properties:
+
+    private RendererModulesInterface $modules;
 
     public function __construct()
     {
         $this->templateErrorHandler = null;
         $this->customOutputEscapeCallback = null;
         $this->globalVariables = [];
-        $this->escapeVariableName = 'escape';
         $this->compilerExtensionCallback = null;
+        $this->templateErrorEventName = 'template_error';
+        $this->escapeVariableName = 'escape';
+
         $this->modules = new BladeRendererModules();
     }
 
-    //// Getters.
+    //// Getters:
 
-    /**
-     * @return callable(TemplateErrorInterface $templateError): void|null
-     */
     public function getTemplateErrorHandler(): ?callable
     {
         return $this->templateErrorHandler;
     }
 
-    /**
-     * @return callable(mixed $variable): string|null
-     */
-    public function getCustomOutputEscapeCallback(): ?callable
-    {
-        return $this->customOutputEscapeCallback;
-    }
-
-    /**
-     * @return array<string,mixed>
-     */
     public function getGlobalVariables(): array
     {
         return $this->globalVariables;
+    }
+
+    public function getCustomOutputEscapeCallback(): ?callable
+    {
+        return $this->customOutputEscapeCallback;
     }
 
     public function getEscapeVariableName(): string
@@ -77,37 +74,40 @@ final class BladeRendererConfig
         return $this->escapeVariableName;
     }
 
-    /**
-     * @return callable(string $template): string|null
-     */
     public function getCompilerExtensionCallback(): ?callable
     {
         return $this->compilerExtensionCallback;
     }
 
-    public function getModules(): BladeRendererModules
+    public function getTemplateErrorEventName(): string
+    {
+        return $this->templateErrorEventName;
+    }
+
+    public function getModules(): RendererModulesInterface
     {
         return $this->modules;
     }
 
-    //// Setters.
+    //// Setters:
 
-    /**
-     * @param callable(string $template): string|null $compilerExtensionCallback
-     */
-    public function setCompilerExtensionCallback(?callable $compilerExtensionCallback): self
+    public function setTemplateErrorHandler(?callable $templateErrorHandler): self
     {
-        $this->compilerExtensionCallback = $compilerExtensionCallback;
+        $this->templateErrorHandler = $templateErrorHandler;
 
         return $this;
     }
 
-    /**
-     * @param callable(TemplateErrorInterface $templateError): void|null $templateErrorHandler
-     */
-    public function setTemplateErrorHandler(?callable $templateErrorHandler): self
+    public function setGlobalVariables(array $globalVariables): self
     {
-        $this->templateErrorHandler = $templateErrorHandler;
+        $this->globalVariables = $globalVariables;
+
+        return $this;
+    }
+
+    public function setCompilerExtensionCallback(?callable $compilerExtensionCallback): self
+    {
+        $this->compilerExtensionCallback = $compilerExtensionCallback;
 
         return $this;
     }
@@ -119,16 +119,6 @@ final class BladeRendererConfig
         return $this;
     }
 
-    /**
-     * @param array<string,mixed> $globalVariables
-     */
-    public function setGlobalVariables(array $globalVariables): self
-    {
-        $this->globalVariables = $globalVariables;
-
-        return $this;
-    }
-
     public function setEscapeVariableName(string $escapeVariableName): self
     {
         $this->escapeVariableName = $escapeVariableName;
@@ -136,9 +126,9 @@ final class BladeRendererConfig
         return $this;
     }
 
-    public function setModules(BladeRendererModules $modules): self
+    public function setTemplateErrorEventName(string $templateErrorEventName): self
     {
-        $this->modules = $modules;
+        $this->templateErrorEventName = $templateErrorEventName;
 
         return $this;
     }

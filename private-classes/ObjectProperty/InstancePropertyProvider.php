@@ -12,7 +12,7 @@ use Prosopo\Views\View;
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
  * We reserve the right to change its name and implementation.
  */
-class InstancePropertyProvider implements PropertyValueProviderInterface
+final class InstancePropertyProvider implements PropertyValueProviderInterface
 {
     private ViewFactoryInterface $viewFactory;
 

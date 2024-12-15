@@ -4,36 +4,47 @@ declare(strict_types=1);
 
 namespace Prosopo\Views;
 
+use Prosopo\Views\Interfaces\Config\NamespaceConfigInterface;
+use Prosopo\Views\Interfaces\Modules\ModulesInterface;
+use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
+use Prosopo\Views\PrivateClasses\Modules;
+
 /**
  * This class is marked as a final to prevent anyone from extending it.
- * We reserve the right to change its private and protected methods and properties, and introduce new public ones.
- *
- * We opt to use a class instead of an interface because it allows for the addition of new (optional) settings,
- * without breaking existing setups.
+ * We reserve the right to change its private and protected methods, properties and introduce new public ones.
  */
-final class NamespaceConfig
+final class NamespaceConfig implements NamespaceConfigInterface
 {
     //// Required settings:
 
     private string $templatesRootPath;
     private string $viewsRootNamespace;
     private string $templateFileExtension;
-    private Modules $modulesCollection;
 
     //// Optional settings:
 
+    /**
+     * @var callable(array<string,mixed> $eventDetails): void|null
+     */
+    private $templateErrorHandler;
+    private string $templateErrorEventName;
     /**
      * @var array<string,mixed>
      */
     private array $defaultPropertyValues;
 
-    public function __construct()
+    //// Own properties:
+
+    private ModulesInterface $modules;
+
+    public function __construct(TemplateRendererInterface $templateRenderer)
     {
         // Defaults are not set for required modules.
         // This is intentional to ensure an Exception is thrown if their getters are called without providing values.
 
-        $this->modulesCollection = new Modules();
+        $this->modules = new Modules($templateRenderer);
 
+        $this->templateErrorHandler = null;
         $this->defaultPropertyValues = array(
             'array'  => array(),
             'bool'   => false,
@@ -41,6 +52,7 @@ final class NamespaceConfig
             'int'    => 0,
             'string' => '',
         );
+        $this->templateErrorEventName = 'template_error';
     }
 
     //// Getters.
@@ -60,20 +72,27 @@ final class NamespaceConfig
         return $this->templateFileExtension;
     }
 
-    /**
-     * @return array<string,mixed>
-     */
+    public function getTemplateErrorHandler(): ?callable
+    {
+        return $this->templateErrorHandler;
+    }
+
+    public function getTemplateErrorEventName(): string
+    {
+        return $this->templateErrorEventName;
+    }
+
     public function getDefaultPropertyValues(): array
     {
         return $this->defaultPropertyValues;
     }
 
-    public function getModules(): Modules
+    public function getModules(): ModulesInterface
     {
-        return $this->modulesCollection;
+        return $this->modules;
     }
 
-    //// Setters.
+    //// Setters:
 
     public function setTemplatesRootPath(string $templatesRootPath): self
     {
@@ -96,9 +115,13 @@ final class NamespaceConfig
         return $this;
     }
 
-    /**
-     * @param array<string,mixed> $defaultPropertyValues
-     */
+    public function setTemplateErrorHandler(?callable $templateErrorHandler): self
+    {
+        $this->templateErrorHandler = $templateErrorHandler;
+
+        return $this;
+    }
+
     public function setDefaultPropertyValues(array $defaultPropertyValues): self
     {
         $this->defaultPropertyValues = $defaultPropertyValues;
@@ -106,9 +129,9 @@ final class NamespaceConfig
         return $this;
     }
 
-    public function setModules(Modules $modulesCollection): self
+    public function setTemplateErrorEventName(string $templateErrorEventName): self
     {
-        $this->modulesCollection = $modulesCollection;
+        $this->templateErrorEventName = $templateErrorEventName;
 
         return $this;
     }
