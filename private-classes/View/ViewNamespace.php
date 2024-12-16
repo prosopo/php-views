@@ -90,6 +90,7 @@ final class ViewNamespace
                 $namespace,
                 $config->getTemplatesRootPath(),
                 $config->getTemplateFileExtension(),
+                $config->isFileBasedTemplate(),
                 $modelNamespaceProvider,
                 $modelNameProvider
             ) :
@@ -130,7 +131,6 @@ final class ViewNamespace
             new ModelRenderer(
                 $modules->getTemplateRenderer(),
                 $modelFactory,
-                $objectReader,
                 $templateProvider
             ) :
             $realViewRenderer;

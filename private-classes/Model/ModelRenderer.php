@@ -7,7 +7,6 @@ namespace Prosopo\Views\PrivateClasses\Model;
 use Closure;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
-use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 
@@ -19,18 +18,15 @@ final class ModelRenderer implements ModelRendererInterface
 {
     private TemplateRendererInterface $templateRenderer;
     private ModelFactoryInterface $viewFactory;
-    private ObjectReaderInterface $objectReader;
     private ModelTemplateProviderInterface $templateProvider;
 
     public function __construct(
         TemplateRendererInterface $templateRenderer,
         ModelFactoryInterface $modelFactory,
-        ObjectReaderInterface $objectReader,
         ModelTemplateProviderInterface $templateProvider
     ) {
         $this->templateRenderer       = $templateRenderer;
         $this->viewFactory            = $modelFactory;
-        $this->objectReader = $objectReader;
         $this->templateProvider = $templateProvider;
     }
 
@@ -44,8 +40,7 @@ final class ModelRenderer implements ModelRendererInterface
             $setupCallback($model);
         }
 
-        $variables = $this->objectReader->getObjectVariables($model);
-
+        $variables = $model->getTemplateArguments();
         $template  = $this->templateProvider->getModelTemplate($model);
 
         return $this->templateRenderer->renderTemplate($template, $variables, $doPrint);

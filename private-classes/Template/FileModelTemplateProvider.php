@@ -18,6 +18,7 @@ final class FileModelTemplateProvider implements ModelTemplateProviderInterface
     private string $templatesRootPath;
     private string $namespace;
     private string $extension;
+    private bool $isFileBasedTemplate;
     private ModelNameProviderInterface $modelNameProvider;
     private ModelNamespaceProviderInterface $modelNamespaceProvider;
 
@@ -25,12 +26,14 @@ final class FileModelTemplateProvider implements ModelTemplateProviderInterface
         string $namespace,
         string $templatesRootPath,
         string $extension,
+        bool $isFileBasedTemplate,
         ModelNamespaceProviderInterface $modelNamespaceProvider,
         ModelNameProviderInterface $modelNameProvider
     ) {
         $this->templatesRootPath = $templatesRootPath;
         $this->namespace = $namespace;
         $this->extension = $extension;
+        $this->isFileBasedTemplate = $isFileBasedTemplate;
         $this->modelNameProvider = $modelNameProvider;
         $this->modelNamespaceProvider = $modelNamespaceProvider;
     }
@@ -47,7 +50,9 @@ final class FileModelTemplateProvider implements ModelTemplateProviderInterface
 
         $absoluteTemplatePath = $this->getAbsoluteTemplatePath($relativeTemplatePath);
 
-        return $this->getFileContent($absoluteTemplatePath);
+        return true === $this->isFileBasedTemplate ?
+            $absoluteTemplatePath :
+            $this->getFileContent($absoluteTemplatePath);
     }
 
     protected function getFileContent(string $file): string

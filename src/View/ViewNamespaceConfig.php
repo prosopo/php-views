@@ -14,6 +14,7 @@ final class ViewNamespaceConfig
 {
     private string $templatesRootPath;
     private string $templateFileExtension;
+    private bool $isFileBasedTemplate;
     /**
      * @var callable(array<string,mixed> $eventDetails): void|null
      */
@@ -30,6 +31,7 @@ final class ViewNamespaceConfig
     {
         $this->templatesRootPath = '';
         $this->templateFileExtension = '';
+        $this->isFileBasedTemplate = true;
         $this->templateErrorHandler = null;
         $this->defaultPropertyValues = array(
             'array'  => array(),
@@ -53,6 +55,11 @@ final class ViewNamespaceConfig
     public function getTemplateFileExtension(): string
     {
         return $this->templateFileExtension;
+    }
+
+    public function isFileBasedTemplate(): bool
+    {
+        return $this->isFileBasedTemplate;
     }
 
     public function getTemplateErrorHandler(): ?callable
@@ -90,6 +97,13 @@ final class ViewNamespaceConfig
     public function setTemplateFileExtension(string $templateFileExtension): self
     {
         $this->templateFileExtension = $templateFileExtension;
+
+        return $this;
+    }
+
+    public function setIsFileBasedTemplate(bool $isFileBasedTemplate): self
+    {
+        $this->isFileBasedTemplate = $isFileBasedTemplate;
 
         return $this;
     }
