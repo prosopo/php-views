@@ -129,7 +129,8 @@ final class ViewsNamespace implements ViewsNamespaceInterface
 
         //// 3. Now we can save the objects to the storage.
 
-        $modules->setObjectReader($objectReader)
+        $modules->setEventDispatcher($eventDispatcher)
+                ->setObjectReader($objectReader)
                 ->setObjectPropertyWriter($objectPropertyWriter)
                 ->setModelTemplateProvider($templateProvider)
                 ->setPropertyValueProvider($propertyValueProvider)

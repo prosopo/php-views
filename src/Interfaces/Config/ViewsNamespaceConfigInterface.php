@@ -49,4 +49,6 @@ interface ViewsNamespaceConfigInterface
     public function setDefaultPropertyValues(array $defaultPropertyValues): self;
 
     public function setTemplateErrorEventName(string $templateErrorEventName): self;
+
+    public function setModules(ModulesInterface $modules): self;
 }

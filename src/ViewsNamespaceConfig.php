@@ -128,4 +128,11 @@ final class ViewsNamespaceConfig implements ViewsNamespaceConfigInterface
 
         return $this;
     }
+
+    public function setModules(ModulesInterface $modules): self
+    {
+        $this->modules = $modules;
+
+        return $this;
+    }
 }
