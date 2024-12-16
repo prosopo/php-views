@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Prosopo\Views;
 
-use Prosopo\Views\Interfaces\Config\ViewsNamespaceConfigInterface;
-use Prosopo\Views\Interfaces\Modules\ModulesInterface;
+use Prosopo\Views\Interfaces\Config\ViewNamespaceConfigInterface;
+use Prosopo\Views\Interfaces\Modules\ViewNamespaceModulesInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
-use Prosopo\Views\PrivateClasses\Modules;
+use Prosopo\Views\PrivateClasses\Modules\ViewNamespaceModules;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties and introduce new public ones.
  */
-final class ViewsNamespaceConfig implements ViewsNamespaceConfigInterface
+final class ViewNamespaceConfig implements ViewNamespaceConfigInterface
 {
     private string $templatesRootPath;
     private string $modelsRootNamespace;
@@ -28,7 +28,7 @@ final class ViewsNamespaceConfig implements ViewsNamespaceConfigInterface
      */
     private array $defaultPropertyValues;
 
-    private ModulesInterface $modules;
+    private ViewNamespaceModulesInterface $modules;
 
     public function __construct(TemplateRendererInterface $templateRenderer)
     {
@@ -45,7 +45,7 @@ final class ViewsNamespaceConfig implements ViewsNamespaceConfigInterface
         );
         $this->templateErrorEventName = 'template_error';
 
-        $this->modules = new Modules($templateRenderer);
+        $this->modules = new ViewNamespaceModules($templateRenderer);
     }
 
     //// Getters.
@@ -80,7 +80,7 @@ final class ViewsNamespaceConfig implements ViewsNamespaceConfigInterface
         return $this->defaultPropertyValues;
     }
 
-    public function getModules(): ModulesInterface
+    public function getModules(): ViewNamespaceModulesInterface
     {
         return $this->modules;
     }
@@ -129,7 +129,7 @@ final class ViewsNamespaceConfig implements ViewsNamespaceConfigInterface
         return $this;
     }
 
-    public function setModules(ModulesInterface $modules): self
+    public function setModules(ViewNamespaceModulesInterface $modules): self
     {
         $this->modules = $modules;
 

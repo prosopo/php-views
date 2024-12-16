@@ -6,16 +6,16 @@ namespace Prosopo\Views;
 
 use Closure;
 use Exception;
-use Prosopo\Views\Interfaces\Config\ViewsNamespaceConfigInterface;
+use Prosopo\Views\Interfaces\Config\ViewNamespaceConfigInterface;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
-use Prosopo\Views\Interfaces\Modules\ModulesInterface;
+use Prosopo\Views\Interfaces\Modules\ViewNamespaceModulesInterface;
+use Prosopo\Views\Interfaces\Views\ViewNamespaceInterface;
 use Prosopo\Views\Interfaces\Views\ViewsInterface;
-use Prosopo\Views\Interfaces\Views\ViewsNamespaceInterface;
 use Prosopo\Views\PrivateClasses\Model\ModelNamespaceProvider;
 use Prosopo\Views\PrivateClasses\Object\ObjectClassReader;
-use Prosopo\Views\PrivateClasses\ViewsNamespace;
+use Prosopo\Views\PrivateClasses\View\ViewNamespace;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
@@ -48,11 +48,11 @@ final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendere
         $this->namespaceNotFoundErrorMessage = $namespaceNotFoundErrorMessage;
     }
 
-    public function addNamespace(ViewsNamespaceConfigInterface $config): ModulesInterface
+    public function addNamespace(ViewNamespaceConfigInterface $config): ViewNamespaceModulesInterface
     {
-        $viewsNamespace = $this->makeViewsNamespace($config);
+        $viewNamespace = $this->makeViewNamespace($config);
 
-        $namespaceModules = $viewsNamespace->getModules();
+        $namespaceModules = $viewNamespace->getModules();
 
         $namespaceFactory = $namespaceModules->getModelFactory();
         $namespaceRenderer = $namespaceModules->getModelRenderer();
@@ -104,9 +104,9 @@ final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendere
         return $renderer->renderModel($modelOrClass, $setupCallback, $doPrint);
     }
 
-    protected function makeViewsNamespace(ViewsNamespaceConfigInterface $config): ViewsNamespaceInterface
+    protected function makeViewNamespace(ViewNamespaceConfigInterface $config): ViewNamespaceInterface
     {
-        return new ViewsNamespace($config, $this, $this);
+        return new ViewNamespace($config, $this, $this);
     }
 
     // fixme move the methods below into separate class.

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\Interfaces\Config;
 
-use Prosopo\Views\Interfaces\Modules\ModulesInterface;
+use Prosopo\Views\Interfaces\Modules\ViewNamespaceModulesInterface;
 
-interface ViewsNamespaceConfigInterface
+interface ViewNamespaceConfigInterface
 {
     //// Getters.
 
@@ -28,7 +28,7 @@ interface ViewsNamespaceConfigInterface
      */
     public function getDefaultPropertyValues(): array;
 
-    public function getModules(): ModulesInterface;
+    public function getModules(): ViewNamespaceModulesInterface;
 
     //// Setters.
 
@@ -50,5 +50,5 @@ interface ViewsNamespaceConfigInterface
 
     public function setTemplateErrorEventName(string $templateErrorEventName): self;
 
-    public function setModules(ModulesInterface $modules): self;
+    public function setModules(ViewNamespaceModulesInterface $modules): self;
 }

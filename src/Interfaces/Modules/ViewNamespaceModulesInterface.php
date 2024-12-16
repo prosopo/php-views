@@ -15,7 +15,7 @@ use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
 use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 
-interface ModulesInterface
+interface ViewNamespaceModulesInterface
 {
     //// Getters.
 

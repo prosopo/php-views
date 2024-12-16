@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\PrivateClasses;
+namespace Prosopo\Views\PrivateClasses\View;
 
-use Prosopo\Views\Interfaces\Config\ViewsNamespaceConfigInterface;
-use Prosopo\Views\Interfaces\Modules\ModulesInterface;
+use Prosopo\Views\Interfaces\Config\ViewNamespaceConfigInterface;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
-use Prosopo\Views\Interfaces\Views\ViewsNamespaceInterface;
+use Prosopo\Views\Interfaces\Views\ViewNamespaceInterface;
 use Prosopo\Views\PrivateClasses\Object\{ObjectClassReader,
     PropertyValueProviderForModels,
     ObjectReader,
@@ -22,15 +21,16 @@ use Prosopo\Views\PrivateClasses\Model\{ModelFactory,
     ModelNamespaceProvider,
     ModelRenderer,
     ModelRendererWithEventDetails};
+use Prosopo\Views\PrivateClasses\EventDispatcher;
 use Prosopo\Views\PrivateClasses\Template\FileModelTemplateProvider;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
  * We reserve the right to change its name and implementation.
  */
-final class ViewsNamespace implements ViewsNamespaceInterface
+final class ViewNamespace implements ViewNamespaceInterface
 {
-    private ModulesInterface $modules;
+    private ViewNamespaceConfigInterface $config;
 
     /**
      * Using the external ViewFactory and ViewRenderer enables us to seamlessly mix Models from different namespaces,
@@ -38,11 +38,13 @@ final class ViewsNamespace implements ViewsNamespaceInterface
      * (see the Views class)
      */
     public function __construct(
-        ViewsNamespaceConfigInterface $config,
+        ViewNamespaceConfigInterface $config,
         ModelFactoryInterface $modelFactoryWithNamespaces,
         ModelRendererInterface $modelRendererWithNamespace
     ) {
-        $modules = clone $config->getModules();
+        $this->config = clone $config;
+        $modules = clone $this->config->getModules();
+        $this->config->setModules($modules);
 
         //// 1. Modules creation:
 
@@ -151,12 +153,10 @@ final class ViewsNamespace implements ViewsNamespaceInterface
                 ->setModelRenderer($realViewRenderer)
                 ->setModelNamespaceProvider($modelNamespaceProvider)
                 ->setModelNameProvider($modelNameProvider);
-
-        $this->modules = $modules;
     }
 
-    public function getModules(): ModulesInterface
+    public function getConfig(): ViewNamespaceConfigInterface
     {
-        return $this->modules;
+        return $this->config;
     }
 }
