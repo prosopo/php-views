@@ -6,20 +6,20 @@ namespace Prosopo\Views\PrivateClasses\View;
 
 use Closure;
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
-use Prosopo\Views\Interfaces\View\ViewRendererInterface;
+use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
  * We reserve the right to change its name and implementation.
  */
-final class ViewRendererWithEventDetails implements ViewRendererInterface
+final class ModelRendererWithEventDetails implements ModelRendererInterface
 {
-    private ViewRendererInterface $viewRenderer;
+    private ModelRendererInterface $viewRenderer;
     private EventDispatcherInterface $eventDispatcher;
     private string $eventName;
 
     public function __construct(
-        ViewRendererInterface $viewRenderer,
+        ModelRendererInterface $viewRenderer,
         EventDispatcherInterface $eventDispatcher,
         string $eventName
     ) {
@@ -28,11 +28,11 @@ final class ViewRendererWithEventDetails implements ViewRendererInterface
         $this->eventName = $eventName;
     }
 
-    public function renderView($viewOrClass, Closure $setupCallback = null, bool $doPrint = false): string
+    public function renderModel($modelOrClass, Closure $setupCallback = null, bool $doPrint = false): string
     {
-        $viewClass = true === is_string($viewOrClass) ?
-            $viewOrClass :
-            get_class($viewOrClass);
+        $viewClass = true === is_string($modelOrClass) ?
+            $modelOrClass :
+            get_class($modelOrClass);
 
         $eventDetails = [
             'viewClass' => $viewClass,
@@ -40,7 +40,7 @@ final class ViewRendererWithEventDetails implements ViewRendererInterface
 
         $this->eventDispatcher->attachEventDetails($this->eventName, $eventDetails);
 
-        $response = $this->viewRenderer->renderView($viewOrClass, $setupCallback, $doPrint);
+        $response = $this->viewRenderer->renderModel($modelOrClass, $setupCallback, $doPrint);
 
         $this->eventDispatcher->detachEventDetails($this->eventName, $eventDetails);
 

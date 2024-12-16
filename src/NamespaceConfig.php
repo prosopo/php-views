@@ -18,7 +18,7 @@ final class NamespaceConfig implements NamespaceConfigInterface
     //// Required settings:
 
     private string $templatesRootPath;
-    private string $viewsRootNamespace;
+    private string $modelsRootNamespace;
     private string $templateFileExtension;
 
     //// Optional settings:
@@ -62,9 +62,9 @@ final class NamespaceConfig implements NamespaceConfigInterface
         return $this->templatesRootPath;
     }
 
-    public function getViewsRootNamespace(): string
+    public function getModelsRootNamespace(): string
     {
-        return $this->viewsRootNamespace;
+        return $this->modelsRootNamespace;
     }
 
     public function getTemplateFileExtension(): string
@@ -101,9 +101,9 @@ final class NamespaceConfig implements NamespaceConfigInterface
         return $this;
     }
 
-    public function setViewsRootNamespace(string $viewsRootNamespace): self
+    public function setModelsRootNamespace(string $modelsRootNamespace): self
     {
-        $this->viewsRootNamespace = $viewsRootNamespace;
+        $this->modelsRootNamespace = $modelsRootNamespace;
 
         return $this;
     }

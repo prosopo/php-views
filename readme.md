@@ -42,16 +42,17 @@ Model class:
 ```php
 namespace MyPackage\Views;
 
-use Prosopo\Views\Interfaces\View\ViewInterface;
-use Prosopo\Views\View;
+use Prosopo\Views\TemplateModel;
+use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 
-class MyView extends View
+class EmployeeTemplateModel extends TemplateModel
 {
     public int $salary;
     public int $bonus;
-    public View_Interface $innerComponent;
-    // Use this specific class only when you want to restrict the usage to it.
-    public CompanyView $company;
+    // Use the abstract interface to accept any Model. 
+    public TemplateModelInterface $innerModel;
+    // Use a specific class only when you want to restrict the usage to it.
+    public CompanyTemplateModel $company;
 
     public function total(): int
     {
@@ -68,7 +69,7 @@ Your month income is {{ $total() }},
 from which {{ $salary }} is a salary, and {{ $bonus }} is a bonus.
 </p>
 
-{!! $innerComponent !!}
+{!! $innerModel !!}
 
 <p>Company info:</p>
 
@@ -95,9 +96,9 @@ set custom default values, consider using one of the following approaches:
 ```php
 namespace MyPackage\Views;
 
-use Prosopo\Views\View;
+use Prosopo\Views\TemplateModel;
 
-class MyView extends View
+class EmployeeTemplateModel extends TemplateModel
 {
     // approach for plain field types.
     public int $varWithCustomDefaultValue = 'custom default value';
@@ -110,42 +111,36 @@ class MyView extends View
 }
 ```
 
-> Tip: If your app Models require additional object dependencies, you can override the `InstancePropertyProvider`
+> Tip: If your app Models require additional object dependencies, you can override the `PropertyValueProvider`
 > module to
-> integrate with a Dependency Injection container like [PHP-DI](https://php-di.org/). This allows class properties to be
+> integrate with a Dependency Injection container like [PHP-DI](https://php-di.org/). This allows model properties to be
 > automatically resolved
 > while object creation by your application's DI system.
 
 ### 1.4) Custom Model implementation (advanced usage)
 
-The only requirement for a View class is to implement the `ViewInterface`. This means you can transform any class into a
-`View` without needing to extend a specific base class, allowing for maximum flexibility and customization:
+The only requirement for a Model is to implement the `TemplateModelInterface`. This means you can transform any class
+into a Model without needing to extend a specific base class, or define public properties:
 
 ```php
 namespace MyPackage\Views;
 
-use Prosopo\Views\Interfaces\View\ViewInterface;
+use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 
-class MyView implements ViewInterface {
-    public int $salary;
-    public int $bonus;
-
-    public function total(): int
-    {
-        return $this->salary + $this->bonus;
-    }
-    
-    // ViewInterface requires only the single method:
-    
-    public function getTemplate(): string {
-        return '@if($total() > 3000)Congrats, you have a great salary!@endif';
-    }
+class AnyClass implements TemplateModelInterface {  
+     public function getTemplateArguments(): array {
+        // you can fill out arguments from any source or define manually.
+        return [
+           'name' => 'value',
+        ];
+     }
 }
 ```
 
 ## 2. Views
 
-`Views` is the root class of this package, responsible for initializing all modules, including the `TemplateProvider`,
+`Views` is the root class of this package, responsible for initializing all modules, including the `TemplateProvider`
+module,
 which automates the linking of Models to their respective templates.
 
 ### 2.1) Flat setup
@@ -168,7 +163,7 @@ $bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
 $namespaceConfig = (new NamespaceConfig($bladeRenderer))
     // required settings:
     ->setTemplatesRootPath(__DIR__ . './templates')
-    ->setViewsRootNamespace('MyPackage\Views')
+    ->setModelsRootNamespace('MyPackage\Views')
     ->setTemplateFileExtension('.blade.php')
     // optional settings:
     ->setTemplateErrorHandler(function (array $eventDetails) {
@@ -195,13 +190,15 @@ as
 shown below:
 
 ```php
-echo $views->getRenderer()
-    ->renderView(MyView::class, function (MyView $view) use ($salary, $bonus) {
-        $view->salary = $salary;
-        $view->bonus = $bonus;
-    });
+echo $views->renderModel(
+    EmployeeModel::class,
+    function (EmployeeModel $employee) use ($salary, $bonus) {
+        $employee->salary = $salary;
+        $employee->bonus = $bonus;
+    }
+);
 
-// Tip: pass true to the third renderView() argument to print it without echo.
+// Tip: pass true to the third renderModel() argument to print it without echo.
 ```
 
 This approach enables a functional programming style when working with Models.
@@ -211,20 +208,18 @@ This approach enables a functional programming style when working with Models.
 When you need split creation, use the factory to create the model, and then render later when you need it.
 
 ```php
-$view = $views->getFactory()
-    ->makeView(MyView::class);
+$employee = $views->makeModel(EmployeeModel::class);
 
 // ...
 
-$view->salary = $salary;
-$view->bonus = $bonus;
+$employee->salary = $salary;
+$employee->bonus = $bonus;
 
 // ...
 
-echo $views->getRenderer()
-    ->renderView($view);
+echo $views->renderModel($employee);
 
-// Tip: you can still pass the callback as the second renderView() argument
+// Tip: you can still pass the callback as the second renderModel() argument
 // to customize the Model properties before rendering. 
 ```
 
@@ -264,6 +259,7 @@ configuration. The `Views` class will use the specified implementation.
 // 1. Make a facade (for Twig or another template engine)
 
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
+use Prosopo\Views\NamespaceConfig;
 
 class TwigDecorator implements TemplateRendererInterface {
     private $twig;
@@ -341,16 +337,34 @@ Visit the [official Blade docs](https://laravel.com/docs/11.x/blade) to learn ab
 use Prosopo\Views\Blade\BladeTemplateRenderer;
 use Prosopo\Views\Blade\BladeRendererConfig;
 
-$bladeRenderer = new BladeTemplateRenderer(new BladeRendererConfig());
+$bladeRendererConfig = new BladeRendererConfig();
+$bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+
+echo $bladeRenderer->renderTemplate('/my-template.blade.php', [
+    'var' => true
+]);
+```
+
+> Tip #1: by default, `BladeTemplateRenderer` is configured to work with files, but you can also switch it to work with
+> plain strings:
+
+```php
+use Prosopo\Views\Blade\BladeTemplateRenderer;
+use Prosopo\Views\Blade\BladeRendererConfig;
+
+$bladeRendererConfig = new BladeRendererConfig();
+$bladeRendererConfig->setIsFileBasedTemplate(false);
+
+$bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
 
 echo $bladeRenderer->renderTemplate('@if($var)The variable is set.@endif', [
     'var' => true
 ]);
 ```
 
-> Tip: The built-in Blade implementation is fully standalone and independent of the `Views` class. This means that even
-> if
-> you’re unable to use the model-driven approach, you can still utilize it as an independent Blade compiler.
+> Tip #2: As you see, the built-in Blade implementation is fully standalone and independent of the `Views` class. This
+> means that even if you can't to use the model-driven approach, you can still utilize it as an independent Blade
+> compiler.
 
 ### 3.3) Available Blade Renderer settings
 
@@ -362,6 +376,9 @@ use Prosopo\Views\Blade\BladeRendererConfig;
 use Prosopo\Views\Interfaces\Template\TemplateErrorInterface;
 
 $bladeRendererConfig = (new BladeRendererConfig())
+// By default, the Renderer expect a file name.
+// Set to false if to work with strings
+->setIsFileBasedTemplate(true)
 ->setTemplateErrorHandler(function (array $eventDetails): void {
     // Can be used for logging, notifying, etc.
 })
@@ -418,7 +435,7 @@ configuration. The `BladeTemplateRenderer` will use the specified implementation
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
 
 class MyOwnBladeCompiler implements TemplateCompilerInterface {
-    public function compile(string $template): string {
+    public function compileTemplate(string $template): string {
        // todo your custom compiler.
     }
 }

@@ -18,29 +18,30 @@ final class BladeRendererModules implements RendererModulesInterface
 {
     //// Custom modules: define them only when you need to override the default behavior:
 
+    private ?TemplateRendererInterface $templateRenderer;
     private ?EventDispatcherInterface $eventDispatcher;
     private ?TemplateCompilerInterface $templateCompiler;
-    private ?TemplateRendererInterface $templateRenderer;
     private ?CodeExecutorInterface $phpCodeExecutor;
 
     public function __construct()
     {
-        $this->eventDispatcher = null;
         $this->templateRenderer = null;
+        $this->eventDispatcher = null;
         $this->templateCompiler = null;
         $this->phpCodeExecutor = null;
     }
 
     //// Getters.
 
-    public function getEventDispatcher(): ?EventDispatcherInterface
-    {
-        return $this->eventDispatcher;
-    }
 
     public function getTemplateRenderer(): ?TemplateRendererInterface
     {
         return $this->templateRenderer;
+    }
+
+    public function getEventDispatcher(): ?EventDispatcherInterface
+    {
+        return $this->eventDispatcher;
     }
 
     public function getTemplateCompiler(): ?TemplateCompilerInterface
@@ -55,16 +56,16 @@ final class BladeRendererModules implements RendererModulesInterface
 
     //// Setters.
 
-    public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self
+    public function setTemplateRenderer(?TemplateRendererInterface $templateRenderer): self
     {
-        $this->eventDispatcher = $eventDispatcher;
+        $this->templateRenderer = $templateRenderer;
 
         return $this;
     }
 
-    public function setTemplateRenderer(?TemplateRendererInterface $templateRenderer): self
+    public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self
     {
-        $this->templateRenderer = $templateRenderer;
+        $this->eventDispatcher = $eventDispatcher;
 
         return $this;
     }

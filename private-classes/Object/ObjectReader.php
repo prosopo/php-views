@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\PrivateClasses\ObjectProperty;
+namespace Prosopo\Views\PrivateClasses\Object;
 
-use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyReaderInterface;
+use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -13,9 +13,9 @@ use ReflectionProperty;
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
  * We reserve the right to change its name and implementation.
  */
-final class ObjectPropertyReader implements ObjectPropertyReaderInterface
+final class ObjectReader implements ObjectReaderInterface
 {
-    public function getVariables(object $instance): array
+    public function getObjectVariables(object $instance): array
     {
         $reflectionClass = new ReflectionClass($instance);
 

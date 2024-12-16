@@ -13,18 +13,18 @@ use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
  */
 final class TemplateRenderer implements TemplateRendererInterface
 {
-    private CodeExecutorInterface $templateExecutor;
+    private CodeExecutorInterface $codeExecutor;
 
-    public function __construct(CodeExecutorInterface $templateExecutor)
+    public function __construct(CodeExecutorInterface $codeExecutor)
     {
-        $this->templateExecutor = $templateExecutor;
+        $this->codeExecutor = $codeExecutor;
     }
 
     public function renderTemplate(string $template, array $variables, bool $doPrint = false): string
     {
         ob_start();
 
-        $this->templateExecutor->executeCode($template, $variables);
+        $this->codeExecutor->executeCode($template, $variables);
 
         $html = (string)ob_get_clean();
 

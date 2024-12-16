@@ -6,19 +6,21 @@ namespace Prosopo\Views\PrivateClasses;
 
 use Prosopo\Views\Interfaces\Config\NamespaceConfigInterface;
 use Prosopo\Views\Interfaces\Modules\ModulesInterface;
-use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
-use Prosopo\Views\Interfaces\View\ViewRendererInterface;
+use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
+use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Views\ViewsNamespaceInterface;
-use Prosopo\Views\PrivateClasses\ObjectProperty\{InstancePropertyProvider,
-    ObjectPropertyReader,
-    ObjectPropertyReaderWithRendering,
+use Prosopo\Views\PrivateClasses\Object\{PropertyValueProviderForModels,
+    ObjectReader,
+    ObjectReaderWithRendering,
     ObjectPropertyWriter,
-    PropertyValueProvider};
-use Prosopo\Views\PrivateClasses\Template\TemplateProvider;
-use Prosopo\Views\PrivateClasses\View\{ViewFactory,
-    ViewFactoryWithPropertyInitialization,
-    ViewRenderer,
-    ViewRendererWithEventDetails};
+    PropertyValueProvider,
+    PropertyValueProviderByTypes};
+use Prosopo\Views\PrivateClasses\Model\ModelFactory;
+use Prosopo\Views\PrivateClasses\Model\ModelFactoryWithPropertyInitialization;
+use Prosopo\Views\PrivateClasses\Model\ModelRenderer;
+use Prosopo\Views\PrivateClasses\Template\FileTemplateProvider;
+use Prosopo\Views\PrivateClasses\View\{
+    ModelRendererWithEventDetails};
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
@@ -35,8 +37,8 @@ final class ViewsNamespace implements ViewsNamespaceInterface
      */
     public function __construct(
         NamespaceConfigInterface $config,
-        ViewFactoryInterface $viewFactoryWithNamespaces,
-        ViewRendererInterface $viewRendererWithNamespaces
+        ModelFactoryInterface $modelFactoryWithNamespaces,
+        ModelRendererInterface $modelRendererWithNamespace
     ) {
         $modules = clone $config->getModules();
 
@@ -54,14 +56,14 @@ final class ViewsNamespace implements ViewsNamespaceInterface
             $eventDispatcher->addEventListener($templateErrorEventName, $templateErrorHandler);
         }
 
-        $objectPropertyReader = $modules->getObjectPropertyReader();
-        $objectPropertyReader = null === $objectPropertyReader ?
-            new ObjectPropertyReader() :
-            $objectPropertyReader;
+        $objectReader = $modules->getObjectReader();
+        $objectReader = null === $objectReader ?
+            new ObjectReader() :
+            $objectReader;
 
-        $objectPropertyReader = new ObjectPropertyReaderWithRendering(
-            $objectPropertyReader,
-            $viewRendererWithNamespaces
+        $objectReader = new ObjectReaderWithRendering(
+            $objectReader,
+            $modelRendererWithNamespace
         );
 
         $objectPropertyWriter = $modules->getObjectPropertyWriter();
@@ -71,48 +73,54 @@ final class ViewsNamespace implements ViewsNamespaceInterface
 
         $templateProvider = $modules->getTemplateProvider();
         $templateProvider = null === $templateProvider ?
-            new TemplateProvider(
+            new FileTemplateProvider(
                 $config->getTemplatesRootPath(),
-                $config->getViewsRootNamespace(),
+                $config->getModelsRootNamespace(),
                 $config->getTemplateFileExtension()
             ) :
             $templateProvider;
 
-        $instancePropertyProvider = $modules->getInstancePropertyProvider();
-        $instancePropertyProvider = null === $instancePropertyProvider ?
-            new InstancePropertyProvider($viewFactoryWithNamespaces) :
-            $instancePropertyProvider;
-
         $propertyValueProvider = $modules->getPropertyValueProvider();
         $propertyValueProvider = null === $propertyValueProvider ?
-            new PropertyValueProvider($instancePropertyProvider, $config->getDefaultPropertyValues()) :
+            new PropertyValueProvider() :
             $propertyValueProvider;
 
-        $viewFactory = new ViewFactoryWithPropertyInitialization(
-            $viewFactoryWithNamespaces,
+        $propertyValueProvider = new PropertyValueProviderByTypes(
+            $propertyValueProvider,
+            $config->getDefaultPropertyValues()
+        );
+
+        $propertyValueProvider = new PropertyValueProviderForModels(
+            $propertyValueProvider,
+            $modelFactoryWithNamespaces
+        );
+
+        $modelFactory = new ModelFactoryWithPropertyInitialization(
+            $modelFactoryWithNamespaces,
             // Plain reader, without rendering.
-            $objectPropertyReader,
+            $objectReader,
             $objectPropertyWriter,
             $propertyValueProvider
         );
 
         //// 2. Real Factory and Renderer creation (used in the Views class):
 
-        $realViewFactory = $modules->getViewFactory();
+        $realViewFactory = $modules->getModelFactory();
         $realViewFactory = null === $realViewFactory ?
-            new ViewFactory($templateProvider) :
+            new ModelFactory($objectReader) :
             $realViewFactory;
 
-        $realViewRenderer = $modules->getViewRenderer();
+        $realViewRenderer = $modules->getModelRenderer();
         $realViewRenderer = null === $realViewRenderer ?
-            new ViewRenderer(
+            new ModelRenderer(
                 $modules->getTemplateRenderer(),
-                $viewFactory,
-                $objectPropertyReader
+                $modelFactory,
+                $objectReader,
+                $templateProvider
             ) :
             $realViewRenderer;
 
-        $realViewRenderer = new ViewRendererWithEventDetails(
+        $realViewRenderer = new ModelRendererWithEventDetails(
             $realViewRenderer,
             $eventDispatcher,
             $templateErrorEventName
@@ -120,13 +128,12 @@ final class ViewsNamespace implements ViewsNamespaceInterface
 
         //// 3. Now we can save the objects to the storage.
 
-        $modules->setObjectPropertyReader($objectPropertyReader)
+        $modules->setObjectReader($objectReader)
                 ->setObjectPropertyWriter($objectPropertyWriter)
                 ->setTemplateProvider($templateProvider)
-                ->setInstancePropertyProvider($instancePropertyProvider)
                 ->setPropertyValueProvider($propertyValueProvider)
-                ->setViewFactory($realViewFactory)
-                ->setViewRenderer($realViewRenderer);
+                ->setModelFactory($realViewFactory)
+                ->setModelRenderer($realViewRenderer);
 
         $this->modules = $modules;
     }

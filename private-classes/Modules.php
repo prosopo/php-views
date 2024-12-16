@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Prosopo\Views\PrivateClasses;
 
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
+use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
+use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Modules\ModulesInterface;
-use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyReaderInterface;
-use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyWriterInterface;
-use Prosopo\Views\Interfaces\ObjectProperty\PropertyValueProviderInterface;
+use Prosopo\Views\Interfaces\Object\ObjectPropertyWriterInterface;
+use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
+use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
-use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
-use Prosopo\Views\Interfaces\View\ViewRendererInterface;
-use Prosopo\Views\PrivateClasses\ObjectProperty\InstancePropertyProvider;
+use Prosopo\Views\PrivateClasses\Object\PropertyValueProviderForModels;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
@@ -27,13 +27,12 @@ final class Modules implements ModulesInterface
 
     //// Custom modules: define them only when you need to override the default behavior:
 
-    private ?ViewFactoryInterface $viewFactory;
+    private ?ModelFactoryInterface $viewFactory;
     private ?TemplateProviderInterface $templateProvider;
-    private ?ObjectPropertyReaderInterface $objectPropertyReader;
+    private ?ObjectReaderInterface $objectReader;
     private ?ObjectPropertyWriterInterface $objectPropertyWriter;
-    private ?InstancePropertyProvider $instancePropertyProvider;
     private ?PropertyValueProviderInterface $propertyValueProvider;
-    private ?ViewRendererInterface $viewRenderer;
+    private ?ModelRendererInterface $viewRenderer;
     private ?EventDispatcherInterface $eventDispatcher;
 
     public function __construct(TemplateRendererInterface $templateRenderer)
@@ -41,9 +40,8 @@ final class Modules implements ModulesInterface
         $this->templateRenderer = $templateRenderer;
         $this->viewFactory = null;
         $this->templateProvider = null;
-        $this->objectPropertyReader = null;
+        $this->objectReader = null;
         $this->objectPropertyWriter = null;
-        $this->instancePropertyProvider = null;
         $this->propertyValueProvider = null;
         $this->viewRenderer = null;
         $this->eventDispatcher = null;
@@ -56,7 +54,7 @@ final class Modules implements ModulesInterface
         return $this->templateRenderer;
     }
 
-    public function getViewFactory(): ?ViewFactoryInterface
+    public function getModelFactory(): ?ModelFactoryInterface
     {
         return $this->viewFactory;
     }
@@ -66,9 +64,9 @@ final class Modules implements ModulesInterface
         return $this->templateProvider;
     }
 
-    public function getObjectPropertyReader(): ?ObjectPropertyReaderInterface
+    public function getObjectReader(): ?ObjectReaderInterface
     {
-        return $this->objectPropertyReader;
+        return $this->objectReader;
     }
 
     public function getObjectPropertyWriter(): ?ObjectPropertyWriterInterface
@@ -76,17 +74,12 @@ final class Modules implements ModulesInterface
         return $this->objectPropertyWriter;
     }
 
-    public function getInstancePropertyProvider(): ?InstancePropertyProvider
-    {
-        return $this->instancePropertyProvider;
-    }
-
     public function getPropertyValueProvider(): ?PropertyValueProviderInterface
     {
         return $this->propertyValueProvider;
     }
 
-    public function getViewRenderer(): ?ViewRendererInterface
+    public function getModelRenderer(): ?ModelRendererInterface
     {
         return $this->viewRenderer;
     }
@@ -105,7 +98,7 @@ final class Modules implements ModulesInterface
         return $this;
     }
 
-    public function setViewFactory(?ViewFactoryInterface $viewFactory): self
+    public function setModelFactory(?ModelFactoryInterface $viewFactory): self
     {
         $this->viewFactory = $viewFactory;
 
@@ -119,9 +112,9 @@ final class Modules implements ModulesInterface
         return $this;
     }
 
-    public function setObjectPropertyReader(?ObjectPropertyReaderInterface $objectPropertyReader): self
+    public function setObjectReader(?ObjectReaderInterface $objectPropertyReader): self
     {
-        $this->objectPropertyReader = $objectPropertyReader;
+        $this->objectReader = $objectPropertyReader;
 
         return $this;
     }
@@ -133,13 +126,6 @@ final class Modules implements ModulesInterface
         return $this;
     }
 
-    public function setInstancePropertyProvider(?InstancePropertyProvider $instancePropertyProvider): self
-    {
-        $this->instancePropertyProvider = $instancePropertyProvider;
-
-        return $this;
-    }
-
     public function setPropertyValueProvider(?PropertyValueProviderInterface $propertyValueProvider): self
     {
         $this->propertyValueProvider = $propertyValueProvider;
@@ -147,7 +133,7 @@ final class Modules implements ModulesInterface
         return $this;
     }
 
-    public function setViewRenderer(?ViewRendererInterface $viewRenderer): self
+    public function setModelRenderer(?ModelRendererInterface $viewRenderer): self
     {
         $this->viewRenderer = $viewRenderer;
 

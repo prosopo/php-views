@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Prosopo\Views\Interfaces\Modules;
 
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
-use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyReaderInterface;
-use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyWriterInterface;
-use Prosopo\Views\Interfaces\ObjectProperty\PropertyValueProviderInterface;
+use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
+use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
+use Prosopo\Views\Interfaces\Object\ObjectPropertyWriterInterface;
+use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
+use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
-use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
-use Prosopo\Views\Interfaces\View\ViewRendererInterface;
-use Prosopo\Views\PrivateClasses\ObjectProperty\InstancePropertyProvider;
+use Prosopo\Views\PrivateClasses\Object\PropertyValueProviderForModels;
 
 interface ModulesInterface
 {
@@ -20,19 +20,17 @@ interface ModulesInterface
 
     public function getTemplateRenderer(): TemplateRendererInterface;
 
-    public function getViewFactory(): ?ViewFactoryInterface;
+    public function getModelFactory(): ?ModelFactoryInterface;
 
     public function getTemplateProvider(): ?TemplateProviderInterface;
 
-    public function getObjectPropertyReader(): ?ObjectPropertyReaderInterface;
+    public function getObjectReader(): ?ObjectReaderInterface;
 
     public function getObjectPropertyWriter(): ?ObjectPropertyWriterInterface;
 
-    public function getInstancePropertyProvider(): ?InstancePropertyProvider;
-
     public function getPropertyValueProvider(): ?PropertyValueProviderInterface;
 
-    public function getViewRenderer(): ?ViewRendererInterface;
+    public function getModelRenderer(): ?ModelRendererInterface;
 
     public function getEventDispatcher(): ?EventDispatcherInterface;
 
@@ -40,19 +38,17 @@ interface ModulesInterface
 
     public function setTemplateRenderer(TemplateRendererInterface $templateRenderer): self;
 
-    public function setViewFactory(?ViewFactoryInterface $viewFactory): self;
+    public function setModelFactory(?ModelFactoryInterface $viewFactory): self;
 
     public function setTemplateProvider(?TemplateProviderInterface $templateProvider): self;
 
-    public function setObjectPropertyReader(?ObjectPropertyReaderInterface $objectPropertyReader): self;
+    public function setObjectReader(?ObjectReaderInterface $objectPropertyReader): self;
 
     public function setObjectPropertyWriter(?ObjectPropertyWriterInterface $objectPropertyWriter): self;
 
-    public function setInstancePropertyProvider(?InstancePropertyProvider $instancePropertyProvider): self;
-
     public function setPropertyValueProvider(?PropertyValueProviderInterface $propertyValueProvider): self;
 
-    public function setViewRenderer(?ViewRendererInterface $viewRenderer): self;
+    public function setModelRenderer(?ModelRendererInterface $viewRenderer): self;
 
     public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self;
 }

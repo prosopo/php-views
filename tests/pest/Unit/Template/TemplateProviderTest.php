@@ -6,7 +6,7 @@ namespace Tests\Unit\Template;
 
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
-use Prosopo\Views\PrivateClasses\Template\TemplateProvider;
+use Prosopo\Views\PrivateClasses\ViewemplateProvider;
 
 class TemplateProviderTest extends TestCase
 {
@@ -14,7 +14,7 @@ class TemplateProviderTest extends TestCase
     {
         // given
          vfsStream::setup('templates', null, ['sample-view.blade.php' => 'View Content']);
-        $provider = new TemplateProvider(vfsStream::url('templates'), 'App\\Views', '.blade.php');
+        $provider = new FileTemplateProvider(vfsStream::url('templates'), 'App\\Views', '.blade.php');
 
         $viewClass = 'App\\Views\\SampleView';
 
@@ -29,7 +29,7 @@ class TemplateProviderTest extends TestCase
     {
         // given
         vfsStream::setup('templates'); // Empty directory
-        $provider = new TemplateProvider(vfsStream::url('templates'), 'App\\Views', '.blade.php');
+        $provider = new FileTemplateProvider(vfsStream::url('templates'), 'App\\Views', '.blade.php');
 
         $viewClass = 'App\\Views\\MissingView';
 
@@ -44,7 +44,7 @@ class TemplateProviderTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['some-camel-case-view.blade.php' => 'Camel Case Content']);
-        $provider = new TemplateProvider(vfsStream::url('templates'), 'App\\Views', '.blade.php');
+        $provider = new FileTemplateProvider(vfsStream::url('templates'), 'App\\Views', '.blade.php');
 
         $viewClass = 'App\\Views\\SomeCamelCaseView';
 
@@ -61,7 +61,7 @@ class TemplateProviderTest extends TestCase
         vfsStream::setup('templates', null, [
             'admin/dashboard-view.blade.php' => 'Dashboard Content'
         ]);
-        $provider = new TemplateProvider(vfsStream::url('templates'), 'App\\Views', '.blade.php');
+        $provider = new FileTemplateProvider(vfsStream::url('templates'), 'App\\Views', '.blade.php');
 
         $viewClass = 'App\\Views\\Admin\\DashboardView';
 

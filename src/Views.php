@@ -7,9 +7,9 @@ namespace Prosopo\Views;
 use Closure;
 use Exception;
 use Prosopo\Views\Interfaces\Config\NamespaceConfigInterface;
+use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
+use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Modules\ModulesInterface;
-use Prosopo\Views\Interfaces\View\ViewFactoryInterface;
-use Prosopo\Views\Interfaces\View\ViewRendererInterface;
 use Prosopo\Views\Interfaces\Views\ViewsInterface;
 use Prosopo\Views\Interfaces\Views\ViewsNamespaceInterface;
 use Prosopo\Views\PrivateClasses\ViewsNamespace;
@@ -18,14 +18,14 @@ use Prosopo\Views\PrivateClasses\ViewsNamespace;
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties and introduce new public ones.
  */
-final class Views implements ViewsInterface, ViewFactoryInterface, ViewRendererInterface
+final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendererInterface
 {
     /**
-     * @var array<string, ViewFactoryInterface> namespace => ViewRendererInterface
+     * @var array<string, ModelFactoryInterface> namespace => ViewRendererInterface
      */
     private array $factories;
     /**
-     * @var array<string, ViewRendererInterface> namespace => ViewFactoryInterface
+     * @var array<string, ModelRendererInterface> namespace => ViewFactoryInterface
      */
     private array $renderers;
     private string $notFoundErrorMessage;
@@ -44,8 +44,8 @@ final class Views implements ViewsInterface, ViewFactoryInterface, ViewRendererI
 
         $namespaceModules = $viewsNamespace->getModules();
 
-        $namespaceFactory = $namespaceModules->getViewFactory();
-        $namespaceRenderer = $namespaceModules->getViewRenderer();
+        $namespaceFactory = $namespaceModules->getModelFactory();
+        $namespaceRenderer = $namespaceModules->getModelRenderer();
 
         if (
             null === $namespaceFactory ||
@@ -56,8 +56,8 @@ final class Views implements ViewsInterface, ViewFactoryInterface, ViewRendererI
 
         // Save the original Factory and Renderer.
 
-        $this->factories[$config->getViewsRootNamespace()] = $namespaceFactory;
-        $this->renderers[$config->getViewsRootNamespace()] = $namespaceRenderer;
+        $this->factories[$config->getModelsRootNamespace()] = $namespaceFactory;
+        $this->renderers[$config->getModelsRootNamespace()] = $namespaceRenderer;
 
         // Sort to ensure the rule is followed: more specific namespaces take precedence.
         // For example, /My/Package/Blade will be processed before the more generic /My/Package.
@@ -68,22 +68,22 @@ final class Views implements ViewsInterface, ViewFactoryInterface, ViewRendererI
         return $namespaceModules;
     }
 
-    public function makeView(string $viewClass)
+    public function makeModel(string $modelClass)
     {
-        $factory = $this->getItemByClassName($viewClass, $this->factories);
+        $factory = $this->getItemByClassName($modelClass, $this->factories);
 
         if (null === $factory) {
-            throw $this->makeNamespaceNotRegisteredException($viewClass);
+            throw $this->makeNamespaceNotRegisteredException($modelClass);
         }
 
-        return $factory->makeView($viewClass);
+        return $factory->makeModel($modelClass);
     }
 
-    public function renderView($viewOrClass, Closure $setupCallback = null, bool $doPrint = false): string
+    public function renderModel($modelOrClass, Closure $setupCallback = null, bool $doPrint = false): string
     {
-        $viewClass = false === is_string($viewOrClass) ?
-            get_class($viewOrClass) :
-            $viewOrClass;
+        $viewClass = false === is_string($modelOrClass) ?
+            get_class($modelOrClass) :
+            $modelOrClass;
 
         $renderer = $this->getItemByClassName($viewClass, $this->renderers);
 
@@ -91,7 +91,7 @@ final class Views implements ViewsInterface, ViewFactoryInterface, ViewRendererI
             throw $this->makeNamespaceNotRegisteredException($viewClass);
         }
 
-        return $renderer->renderView($viewOrClass, $setupCallback, $doPrint);
+        return $renderer->renderModel($modelOrClass, $setupCallback, $doPrint);
     }
 
     protected function makeViewsNamespace(NamespaceConfigInterface $config): ViewsNamespaceInterface

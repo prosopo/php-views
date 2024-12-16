@@ -14,6 +14,16 @@ use Prosopo\Views\PrivateClasses\Blade\BladeRendererModules;
  */
 final class BladeRendererConfig implements BladeRendererConfigInterface
 {
+    //// Required settings:
+
+    private bool $isFileBasedTemplate;
+    private string $escapeVariableName;
+    private string $templateErrorEventName;
+    /**
+     * @var array<string,mixed>
+     */
+    private array $globalVariables;
+
     //// Optional settings:
 
     /**
@@ -25,16 +35,10 @@ final class BladeRendererConfig implements BladeRendererConfigInterface
      */
     private $customOutputEscapeCallback;
     /**
-     * @var array<string,mixed>
-     */
-    private array $globalVariables;
-
-    /**
      * @var callable(string $template): string|null
      */
     private $compilerExtensionCallback;
-    private string $escapeVariableName;
-    private string $templateErrorEventName;
+
 
     //// Own properties:
 
@@ -42,17 +46,24 @@ final class BladeRendererConfig implements BladeRendererConfigInterface
 
     public function __construct()
     {
+        $this->isFileBasedTemplate = true;
+        $this->templateErrorEventName = 'template_error';
+        $this->escapeVariableName = 'escape';
+
         $this->templateErrorHandler = null;
         $this->customOutputEscapeCallback = null;
         $this->globalVariables = [];
         $this->compilerExtensionCallback = null;
-        $this->templateErrorEventName = 'template_error';
-        $this->escapeVariableName = 'escape';
 
         $this->modules = new BladeRendererModules();
     }
 
     //// Getters:
+
+    public function isFileBasedTemplate(): bool
+    {
+        return $this->isFileBasedTemplate;
+    }
 
     public function getTemplateErrorHandler(): ?callable
     {
@@ -90,6 +101,13 @@ final class BladeRendererConfig implements BladeRendererConfigInterface
     }
 
     //// Setters:
+
+    public function setIsFileBasedTemplate(bool $isFileBasedTemplate): self
+    {
+        $this->isFileBasedTemplate = $isFileBasedTemplate;
+
+        return $this;
+    }
 
     public function setTemplateErrorHandler(?callable $templateErrorHandler): self
     {

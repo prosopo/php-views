@@ -8,6 +8,8 @@ interface BladeRendererConfigInterface extends RendererConfigInterface
 {
     //// Getters.
 
+    public function isFileBasedTemplate(): bool;
+
     /**
      * @return callable(mixed $variable): string|null
      */
@@ -21,6 +23,8 @@ interface BladeRendererConfigInterface extends RendererConfigInterface
     public function getCompilerExtensionCallback(): ?callable;
 
     //// Setters.
+
+    public function setIsFileBasedTemplate(bool $isFileBasedTemplate): self;
 
     /**
      * @param callable(string $template): string|null $compilerExtensionCallback

@@ -6,8 +6,8 @@ namespace Tests\Unit\ObjectProperty;
 
 use Mockery;
 use PHPUnit\Framework\TestCase;
-use Prosopo\Views\Interfaces\ObjectProperty\PropertyValueProviderInterface;
-use Prosopo\Views\PrivateClasses\ObjectProperty\ObjectPropertyWriter;
+use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
+use Prosopo\Views\PrivateClasses\Object\ObjectPropertyWriter;
 
 class ObjectPropertyWriterTest extends TestCase
 {
@@ -22,15 +22,15 @@ class ObjectPropertyWriterTest extends TestCase
         };
 
         // when
-        $result = fn() => $writer->setDefaultValues($testInstance, $propertyValueProvider);
+        $result = fn() => $writer->setObjectPropertyValues($testInstance, $propertyValueProvider);
 
         // then
-        $propertyValueProvider->shouldReceive('supports')
+        $propertyValueProvider->shouldReceive('supportsProperty')
             ->once()
             ->with('string')
             ->andReturn(true);
 
-        $propertyValueProvider->shouldReceive('getValue')
+        $propertyValueProvider->shouldReceive('getPropertyValue')
             ->once()
             ->with('string')
             ->andReturn('Default Name');
@@ -53,7 +53,7 @@ class ObjectPropertyWriterTest extends TestCase
         };
 
         // when
-        $result = fn() => $writer->setDefaultValues($testInstance);
+        $result = fn() => $writer->setObjectPropertyValues($testInstance);
 
         // then
         $result();
@@ -70,7 +70,7 @@ class ObjectPropertyWriterTest extends TestCase
         };
 
         // when
-        $result = fn() => $writer->setDefaultValues($testInstance);
+        $result = fn() => $writer->setObjectPropertyValues($testInstance);
 
         // then
         $result();
@@ -87,10 +87,10 @@ class ObjectPropertyWriterTest extends TestCase
         };
 
         // when
-        $result = fn() => $writer->setDefaultValues($testInstance, $propertyValueProvider);
+        $result = fn() => $writer->setObjectPropertyValues($testInstance, $propertyValueProvider);
 
         // then
-        $propertyValueProvider->shouldReceive('supports')
+        $propertyValueProvider->shouldReceive('supportsProperty')
             ->once()
             ->with('int')
             ->andReturn(false);

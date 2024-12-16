@@ -12,7 +12,7 @@ interface NamespaceConfigInterface
 
     public function getTemplatesRootPath(): string;
 
-    public function getViewsRootNamespace(): string;
+    public function getModelsRootNamespace(): string;
 
     public function getTemplateFileExtension(): string;
 
@@ -34,7 +34,7 @@ interface NamespaceConfigInterface
 
     public function setTemplatesRootPath(string $templatesRootPath): self;
 
-    public function setViewsRootNamespace(string $viewsRootNamespace): self;
+    public function setModelsRootNamespace(string $modelsRootNamespace): self;
 
     public function setTemplateFileExtension(string $templateFileExtension): self;
 

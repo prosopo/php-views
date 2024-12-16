@@ -13,9 +13,9 @@ interface RendererModulesInterface
 {
     //// Getters.
 
-    public function getEventDispatcher(): ?EventDispatcherInterface;
-
     public function getTemplateRenderer(): ?TemplateRendererInterface;
+
+    public function getEventDispatcher(): ?EventDispatcherInterface;
 
     public function getTemplateCompiler(): ?TemplateCompilerInterface;
 
@@ -23,9 +23,9 @@ interface RendererModulesInterface
 
     //// Setters.
 
-    public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self;
-
     public function setTemplateRenderer(?TemplateRendererInterface $templateRenderer): self;
+
+    public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self;
 
     public function setTemplateCompiler(?TemplateCompilerInterface $templateCompiler): self;
 

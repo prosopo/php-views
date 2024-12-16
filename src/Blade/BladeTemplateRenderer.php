@@ -17,6 +17,7 @@ use Prosopo\Views\PrivateClasses\EventDispatcher;
 use Prosopo\Views\PrivateClasses\Template\TemplateRenderer;
 use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithCustomEscape;
 use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithEventDetails;
+use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithFileTemplate;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
@@ -61,6 +62,10 @@ final class BladeTemplateRenderer implements TemplateRendererInterface, Renderer
         $templateRenderer = null === $templateRenderer ?
             new TemplateRenderer($codeExecutor) :
             $templateRenderer;
+
+        if (true === $config->isFileBasedTemplate()) {
+            $templateRenderer = new TemplateRendererWithFileTemplate($templateRenderer);
+        }
 
         $templateRenderer = new TemplateRendererWithCustomEscape(
             $templateRenderer,

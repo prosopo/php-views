@@ -6,8 +6,8 @@ namespace Tests\Unit\ObjectProperty;
 
 use Mockery;
 use PHPUnit\Framework\TestCase;
-use Prosopo\Views\Interfaces\ObjectProperty\PropertyValueProviderInterface;
-use Prosopo\Views\PrivateClasses\ObjectProperty\PropertyValueProvider;
+use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
+use Prosopo\Views\PrivateClasses\Object\PropertyValueProviderByTypes;
 
 class PropertyValueProviderTest extends TestCase
 {
@@ -16,13 +16,13 @@ class PropertyValueProviderTest extends TestCase
         // given
         $defaultValues = ['string' => 'Default String Value'];
         $instanceProvider = Mockery::mock(PropertyValueProviderInterface::class);
-        $provider = new PropertyValueProvider($instanceProvider, $defaultValues);
+        $provider = new PropertyValueProviderByTypes($instanceProvider, $defaultValues);
 
         // when
-        $result = fn() => $provider->supports('string');
+        $result = fn() => $provider->supportsProperty('string');
 
         // then
-        $instanceProvider->shouldNotReceive('supports');
+        $instanceProvider->shouldNotReceive('supportsProperty');
         $this->assertTrue($result());
 
         // apply
@@ -34,13 +34,13 @@ class PropertyValueProviderTest extends TestCase
         // given
         $defaultValues = [];
         $instanceProvider = Mockery::mock(PropertyValueProviderInterface::class);
-        $provider = new PropertyValueProvider($instanceProvider, $defaultValues);
+        $provider = new PropertyValueProviderByTypes($instanceProvider, $defaultValues);
 
         // when
-        $result = fn() => $provider->supports('customType');
+        $result = fn() => $provider->supportsProperty('customType');
 
         // then
-        $instanceProvider->shouldReceive('supports')
+        $instanceProvider->shouldReceive('supportsProperty')
             ->once()
             ->with('customType')
             ->andReturn(true);
@@ -56,13 +56,13 @@ class PropertyValueProviderTest extends TestCase
         // given
         $defaultValues = ['string' => 'Default String Value'];
         $instanceProvider = Mockery::mock(PropertyValueProviderInterface::class);
-        $provider = new PropertyValueProvider($instanceProvider, $defaultValues);
+        $provider = new PropertyValueProviderByTypes($instanceProvider, $defaultValues);
 
         // when
-        $result = fn() => $provider->getValue('string');
+        $result = fn() => $provider->getPropertyValue('string');
 
         // then
-        $instanceProvider->shouldNotReceive('getValue'); // No need to call instance provider
+        $instanceProvider->shouldNotReceive('getPropertyValue'); // No need to call instance provider
         $this->assertSame('Default String Value', $result());
 
         // apply
@@ -73,13 +73,13 @@ class PropertyValueProviderTest extends TestCase
     {
         // given
         $instanceProvider = Mockery::mock(PropertyValueProviderInterface::class);
-        $provider = new PropertyValueProvider($instanceProvider, []);
+        $provider = new PropertyValueProviderByTypes($instanceProvider, []);
 
         // when
-        $result = fn() => $provider->getValue('customType');
+        $result = fn() => $provider->getPropertyValue('customType');
 
         // then
-        $instanceProvider->shouldReceive('getValue')
+        $instanceProvider->shouldReceive('getPropertyValue')
             ->once()
             ->with('customType')
             ->andReturn('Instance Provided Value');

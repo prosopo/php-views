@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\PrivateClasses\ObjectProperty;
+namespace Prosopo\Views\PrivateClasses\Object;
 
-use Prosopo\Views\Interfaces\ObjectProperty\ObjectPropertyWriterInterface;
-use Prosopo\Views\Interfaces\ObjectProperty\PropertyValueProviderInterface;
+use Prosopo\Views\Interfaces\Object\ObjectPropertyWriterInterface;
+use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
 use ReflectionClass;
 use ReflectionProperty;
 
@@ -15,7 +15,7 @@ use ReflectionProperty;
  */
 final class ObjectPropertyWriter implements ObjectPropertyWriterInterface
 {
-    public function setDefaultValues(
+    public function setObjectPropertyValues(
         object $instance,
         ?PropertyValueProviderInterface $propertyValueProvider = null
     ): void {
@@ -60,18 +60,11 @@ final class ObjectPropertyWriter implements ObjectPropertyWriterInterface
         PropertyValueProviderInterface $propertyValueProvider,
         ReflectionProperty $reflectionProperty
     ): bool {
-        $type = $reflectionProperty->getType();
-
-        $typeName = null !== $type ?
-            // @phpstan-ignore-next-line
-            $type->getName() :
-            '';
-
-        if (false === $propertyValueProvider->supports($typeName)) {
+        if (false === $propertyValueProvider->supportsProperty($reflectionProperty)) {
             return false;
         }
 
-        $value = $propertyValueProvider->getValue($typeName);
+        $value = $propertyValueProvider->getPropertyValue($reflectionProperty);
 
         $reflectionProperty->setValue($instance, $value);
 
