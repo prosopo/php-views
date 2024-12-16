@@ -2,41 +2,41 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\ObjectProperty;
+namespace Tests\Unit\Object;
 
 use Mockery;
 use PHPUnit\Framework\TestCase;
-use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
-use Prosopo\Views\Interfaces\View\ViewInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
+use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
+use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use Prosopo\Views\PrivateClasses\Object\ObjectReaderWithRendering;
 
-class ObjectPropertyReaderWithRenderingTest extends TestCase
+class ObjectReaderWithRenderingTest extends TestCase
 {
     public function testGetVariablesRendersInnerViews(): void
     {
         // given
-        $objectPropertyReader = Mockery::mock(ObjectReaderInterface::class);
-        $viewRenderer = Mockery::mock(ModelRendererInterface::class);
-        $reader = new ObjectReaderWithRendering($objectPropertyReader, $viewRenderer);
-        $viewInstance = Mockery::mock(ViewInterface::class);
+        $objectReader = Mockery::mock(ObjectReaderInterface::class);
+        $modelRenderer = Mockery::mock(ModelRendererInterface::class);
+        $reader = new ObjectReaderWithRendering($objectReader, $modelRenderer);
+        $model = Mockery::mock(TemplateModelInterface::class);
 
         // when
         $result = fn() => $reader->getObjectVariables(new class {
         });
 
         // then
-        $objectPropertyReader->shouldReceive('getObjectVariables')
+        $objectReader->shouldReceive('getObjectVariables')
             ->once()
             ->with(Mockery::type('object'))
             ->andReturn([
                 'key1' => 'value1',
-                'key2' => $viewInstance,
-                'key3' => ['nestedKey' => $viewInstance],
+                'key2' => $model,
+                'key3' => ['nestedKey' => $model],
             ]);
-        $viewRenderer->shouldReceive('renderModel')
+        $modelRenderer->shouldReceive('renderModel')
             ->twice()
-            ->with($viewInstance)
+            ->with($model)
             ->andReturn('<div>Rendered View</div>');
 
         $this->assertEquals([
@@ -53,16 +53,16 @@ class ObjectPropertyReaderWithRenderingTest extends TestCase
     public function testGetVariablesIgnoresNonViewItems(): void
     {
         // given
-        $objectPropertyReader = Mockery::mock(ObjectReaderInterface::class);
-        $viewRenderer = Mockery::mock(ModelRendererInterface::class);
-        $reader = new ObjectReaderWithRendering($objectPropertyReader, $viewRenderer);
+        $objectReader = Mockery::mock(ObjectReaderInterface::class);
+        $modelRenderer = Mockery::mock(ModelRendererInterface::class);
+        $reader = new ObjectReaderWithRendering($objectReader, $modelRenderer);
 
         // when
         $result = fn() => $reader->getObjectVariables(new class {
         });
 
         // then
-        $objectPropertyReader->shouldReceive('getObjectVariables')
+        $objectReader->shouldReceive('getObjectVariables')
             ->once()
             ->with(Mockery::type('object'))
             ->andReturn([
@@ -70,7 +70,7 @@ class ObjectPropertyReaderWithRenderingTest extends TestCase
                 'key2' => 123,
                 'key3' => ['nestedKey' => 'string'],
             ]);
-        $viewRenderer->shouldNotReceive('renderModel');
+        $modelRenderer->shouldNotReceive('renderModel');
 
         $this->assertEquals([
             'key1' => 'value1',

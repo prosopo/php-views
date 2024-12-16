@@ -10,9 +10,8 @@ use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Object\ObjectPropertyWriterInterface;
 use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
-use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
+use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
-use Prosopo\Views\PrivateClasses\Object\PropertyValueProviderForModels;
 
 interface ModulesInterface
 {
@@ -22,7 +21,7 @@ interface ModulesInterface
 
     public function getModelFactory(): ?ModelFactoryInterface;
 
-    public function getTemplateProvider(): ?TemplateProviderInterface;
+    public function getModelTemplateProvider(): ?ModelTemplateProviderInterface;
 
     public function getObjectReader(): ?ObjectReaderInterface;
 
@@ -40,7 +39,7 @@ interface ModulesInterface
 
     public function setModelFactory(?ModelFactoryInterface $viewFactory): self;
 
-    public function setTemplateProvider(?TemplateProviderInterface $templateProvider): self;
+    public function setModelTemplateProvider(?ModelTemplateProviderInterface $modelTemplateProvider): self;
 
     public function setObjectReader(?ObjectReaderInterface $objectPropertyReader): self;
 

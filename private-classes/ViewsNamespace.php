@@ -18,7 +18,7 @@ use Prosopo\Views\PrivateClasses\Object\{PropertyValueProviderForModels,
 use Prosopo\Views\PrivateClasses\Model\ModelFactory;
 use Prosopo\Views\PrivateClasses\Model\ModelFactoryWithPropertyInitialization;
 use Prosopo\Views\PrivateClasses\Model\ModelRenderer;
-use Prosopo\Views\PrivateClasses\Template\FileTemplateProvider;
+use Prosopo\Views\PrivateClasses\Template\FileModelTemplateProvider;
 use Prosopo\Views\PrivateClasses\View\{
     ModelRendererWithEventDetails};
 
@@ -71,9 +71,9 @@ final class ViewsNamespace implements ViewsNamespaceInterface
             new ObjectPropertyWriter() :
             $objectPropertyWriter;
 
-        $templateProvider = $modules->getTemplateProvider();
+        $templateProvider = $modules->getModelTemplateProvider();
         $templateProvider = null === $templateProvider ?
-            new FileTemplateProvider(
+            new FileModelTemplateProvider(
                 $config->getTemplatesRootPath(),
                 $config->getModelsRootNamespace(),
                 $config->getTemplateFileExtension()
@@ -130,7 +130,7 @@ final class ViewsNamespace implements ViewsNamespaceInterface
 
         $modules->setObjectReader($objectReader)
                 ->setObjectPropertyWriter($objectPropertyWriter)
-                ->setTemplateProvider($templateProvider)
+                ->setModelTemplateProvider($templateProvider)
                 ->setPropertyValueProvider($propertyValueProvider)
                 ->setModelFactory($realViewFactory)
                 ->setModelRenderer($realViewRenderer);

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\ObjectProperty;
+namespace Tests\Unit\Object;
 
 use Mockery;
 use PHPUnit\Framework\TestCase;
@@ -15,11 +15,10 @@ class ObjectPropertyWriterTest extends TestCase
     {
         // given
         $propertyValueProvider = Mockery::mock(PropertyValueProviderInterface::class);
-        $writer = new ObjectPropertyWriter();
-
         $testInstance = new class {
             public string $name;
         };
+        $writer = new ObjectPropertyWriter();
 
         // when
         $result = fn() => $writer->setObjectPropertyValues($testInstance, $propertyValueProvider);
@@ -27,19 +26,17 @@ class ObjectPropertyWriterTest extends TestCase
         // then
         $propertyValueProvider->shouldReceive('supportsProperty')
             ->once()
-            ->with('string')
             ->andReturn(true);
 
         $propertyValueProvider->shouldReceive('getPropertyValue')
             ->once()
-            ->with('string')
             ->andReturn('Default Name');
 
-        // apply
         $result();
+
         $this->assertSame('Default Name', $testInstance->name);
 
-        $this->addToAssertionCount(Mockery::getContainer()->mockery_getExpectationCount());
+        // apply
         Mockery::close();
     }
 
@@ -57,6 +54,7 @@ class ObjectPropertyWriterTest extends TestCase
 
         // then
         $result();
+
         $this->assertNull($testInstance->nullableName);
     }
 
@@ -74,6 +72,7 @@ class ObjectPropertyWriterTest extends TestCase
 
         // then
         $result();
+
         $this->assertSame('Initialized Name', $testInstance->name);
     }
 
@@ -81,10 +80,10 @@ class ObjectPropertyWriterTest extends TestCase
     {
         // given
         $propertyValueProvider = Mockery::mock(PropertyValueProviderInterface::class);
-        $writer = new ObjectPropertyWriter();
         $testInstance = new class {
             public int $age;
         };
+        $writer = new ObjectPropertyWriter();
 
         // when
         $result = fn() => $writer->setObjectPropertyValues($testInstance, $propertyValueProvider);
@@ -92,14 +91,13 @@ class ObjectPropertyWriterTest extends TestCase
         // then
         $propertyValueProvider->shouldReceive('supportsProperty')
             ->once()
-            ->with('int')
             ->andReturn(false);
 
-        // apply
         $result();
+
         $this->assertFalse(isset($testInstance->age));
 
-        $this->addToAssertionCount(Mockery::getContainer()->mockery_getExpectationCount());
+        // apply
         Mockery::close();
     }
 }

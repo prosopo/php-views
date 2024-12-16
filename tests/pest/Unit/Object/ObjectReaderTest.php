@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\ObjectProperty;
+namespace Tests\Unit\Object;
 
 use PHPUnit\Framework\TestCase;
 use Prosopo\Views\PrivateClasses\Object\ObjectReader;
 
-class ObjectPropertyReaderTest extends TestCase
+class ObjectReaderTest extends TestCase
 {
     public function testReturnsPublicTypedPropertiesAndMethods(): void
     {
         // given
-        $objectPropertyReader = new ObjectReader();
+        $objectReader = new ObjectReader();
         $testInstance = new class {
             public string $name = 'John Doe';
             public int $age = 30;
@@ -29,7 +29,7 @@ class ObjectPropertyReaderTest extends TestCase
         };
 
         // when
-        $variables = $objectPropertyReader->getObjectVariables($testInstance);
+        $variables = $objectReader->getObjectVariables($testInstance);
 
         // then
         $this->assertEquals([
@@ -43,14 +43,14 @@ class ObjectPropertyReaderTest extends TestCase
     public function testExcludesNonTypedPublicProperties(): void
     {
         // given
-        $objectPropertyReader = new ObjectReader();
+        $objectReader = new ObjectReader();
         $testInstance = new class {
             public $nonTypedProperty = 'value';
             public int $typedProperty = 42;
         };
 
         // when
-        $variables = $objectPropertyReader->getObjectVariables($testInstance);
+        $variables = $objectReader->getObjectVariables($testInstance);
 
         // then
         $this->assertEquals([
@@ -61,7 +61,7 @@ class ObjectPropertyReaderTest extends TestCase
     public function testExcludesConstructorMethod(): void
     {
         // given
-        $objectPropertyReader = new ObjectReader();
+        $objectReader = new ObjectReader();
         $testInstance = new class {
             public string $data = 'sample';
 
@@ -72,7 +72,7 @@ class ObjectPropertyReaderTest extends TestCase
         };
 
         // when
-        $variables = $objectPropertyReader->getObjectVariables($testInstance);
+        $variables = $objectReader->getObjectVariables($testInstance);
 
         // then
 

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Prosopo\Views\PrivateClasses\Template;
 
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
-use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
+use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
  * We reserve the right to change its name and implementation.
  */
-final class FileTemplateProvider implements TemplateProviderInterface
+final class FileModelTemplateProvider implements ModelTemplateProviderInterface
 {
     private string $templatesRootPath;
     private string $viewsRootNamespace;
@@ -24,7 +24,7 @@ final class FileTemplateProvider implements TemplateProviderInterface
         $this->extension = $extension;
     }
 
-    public function getTemplate(TemplateModelInterface $model): string
+    public function getModelTemplate(TemplateModelInterface $model): string
     {
         $modelClass = $this->getModelClass($model);
 

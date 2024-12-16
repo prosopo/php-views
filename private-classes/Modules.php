@@ -11,7 +11,7 @@ use Prosopo\Views\Interfaces\Modules\ModulesInterface;
 use Prosopo\Views\Interfaces\Object\ObjectPropertyWriterInterface;
 use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
-use Prosopo\Views\Interfaces\Template\TemplateProviderInterface;
+use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\PrivateClasses\Object\PropertyValueProviderForModels;
 
@@ -28,7 +28,7 @@ final class Modules implements ModulesInterface
     //// Custom modules: define them only when you need to override the default behavior:
 
     private ?ModelFactoryInterface $viewFactory;
-    private ?TemplateProviderInterface $templateProvider;
+    private ?ModelTemplateProviderInterface $modelTemplateProvider;
     private ?ObjectReaderInterface $objectReader;
     private ?ObjectPropertyWriterInterface $objectPropertyWriter;
     private ?PropertyValueProviderInterface $propertyValueProvider;
@@ -39,7 +39,7 @@ final class Modules implements ModulesInterface
     {
         $this->templateRenderer = $templateRenderer;
         $this->viewFactory = null;
-        $this->templateProvider = null;
+        $this->modelTemplateProvider = null;
         $this->objectReader = null;
         $this->objectPropertyWriter = null;
         $this->propertyValueProvider = null;
@@ -59,9 +59,9 @@ final class Modules implements ModulesInterface
         return $this->viewFactory;
     }
 
-    public function getTemplateProvider(): ?TemplateProviderInterface
+    public function getModelTemplateProvider(): ?ModelTemplateProviderInterface
     {
-        return $this->templateProvider;
+        return $this->modelTemplateProvider;
     }
 
     public function getObjectReader(): ?ObjectReaderInterface
@@ -105,9 +105,9 @@ final class Modules implements ModulesInterface
         return $this;
     }
 
-    public function setTemplateProvider(?TemplateProviderInterface $templateProvider): self
+    public function setModelTemplateProvider(?ModelTemplateProviderInterface $modelTemplateProvider): self
     {
-        $this->templateProvider = $templateProvider;
+        $this->modelTemplateProvider = $modelTemplateProvider;
 
         return $this;
     }
