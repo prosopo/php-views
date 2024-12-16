@@ -6,7 +6,7 @@ namespace Prosopo\Views\Interfaces\Config;
 
 use Prosopo\Views\Interfaces\Modules\ModulesInterface;
 
-interface NamespaceConfigInterface
+interface ViewsNamespaceConfigInterface
 {
     //// Getters.
 

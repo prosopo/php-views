@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Prosopo\Views;
 
-use Prosopo\Views\Interfaces\Config\NamespaceConfigInterface;
+use Prosopo\Views\Interfaces\Config\ViewsNamespaceConfigInterface;
 use Prosopo\Views\Interfaces\Modules\ModulesInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\PrivateClasses\Modules;
@@ -13,16 +13,11 @@ use Prosopo\Views\PrivateClasses\Modules;
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties and introduce new public ones.
  */
-final class NamespaceConfig implements NamespaceConfigInterface
+final class ViewsNamespaceConfig implements ViewsNamespaceConfigInterface
 {
-    //// Required settings:
-
     private string $templatesRootPath;
     private string $modelsRootNamespace;
     private string $templateFileExtension;
-
-    //// Optional settings:
-
     /**
      * @var callable(array<string,mixed> $eventDetails): void|null
      */
@@ -33,17 +28,13 @@ final class NamespaceConfig implements NamespaceConfigInterface
      */
     private array $defaultPropertyValues;
 
-    //// Own properties:
-
     private ModulesInterface $modules;
 
     public function __construct(TemplateRendererInterface $templateRenderer)
     {
-        // Defaults are not set for required modules.
-        // This is intentional to ensure an Exception is thrown if their getters are called without providing values.
-
-        $this->modules = new Modules($templateRenderer);
-
+        $this->templatesRootPath = '';
+        $this->modelsRootNamespace = '';
+        $this->templateFileExtension = '';
         $this->templateErrorHandler = null;
         $this->defaultPropertyValues = array(
             'array'  => array(),
@@ -53,6 +44,8 @@ final class NamespaceConfig implements NamespaceConfigInterface
             'string' => '',
         );
         $this->templateErrorEventName = 'template_error';
+
+        $this->modules = new Modules($templateRenderer);
     }
 
     //// Getters.

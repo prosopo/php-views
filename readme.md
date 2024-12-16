@@ -148,7 +148,7 @@ which automates the linking of Models to their respective templates.
 ```php
 use Prosopo\Views\Blade\BladeRendererConfig;
 use Prosopo\Views\Blade\BladeTemplateRenderer;
-use Prosopo\Views\NamespaceConfig;
+use Prosopo\Views\ViewsNamespaceConfig;
 use Prosopo\Views\Views;
 
 // 1. Make the Template Renderer.
@@ -160,7 +160,7 @@ $bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
 
 // 2. Define the namespace config
 
-$namespaceConfig = (new NamespaceConfig($bladeRenderer))
+$namespaceConfig = (new ViewsNamespaceConfig($bladeRenderer))
     // required settings:
     ->setTemplatesRootPath(__DIR__ . './templates')
     ->setModelsRootNamespace('MyPackage\Views')
@@ -259,7 +259,7 @@ configuration. The `Views` class will use the specified implementation.
 // 1. Make a facade (for Twig or another template engine)
 
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
-use Prosopo\Views\NamespaceConfig;
+use Prosopo\Views\ViewsNamespaceConfig;
 
 class TwigDecorator implements TemplateRendererInterface {
     private $twig;
@@ -277,7 +277,7 @@ class TwigDecorator implements TemplateRendererInterface {
 
 $twigDecorator = new TwigDecorator();
 
-$namespaceConfig = (new NamespaceConfig($twigDecorator))
+$namespaceConfig = (new ViewsNamespaceConfig($twigDecorator))
     ->setTemplatesRootPath(__DIR__ . './templates')
     ->setViewsRootNamespace('MyPackage\Views')
     ->setTemplateFileExtension('.twig')

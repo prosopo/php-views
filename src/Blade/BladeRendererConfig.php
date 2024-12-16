@@ -14,8 +14,6 @@ use Prosopo\Views\PrivateClasses\Blade\BladeRendererModules;
  */
 final class BladeRendererConfig implements BladeRendererConfigInterface
 {
-    //// Required settings:
-
     private bool $isFileBasedTemplate;
     private string $escapeVariableName;
     private string $templateErrorEventName;
@@ -23,8 +21,6 @@ final class BladeRendererConfig implements BladeRendererConfigInterface
      * @var array<string,mixed>
      */
     private array $globalVariables;
-
-    //// Optional settings:
 
     /**
      * @var callable(array<string,mixed> $eventDetails):void|null
@@ -39,20 +35,17 @@ final class BladeRendererConfig implements BladeRendererConfigInterface
      */
     private $compilerExtensionCallback;
 
-
-    //// Own properties:
-
     private RendererModulesInterface $modules;
 
     public function __construct()
     {
         $this->isFileBasedTemplate = true;
-        $this->templateErrorEventName = 'template_error';
         $this->escapeVariableName = 'escape';
+        $this->templateErrorEventName = 'template_error';
+        $this->globalVariables = [];
 
         $this->templateErrorHandler = null;
         $this->customOutputEscapeCallback = null;
-        $this->globalVariables = [];
         $this->compilerExtensionCallback = null;
 
         $this->modules = new BladeRendererModules();

@@ -6,7 +6,7 @@ namespace Prosopo\Views;
 
 use Closure;
 use Exception;
-use Prosopo\Views\Interfaces\Config\NamespaceConfigInterface;
+use Prosopo\Views\Interfaces\Config\ViewsNamespaceConfigInterface;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Modules\ModulesInterface;
@@ -38,7 +38,7 @@ final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendere
         $this->notFoundErrorMessage = $notFoundErrorMessage;
     }
 
-    public function addNamespace(NamespaceConfigInterface $config): ModulesInterface
+    public function addNamespace(ViewsNamespaceConfigInterface $config): ModulesInterface
     {
         $viewsNamespace = $this->makeViewsNamespace($config);
 
@@ -94,7 +94,7 @@ final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendere
         return $renderer->renderModel($modelOrClass, $setupCallback, $doPrint);
     }
 
-    protected function makeViewsNamespace(NamespaceConfigInterface $config): ViewsNamespaceInterface
+    protected function makeViewsNamespace(ViewsNamespaceConfigInterface $config): ViewsNamespaceInterface
     {
         return new ViewsNamespace($config, $this, $this);
     }

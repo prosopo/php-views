@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\PrivateClasses\View;
+namespace Prosopo\Views\PrivateClasses\Model;
 
 use Closure;
 use Prosopo\Views\Interfaces\EventDispatcherInterface;

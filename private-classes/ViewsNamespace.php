@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses;
 
-use Prosopo\Views\Interfaces\Config\NamespaceConfigInterface;
+use Prosopo\Views\Interfaces\Config\ViewsNamespaceConfigInterface;
 use Prosopo\Views\Interfaces\Modules\ModulesInterface;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
@@ -15,12 +15,11 @@ use Prosopo\Views\PrivateClasses\Object\{PropertyValueProviderForModels,
     ObjectPropertyWriter,
     PropertyValueProvider,
     PropertyValueProviderByTypes};
-use Prosopo\Views\PrivateClasses\Model\ModelFactory;
-use Prosopo\Views\PrivateClasses\Model\ModelFactoryWithPropertyInitialization;
-use Prosopo\Views\PrivateClasses\Model\ModelRenderer;
-use Prosopo\Views\PrivateClasses\Template\FileModelTemplateProvider;
-use Prosopo\Views\PrivateClasses\View\{
+use Prosopo\Views\PrivateClasses\Model\{ModelFactory,
+    ModelFactoryWithPropertyInitialization,
+    ModelRenderer,
     ModelRendererWithEventDetails};
+use Prosopo\Views\PrivateClasses\Template\FileModelTemplateProvider;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
@@ -36,7 +35,7 @@ final class ViewsNamespace implements ViewsNamespaceInterface
      * (see the Views class)
      */
     public function __construct(
-        NamespaceConfigInterface $config,
+        ViewsNamespaceConfigInterface $config,
         ModelFactoryInterface $modelFactoryWithNamespaces,
         ModelRendererInterface $modelRendererWithNamespace
     ) {
