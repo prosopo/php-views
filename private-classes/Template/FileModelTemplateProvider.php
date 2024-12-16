@@ -16,20 +16,20 @@ use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
 final class FileModelTemplateProvider implements ModelTemplateProviderInterface
 {
     private string $templatesRootPath;
-    private string $viewsRootNamespace;
+    private string $namespace;
     private string $extension;
     private ModelNameProviderInterface $modelNameProvider;
     private ModelNamespaceProviderInterface $modelNamespaceProvider;
 
     public function __construct(
+        string $namespace,
         string $templatesRootPath,
-        string $viewsRootNamespace,
         string $extension,
         ModelNamespaceProviderInterface $modelNamespaceProvider,
         ModelNameProviderInterface $modelNameProvider
     ) {
         $this->templatesRootPath = $templatesRootPath;
-        $this->viewsRootNamespace = $viewsRootNamespace;
+        $this->namespace = $namespace;
         $this->extension = $extension;
         $this->modelNameProvider = $modelNameProvider;
         $this->modelNamespaceProvider = $modelNamespaceProvider;
@@ -38,7 +38,9 @@ final class FileModelTemplateProvider implements ModelTemplateProviderInterface
     public function getModelTemplate(TemplateModelInterface $model): string
     {
         $modelNamespace = $this->modelNamespaceProvider->getModelNamespace($model);
-        $relativeModelNamespace = substr($modelNamespace, strlen($this->viewsRootNamespace));
+
+        $relativeModelNamespace = substr($modelNamespace, strlen($this->namespace));
+
         $modelName = $this->modelNameProvider->getModelName($model);
 
         $relativeTemplatePath = $this->getRelativeTemplatePath($relativeModelNamespace, $modelName);

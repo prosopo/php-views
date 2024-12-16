@@ -12,15 +12,14 @@ use Prosopo\Views\Interfaces\Model\ModelNameProviderInterface;
 use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
-use Prosopo\Views\Interfaces\Modules\ViewNamespaceModulesInterface;
 use Prosopo\Views\Interfaces\Object\ObjectPropertyWriterInterface;
 use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
 use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
-use Prosopo\Views\PrivateClasses\Modules\ViewNamespaceModules;
 use Prosopo\Views\PrivateClasses\View\ViewNamespace;
-use Prosopo\Views\ViewNamespaceConfig;
+use Prosopo\Views\View\ViewNamespaceConfig;
+use Prosopo\Views\View\ViewNamespaceModules;
 use ReflectionProperty;
 use stdClass;
 
@@ -32,7 +31,7 @@ class ViewNamespaceTest extends TestCase
     {
         $this->testUsesGivenModule(
             null,
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $this->assertNotNull($modules->getTemplateRenderer());
             }
         );
@@ -42,7 +41,7 @@ class ViewNamespaceTest extends TestCase
     {
         $this->testUsesGivenModule(
             null,
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $this->assertNotNull($modules->getPropertyValueProvider());
             }
         );
@@ -52,7 +51,7 @@ class ViewNamespaceTest extends TestCase
     {
         $this->testUsesGivenModule(
             null,
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $this->assertNotNull($modules->getObjectPropertyWriter());
             }
         );
@@ -62,7 +61,7 @@ class ViewNamespaceTest extends TestCase
     {
         $this->testUsesGivenModule(
             null,
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $this->assertNotNull($modules->getModelFactory());
             }
         );
@@ -72,7 +71,7 @@ class ViewNamespaceTest extends TestCase
     {
         $this->testUsesGivenModule(
             null,
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $this->assertNotNull($modules->getModelTemplateProvider());
             }
         );
@@ -82,7 +81,7 @@ class ViewNamespaceTest extends TestCase
     {
         $this->testUsesGivenModule(
             null,
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $this->assertNotNull($modules->getModelRenderer());
             }
         );
@@ -92,7 +91,7 @@ class ViewNamespaceTest extends TestCase
     {
         $this->testUsesGivenModule(
             null,
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $this->assertNotNull($modules->getEventDispatcher());
             }
         );
@@ -102,7 +101,7 @@ class ViewNamespaceTest extends TestCase
     {
         $this->testUsesGivenModule(
             null,
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $this->assertNotNull($modules->getModelNameProvider());
             }
         );
@@ -112,7 +111,7 @@ class ViewNamespaceTest extends TestCase
     {
         $this->testUsesGivenModule(
             null,
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $this->assertNotNull($modules->getModelNamespaceProvider());
             }
         );
@@ -127,10 +126,10 @@ class ViewNamespaceTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (ViewNamespaceModulesInterface $modules) use ($module) {
+            function (ViewNamespaceModules $modules) use ($module) {
                 $modules->setTemplateRenderer($module);
             },
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $modules->getTemplateRenderer()->renderTemplate('', []);
             }
         );
@@ -153,10 +152,10 @@ class ViewNamespaceTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (ViewNamespaceModulesInterface $modules) use ($module) {
+            function (ViewNamespaceModules $modules) use ($module) {
                 $modules->setObjectReader($module);
             },
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $instance = Mockery::mock(StdClass::class);
 
                  $modules->getObjectReader()->getObjectVariables($instance);
@@ -181,10 +180,10 @@ class ViewNamespaceTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (ViewNamespaceModulesInterface $modules) use ($module) {
+            function (ViewNamespaceModules $modules) use ($module) {
                 $modules->setPropertyValueProvider($module);
             },
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $reflectionProperty = Mockery::mock(ReflectionProperty::class);
 
                 $modules->getPropertyValueProvider()->getPropertyValue($reflectionProperty);
@@ -211,10 +210,10 @@ class ViewNamespaceTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (ViewNamespaceModulesInterface $modules) use ($module) {
+            function (ViewNamespaceModules $modules) use ($module) {
                 $modules->setObjectPropertyWriter($module);
             },
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $instance = Mockery::mock(StdClass::class);
 
                 $modules->getObjectPropertyWriter()->setObjectPropertyValues($instance);
@@ -238,10 +237,10 @@ class ViewNamespaceTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (ViewNamespaceModulesInterface $modules) use ($module) {
+            function (ViewNamespaceModules $modules) use ($module) {
                 $modules->setModelFactory($module);
             },
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $modules->getModelFactory()->makeModel('test');
             }
         );
@@ -264,10 +263,10 @@ class ViewNamespaceTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (ViewNamespaceModulesInterface $modules) use ($module) {
+            function (ViewNamespaceModules $modules) use ($module) {
                 $modules->setModelTemplateProvider($module);
             },
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $model = Mockery::mock(TemplateModelInterface::class);
 
                 $modules->getModelTemplateProvider()->getModelTemplate($model);
@@ -292,10 +291,10 @@ class ViewNamespaceTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (ViewNamespaceModulesInterface $modules) use ($module) {
+            function (ViewNamespaceModules $modules) use ($module) {
                 $modules->setModelRenderer($module);
             },
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $model = Mockery::mock(TemplateModelInterface::class);
 
                 $modules->getModelRenderer()->renderModel($model);
@@ -320,10 +319,10 @@ class ViewNamespaceTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (ViewNamespaceModulesInterface $modules) use ($module) {
+            function (ViewNamespaceModules $modules) use ($module) {
                 $modules->setEventDispatcher($module);
             },
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $modules->getEventDispatcher()->attachEventDetails('test', []);
             }
         );
@@ -345,10 +344,10 @@ class ViewNamespaceTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (ViewNamespaceModulesInterface $modules) use ($module) {
+            function (ViewNamespaceModules $modules) use ($module) {
                 $modules->setModelNameProvider($module);
             },
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $model = Mockery::mock(TemplateModelInterface::class);
 
                 $modules->getModelNameProvider()->getModelName($model);
@@ -372,10 +371,10 @@ class ViewNamespaceTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (ViewNamespaceModulesInterface $modules) use ($module) {
+            function (ViewNamespaceModules $modules) use ($module) {
                 $modules->setModelNamespaceProvider($module);
             },
-            function (ViewNamespaceModulesInterface $modules) {
+            function (ViewNamespaceModules $modules) {
                 $modules->getModelNamespaceProvider()->getModelNamespace('test');
             }
         );
@@ -394,8 +393,8 @@ class ViewNamespaceTest extends TestCase
      * We use a wrapper, case given objects are often decorated (wrapped),
      * so we can't compare the response by the plain comparison.
      *
-     * @param callable(ViewNamespaceModulesInterface $modules):void $setModuleCallback
-     * @param callable(ViewNamespaceModulesInterface $modules):void $callModuleCallback
+     * @param callable(ViewNamespaceModules $modules):void $setModuleCallback
+     * @param callable(ViewNamespaceModules $modules):void $callModuleCallback
      */
     protected function testUsesGivenModule(?callable $setModuleCallback, callable $callModuleCallback): void
     {
@@ -414,9 +413,9 @@ class ViewNamespaceTest extends TestCase
         $config->setModules($modules);
 
         // when
-        $makeNamespace = fn()=> new ViewNamespace($config, $modelFactoryMock, $modelRendererMock);
+        $makeNamespace = fn()=> new ViewNamespace('', $config, $modelFactoryMock, $modelRendererMock);
 
         // then
-        $callModuleCallback($makeNamespace()->getConfig()->getModules());
+        $callModuleCallback($makeNamespace()->getModules());
     }
 }

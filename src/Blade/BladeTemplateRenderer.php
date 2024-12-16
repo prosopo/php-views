@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\Blade;
 
-use Prosopo\Views\Interfaces\Modules\RendererModulesContainerInterface;
-use Prosopo\Views\Interfaces\Modules\RendererModulesInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\PrivateClasses\Blade\BladeCompiler;
 use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithErrorEvent;
@@ -22,13 +20,18 @@ use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithFileTemplate;
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties, and introduce new public ones.
  */
-final class BladeTemplateRenderer implements TemplateRendererInterface, RendererModulesContainerInterface
+final class BladeTemplateRenderer implements TemplateRendererInterface
 {
     private TemplateRendererInterface $templateRenderer;
-    private RendererModulesInterface $modules;
+    private BladeRendererModules $modules;
 
-    public function __construct(BladeRendererConfig $config)
+    public function __construct(?BladeRendererConfig $config = null)
     {
+        $config = null === $config ?
+            new BladeRendererConfig() :
+            $config;
+
+        // Clone, as we're going to modify it.
         $modules = clone $config->getModules();
 
         $errorEventName = $config->getTemplateErrorEventName();
@@ -87,7 +90,7 @@ final class BladeTemplateRenderer implements TemplateRendererInterface, Renderer
         return $this->templateRenderer->renderTemplate($template, $variables, $doPrint);
     }
 
-    public function getModules(): RendererModulesInterface
+    public function getModules(): BladeRendererModules
     {
         return $this->modules;
     }

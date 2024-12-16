@@ -42,14 +42,14 @@ Model class:
 ```php
 namespace MyPackage\Views;
 
-use Prosopo\Views\TemplateModel;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
+use Prosopo\Views\TemplateModel;
 
 class EmployeeTemplateModel extends TemplateModel
 {
     public int $salary;
     public int $bonus;
-    // Use the abstract interface to accept any Model. 
+    // Use the abstract interface to accept any Model.
     public TemplateModelInterface $innerModel;
     // Use a specific class only when you want to restrict the usage to it.
     public CompanyTemplateModel $company;
@@ -139,55 +139,56 @@ class AnyClass implements TemplateModelInterface {
 
 ## 2. Views
 
-`Views` is the root class of this package, responsible for initializing all modules, including the `TemplateProvider`
-module,
-which automates the linking of Models to their respective templates.
+The `Views` class provides the `addNamespace`, `makeModel` and `renderModel` methods. It acts as a
+namespace manager and brings together different namespace configurations.
 
-### 2.1) Flat setup
+Each `ViewNamespace` has its own independent setup and set of modules. E.g. among these modules is the
+`ModelTemplateProvider`, which automates the process of linking models to their
+corresponding templates.
+
+### 2.1) Setup
 
 ```php
-use Prosopo\Views\Blade\BladeRendererConfig;
 use Prosopo\Views\Blade\BladeTemplateRenderer;
-use Prosopo\Views\ViewNamespaceConfig;
+use Prosopo\Views\View\ViewNamespaceConfig;
 use Prosopo\Views\Views;
 
 // 1. Make the Template Renderer.
 // It can be the built-in Blade or any external one
-// (we'll show the external one in a separate chapter)
+// (we'll showcase the usage of the external one in a separate chapter)
 
-$bladeRendererConfig = new BladeRendererConfig();
-$bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+$bladeRenderer = new BladeTemplateRenderer();
 
-// 2. Define the namespace config
+// 2. Make the namespace config
 
 $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
     // required settings:
     ->setTemplatesRootPath(__DIR__ . './templates')
-    ->setModelsRootNamespace('MyPackage\Views')
     ->setTemplateFileExtension('.blade.php')
-    // optional settings:
+    // optional setting:
     ->setTemplateErrorHandler(function (array $eventDetails) {
         // logging, notifying, whatever.
     });
 
-// This line is necessary only if you defined the templateErrorHandler
+// (This line is necessary only if you defined the templateErrorHandler)
 $namespaceConfig->getModules()
     ->setEventDispatcher($bladeRenderer->getModules()->getEventDispatcher());
 
-// 3. Make the Views:
+// 3. Make the Views instance:
 
 $views = new Views();
 
-// 4. Add the namespace (you can have multiple namespaces)
+// 4. Add the root namespace of your Template Models
 
-$views->addNamespace($namespaceConfig);
+$views->addNamespace('MyPackage\Views', $namespaceConfig);
+
+// Tip: you can have multiple namespaces, and mix their Models.
 ```
 
 ### 2.2) Single-step Model creation and rendering
 
 You can create, set values, and render a Model in a single step using the callback argument of the `renderView` method,
-as
-shown below:
+as shown below:
 
 ```php
 echo $views->renderModel(
@@ -225,18 +226,19 @@ echo $views->renderModel($employee);
 
 ### 2.4) Automated templates matching
 
-The built-in `TemplateProvider` automatically matches templates based on the Model names and their relative namespaces.
+The built-in `ModelTemplateProvider` automatically matches templates based on the Model names and their relative
+namespaces.
 This automates the process of associating templates with their corresponding Models.
 
 Example:
 
 - src/
     - Views/
-        - MyView.php
+        - Homepage.php
         - settings
             - GeneralSettings.php
     - templates/
-        - my-view{.blade.php}
+        - homepage{.blade.php}
         - settings/
             - general-settings{.blade.php}
 
@@ -245,30 +247,33 @@ names.
 
 ### 2.5) Custom modules
 
-By default, the `Views` class creates module instances using classes from the current package.
+By default, the `addNamespace` class creates module instances for the namespace using classes from the current package.
 
 If you need to override the default module behavior, you can define a custom implementation in the
-configuration. The `Views` class will use the specified implementation.
+configuration and the package will use the specified implementation.
 
-> Tip: You can see the full list of the modules in the `ModulesInterface`.
+> Tip: You can see the full list of the modules in the `ViewNamespaceModules` class.
 
 #### Example: Using Twig as a Template Renderer (instead of the built-in Blade Renderer)
 
 ```php
-
 // 1. Make a facade (for Twig or another template engine)
 
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
-use Prosopo\Views\ViewNamespaceConfig;
+use Prosopo\Views\View\ViewNamespaceConfig;
+use Prosopo\Views\Views;
 
-class TwigDecorator implements TemplateRendererInterface {
+class TwigDecorator implements TemplateRendererInterface
+{
     private $twig;
 
-    public function __construct() {
+    public function __construct()
+    {
         // todo init Twig or another engine.
     }
 
-    public function renderTemplate(string $template, array $variables, bool $doPrint = false): string {
+    public function renderTemplate(string $template, array $variables, bool $doPrint = false): string
+    {
         return $this->twig->render($template, $variables, $doPrint);
     }
 }
@@ -279,8 +284,7 @@ $twigDecorator = new TwigDecorator();
 
 $namespaceConfig = (new ViewNamespaceConfig($twigDecorator))
     ->setTemplatesRootPath(__DIR__ . './templates')
-    ->setViewsRootNamespace('MyPackage\Views')
-    ->setTemplateFileExtension('.twig')
+    ->setTemplateFileExtension('.twig');
 
 // 3. Make the Views:
 
@@ -288,16 +292,23 @@ $views = new Views();
 
 // 4. Add the namespace (you can have multiple namespaces)
 
-$views->addNamespace($namespaceConfig);
+$views->addNamespace('MyPackage\Views', $namespaceConfig);
 ```
 
-> Note: The package includes only the Blade implementation. If you wish to use a different template engine, you will
-> need to install its Composer package and create a facade object, as demonstrated above.
+You can override any namespace module in the following way:
+
+```php
+$namespaceConfig->getModules()
+    ->setModelFactory(new MyFactory());
+```
+
+> Note: The package includes only the Blade implementation. If you wish to use a different template engine,
+> like Twig, you need to install its Composer package and create a facade object, as demonstrated above.
 
 ### 2.6) Namespace mixing
 
 > Fun Fact: The `Views` class not only supporting multiple namespaces, but also enabling you to use Models from one
-> namespace within another, regardless of their setup.
+> namespace within another, preserving their individual setup.
 
 Example of multi-namespace usage:
 
@@ -331,14 +342,12 @@ The following Blade tokens are supported:
 
 Visit the [official Blade docs](https://laravel.com/docs/11.x/blade) to learn about their usage.
 
-### 3.2) Flat setup
+### 3.2) Setup
 
 ```php
 use Prosopo\Views\Blade\BladeTemplateRenderer;
-use Prosopo\Views\Blade\BladeRendererConfig;
 
-$bladeRendererConfig = new BladeRendererConfig();
-$bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+$bladeRenderer = new BladeTemplateRenderer();
 
 echo $bladeRenderer->renderTemplate('/my-template.blade.php', [
     'var' => true
@@ -349,8 +358,8 @@ echo $bladeRenderer->renderTemplate('/my-template.blade.php', [
 > plain strings:
 
 ```php
-use Prosopo\Views\Blade\BladeTemplateRenderer;
 use Prosopo\Views\Blade\BladeRendererConfig;
+use Prosopo\Views\Blade\BladeTemplateRenderer;
 
 $bladeRendererConfig = new BladeRendererConfig();
 $bladeRendererConfig->setIsFileBasedTemplate(false);
@@ -363,8 +372,8 @@ echo $bladeRenderer->renderTemplate('@if($var)The variable is set.@endif', [
 ```
 
 > Tip #2: As you see, the built-in Blade implementation is fully standalone and independent of the `Views` class. This
-> means that even if you can't to use the model-driven approach, you can still utilize it as an independent Blade
-> compiler.
+> means that even if you can't or don't want to use the model-driven approach, you can still utilize it as an
+> independent Blade compiler.
 
 ### 3.3) Available Blade Renderer settings
 
@@ -373,37 +382,39 @@ error handling, and more:
 
 ```php
 use Prosopo\Views\Blade\BladeRendererConfig;
-use Prosopo\Views\Interfaces\Template\TemplateErrorInterface;
+use Prosopo\Views\Blade\BladeTemplateRenderer;
 
 $bladeRendererConfig = (new BladeRendererConfig())
 // By default, the Renderer expect a file name.
 // Set to false if to work with strings
-->setIsFileBasedTemplate(true)
-->setTemplateErrorHandler(function (array $eventDetails): void {
-    // Can be used for logging, notifying, etc.
-})
-->setCustomOutputEscapeCallback(function ($variable): string {
-    if (
-        false === is_string($variable) &&
-        false === is_numeric($variable)
-    ) {
-        return '';
-    }
+    ->setIsFileBasedTemplate(true)
+    ->setTemplateErrorHandler(function (array $eventDetails): void {
+        // Can be used for logging, notifying, etc.
+    })
+    ->setCustomOutputEscapeCallback(function ($variable): string {
+        if (
+            false === is_string($variable) &&
+            false === is_numeric($variable)
+        ) {
+            return '';
+        }
 
-    // htmlspecialchars is the default one.
-    return htmlentities((string)$variable, ENT_QUOTES, 'UTF-8', false);
-})
-->setGlobalVariables([
-    'sum' => function (int $a, int $b): string {
-        return (string)($a + $b);
-    },
-    'variable' => 'value',
+        // htmlspecialchars is the default one.
+        return htmlentities((string)$variable, ENT_QUOTES, 'UTF-8', false);
+    })
+    ->setGlobalVariables([
+        'sum' => function (int $a, int $b): string {
+            return (string)($a + $b);
+        },
+        'variable' => 'value',
     ])
-->setEscapeVariableName('escape')
-->setCompilerExtensionCallback(function (string $template): string {
-    // note: just an example, @use is supported by default.
-    return (string)preg_replace('/@use\s*\((["\'])(.*?)\1\)/s', '<?php use $2; ?>', $template);
-});
+    ->setEscapeVariableName('escape')
+    ->setCompilerExtensionCallback(function (string $template): string {
+        // note: just an example, @use is supported by default.
+        return (string)preg_replace('/@use\s*\((["\'])(.*?)\1\)/s', '<?php use $2; ?>', $template);
+    });
+
+$bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
 ```
 
 ### 3.4) Notes on the standalone Blade implementation
@@ -427,7 +438,7 @@ By default, the `BladeTemplateRenderer` creates module instances using classes f
 If you need to override the default module behavior, you can define a custom implementation in the
 configuration. The `BladeTemplateRenderer` will use the specified implementation.
 
-> Tip: You can see the full list of the modules in the `RendererModulesInterface`.
+> Tip: You can see the full list of the modules in the `BladeRendererModules`.
 
 #### Example: Defining a custom Blade compiler
 

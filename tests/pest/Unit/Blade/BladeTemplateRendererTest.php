@@ -7,13 +7,12 @@ namespace Tests\Unit\Blade;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 use Prosopo\Views\Blade\BladeRendererConfig;
+use Prosopo\Views\Blade\BladeRendererModules;
 use Prosopo\Views\Blade\BladeTemplateRenderer;
 use Prosopo\Views\Interfaces\CodeExecutorInterface;
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
-use Prosopo\Views\Interfaces\Modules\RendererModulesInterface;
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
-use Prosopo\Views\PrivateClasses\Blade\BladeRendererModules;
 
 class BladeTemplateRendererTest extends TestCase
 {
@@ -21,28 +20,28 @@ class BladeTemplateRendererTest extends TestCase
 
     public function testMakesTemplateRenderer(): void
     {
-        $this->testUsesGivenModule(null, function (RendererModulesInterface $modules) {
+        $this->testUsesGivenModule(null, function (BladeRendererModules $modules) {
             $this->assertNotNull($modules->getTemplateRenderer());
         });
     }
 
     public function testMakesEventDispatcher(): void
     {
-        $this->testUsesGivenModule(null, function (RendererModulesInterface $modules) {
+        $this->testUsesGivenModule(null, function (BladeRendererModules $modules) {
             $this->assertNotNull($modules->getEventDispatcher());
         });
     }
 
     public function testMakesTemplateCompiler(): void
     {
-        $this->testUsesGivenModule(null, function (RendererModulesInterface $modules) {
+        $this->testUsesGivenModule(null, function (BladeRendererModules $modules) {
             $this->assertNotNull($modules->getTemplateCompiler());
         });
     }
 
     public function testMakesCodeExecutor(): void
     {
-        $this->testUsesGivenModule(null, function (RendererModulesInterface $modules) {
+        $this->testUsesGivenModule(null, function (BladeRendererModules $modules) {
             $this->assertNotNull($modules->getCodeExecutor());
         });
     }
@@ -56,10 +55,10 @@ class BladeTemplateRendererTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (RendererModulesInterface $modules) use ($module) {
+            function (BladeRendererModules $modules) use ($module) {
                 $modules->setTemplateRenderer($module);
             },
-            function (RendererModulesInterface $modules) {
+            function (BladeRendererModules $modules) {
                 $modules->getTemplateRenderer()->renderTemplate('', []);
             }
         );
@@ -82,10 +81,10 @@ class BladeTemplateRendererTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (RendererModulesInterface $modules) use ($module) {
+            function (BladeRendererModules $modules) use ($module) {
                 $modules->setEventDispatcher($module);
             },
-            function (RendererModulesInterface $modules) {
+            function (BladeRendererModules $modules) {
                 $modules->getEventDispatcher()->attachEventDetails('test', []);
             }
         );
@@ -107,10 +106,10 @@ class BladeTemplateRendererTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (RendererModulesInterface $modules) use ($module) {
+            function (BladeRendererModules $modules) use ($module) {
                 $modules->setTemplateCompiler($module);
             },
-            function (RendererModulesInterface $modules) {
+            function (BladeRendererModules $modules) {
                 $modules->getTemplateCompiler()->compileTemplate('test');
             }
         );
@@ -132,10 +131,10 @@ class BladeTemplateRendererTest extends TestCase
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
-            function (RendererModulesInterface $modules) use ($module) {
+            function (BladeRendererModules $modules) use ($module) {
                 $modules->setCodeExecutor($module);
             },
-            function (RendererModulesInterface $modules) {
+            function (BladeRendererModules $modules) {
                 $modules->getCodeExecutor()->executeCode('test');
             }
         );
@@ -154,8 +153,8 @@ class BladeTemplateRendererTest extends TestCase
      * We use a wrapper, case given objects are often decorated (wrapped),
      * so we can't compare the response by the plain comparison.
      *
-     * @param callable(RendererModulesInterface $modules):void $setModuleCallback
-     * @param callable(RendererModulesInterface $modules):void $callModuleCallback
+     * @param callable(BladeRendererModules $modules):void $setModuleCallback
+     * @param callable(BladeRendererModules $modules):void $callModuleCallback
      */
     protected function testUsesGivenModule(?callable $setModuleCallback, callable $callModuleCallback): void
     {

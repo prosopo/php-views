@@ -22,8 +22,8 @@ class FileModelTemplateProviderTest extends TestCase
         $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceProviderInterface::class);
         $modelNameProviderMock = Mockery::mock(ModelNameProviderInterface::class);
         $provider = new FileModelTemplateProvider(
-            vfsStream::url('templates'),
             'App\\Views',
+            vfsStream::url('templates'),
             '.blade.php',
             $modelNamespaceProviderMock,
             $modelNameProviderMock
@@ -56,8 +56,8 @@ class FileModelTemplateProviderTest extends TestCase
         $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceProviderInterface::class);
         $modelNameProviderMock = Mockery::mock(ModelNameProviderInterface::class);
         $provider = new FileModelTemplateProvider(
-            vfsStream::url('templates'),
             'App\\Views',
+            vfsStream::url('templates'),
             '.blade.php',
             $modelNamespaceProviderMock,
             $modelNameProviderMock
@@ -90,8 +90,8 @@ class FileModelTemplateProviderTest extends TestCase
         $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceProviderInterface::class);
         $modelNameProviderMock = Mockery::mock(ModelNameProviderInterface::class);
         $provider = new FileModelTemplateProvider(
-            vfsStream::url('templates'),
             'App\\Views',
+            vfsStream::url('templates'),
             '.blade.php',
             $modelNamespaceProviderMock,
             $modelNameProviderMock
@@ -124,8 +124,8 @@ class FileModelTemplateProviderTest extends TestCase
         $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceProviderInterface::class);
         $modelNameProviderMock = Mockery::mock(ModelNameProviderInterface::class);
         $provider = new FileModelTemplateProvider(
-            vfsStream::url('templates'),
             'App\\Views',
+            vfsStream::url('templates'),
             '.blade.php',
             $modelNamespaceProviderMock,
             $modelNameProviderMock

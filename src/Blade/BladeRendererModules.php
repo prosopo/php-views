@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\PrivateClasses\Blade;
+namespace Prosopo\Views\Blade;
 
 use Prosopo\Views\Interfaces\CodeExecutorInterface;
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
-use Prosopo\Views\Interfaces\Modules\RendererModulesInterface;
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 
 /**
- * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
- * We reserve the right to change its name and implementation.
+ * This class is marked as a final to prevent anyone from extending it.
+ * We reserve the right to change its private and protected methods, properties, and introduce new public ones.
  */
-final class BladeRendererModules implements RendererModulesInterface
+final class BladeRendererModules
 {
     //// Custom modules: define them only when you need to override the default behavior:
 

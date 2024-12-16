@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\PrivateClasses\Modules;
+namespace Prosopo\Views\View;
 
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\ModelNameProviderInterface;
 use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
-use Prosopo\Views\Interfaces\Modules\ViewNamespaceModulesInterface;
 use Prosopo\Views\Interfaces\Object\ObjectPropertyWriterInterface;
 use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
@@ -17,10 +16,10 @@ use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 
 /**
- * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
- * We reserve the right to change its name and implementation.
+ * This class is marked as a final to prevent anyone from extending it.
+ * We reserve the right to change its private and protected methods, properties, and introduce new public ones.
  */
-final class ViewNamespaceModules implements ViewNamespaceModulesInterface
+final class ViewNamespaceModules
 {
     // Required modules:
 

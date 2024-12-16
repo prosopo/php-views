@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views;
+namespace Prosopo\Views\View;
 
-use Prosopo\Views\Interfaces\Modules\ViewNamespaceModulesInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
-use Prosopo\Views\PrivateClasses\Modules\ViewNamespaceModules;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
@@ -15,7 +13,6 @@ use Prosopo\Views\PrivateClasses\Modules\ViewNamespaceModules;
 final class ViewNamespaceConfig
 {
     private string $templatesRootPath;
-    private string $modelsRootNamespace;
     private string $templateFileExtension;
     /**
      * @var callable(array<string,mixed> $eventDetails): void|null
@@ -27,12 +24,11 @@ final class ViewNamespaceConfig
      */
     private array $defaultPropertyValues;
 
-    private ViewNamespaceModulesInterface $modules;
+    private ViewNamespaceModules $modules;
 
     public function __construct(TemplateRendererInterface $templateRenderer)
     {
         $this->templatesRootPath = '';
-        $this->modelsRootNamespace = '';
         $this->templateFileExtension = '';
         $this->templateErrorHandler = null;
         $this->defaultPropertyValues = array(
@@ -54,11 +50,6 @@ final class ViewNamespaceConfig
         return $this->templatesRootPath;
     }
 
-    public function getModelsRootNamespace(): string
-    {
-        return $this->modelsRootNamespace;
-    }
-
     public function getTemplateFileExtension(): string
     {
         return $this->templateFileExtension;
@@ -74,12 +65,15 @@ final class ViewNamespaceConfig
         return $this->templateErrorEventName;
     }
 
+    /**
+     * @return array<string,mixed>
+     */
     public function getDefaultPropertyValues(): array
     {
         return $this->defaultPropertyValues;
     }
 
-    public function getModules(): ViewNamespaceModulesInterface
+    public function getModules(): ViewNamespaceModules
     {
         return $this->modules;
     }
@@ -89,13 +83,6 @@ final class ViewNamespaceConfig
     public function setTemplatesRootPath(string $templatesRootPath): self
     {
         $this->templatesRootPath = $templatesRootPath;
-
-        return $this;
-    }
-
-    public function setModelsRootNamespace(string $modelsRootNamespace): self
-    {
-        $this->modelsRootNamespace = $modelsRootNamespace;
 
         return $this;
     }
@@ -114,6 +101,9 @@ final class ViewNamespaceConfig
         return $this;
     }
 
+    /**
+     * @param array<string,mixed> $defaultPropertyValues
+     */
     public function setDefaultPropertyValues(array $defaultPropertyValues): self
     {
         $this->defaultPropertyValues = $defaultPropertyValues;
@@ -128,7 +118,7 @@ final class ViewNamespaceConfig
         return $this;
     }
 
-    public function setModules(ViewNamespaceModulesInterface $modules): self
+    public function setModules(ViewNamespaceModules $modules): self
     {
         $this->modules = $modules;
 

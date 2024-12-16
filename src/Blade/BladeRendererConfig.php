@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\Blade;
 
-use Prosopo\Views\Interfaces\Modules\RendererModulesInterface;
-use Prosopo\Views\PrivateClasses\Blade\BladeRendererModules;
-
 /**
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties and introduce new public ones.
@@ -34,7 +31,7 @@ final class BladeRendererConfig
      */
     private $compilerExtensionCallback;
 
-    private RendererModulesInterface $modules;
+    private BladeRendererModules $modules;
 
     public function __construct()
     {
@@ -62,6 +59,9 @@ final class BladeRendererConfig
         return $this->templateErrorHandler;
     }
 
+    /**
+     * @return array<string,mixed>
+     */
     public function getGlobalVariables(): array
     {
         return $this->globalVariables;
@@ -87,7 +87,7 @@ final class BladeRendererConfig
         return $this->templateErrorEventName;
     }
 
-    public function getModules(): RendererModulesInterface
+    public function getModules(): BladeRendererModules
     {
         return $this->modules;
     }
@@ -108,6 +108,9 @@ final class BladeRendererConfig
         return $this;
     }
 
+    /**
+     * @param array<string,mixed> $globalVariables
+     */
     public function setGlobalVariables(array $globalVariables): self
     {
         $this->globalVariables = $globalVariables;
@@ -143,7 +146,7 @@ final class BladeRendererConfig
         return $this;
     }
 
-    public function setModules(RendererModulesInterface $modules): self
+    public function setModules(BladeRendererModules $modules): self
     {
         $this->modules = $modules;
 

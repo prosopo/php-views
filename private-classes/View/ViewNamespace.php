@@ -21,7 +21,8 @@ use Prosopo\Views\PrivateClasses\Model\{ModelFactory,
     ModelRendererWithEventDetails};
 use Prosopo\Views\PrivateClasses\EventDispatcher;
 use Prosopo\Views\PrivateClasses\Template\FileModelTemplateProvider;
-use Prosopo\Views\ViewNamespaceConfig;
+use Prosopo\Views\View\ViewNamespaceConfig;
+use Prosopo\Views\View\ViewNamespaceModules;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
@@ -29,7 +30,7 @@ use Prosopo\Views\ViewNamespaceConfig;
  */
 final class ViewNamespace
 {
-    private ViewNamespaceConfig $config;
+    private ViewNamespaceModules $modules;
 
     /**
      * Using the external ViewFactory and ViewRenderer enables us to seamlessly mix Models from different namespaces,
@@ -37,13 +38,12 @@ final class ViewNamespace
      * (see the Views class)
      */
     public function __construct(
+        string $namespace,
         ViewNamespaceConfig $config,
         ModelFactoryInterface $modelFactoryWithNamespaces,
         ModelRendererInterface $modelRendererWithNamespace
     ) {
-        $this->config = clone $config;
-        $modules = clone $this->config->getModules();
-        $this->config->setModules($modules);
+        $modules = clone $config->getModules();
 
         //// 1. Modules creation:
 
@@ -87,8 +87,8 @@ final class ViewNamespace
         $templateProvider = $modules->getModelTemplateProvider();
         $templateProvider = null === $templateProvider ?
             new FileModelTemplateProvider(
+                $namespace,
                 $config->getTemplatesRootPath(),
-                $config->getModelsRootNamespace(),
                 $config->getTemplateFileExtension(),
                 $modelNamespaceProvider,
                 $modelNameProvider
@@ -152,10 +152,12 @@ final class ViewNamespace
                 ->setModelRenderer($realViewRenderer)
                 ->setModelNamespaceProvider($modelNamespaceProvider)
                 ->setModelNameProvider($modelNameProvider);
+
+        $this->modules = $modules;
     }
 
-    public function getConfig(): ViewNamespaceConfig
+    public function getModules(): ViewNamespaceModules
     {
-        return $this->config;
+        return $this->modules;
     }
 }
