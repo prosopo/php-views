@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\View;
 
-use Prosopo\Views\Interfaces\Config\ViewNamespaceConfigInterface;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
-use Prosopo\Views\Interfaces\Views\ViewNamespaceInterface;
 use Prosopo\Views\PrivateClasses\Object\{ObjectClassReader,
     PropertyValueProviderForModels,
     ObjectReader,
@@ -23,14 +21,15 @@ use Prosopo\Views\PrivateClasses\Model\{ModelFactory,
     ModelRendererWithEventDetails};
 use Prosopo\Views\PrivateClasses\EventDispatcher;
 use Prosopo\Views\PrivateClasses\Template\FileModelTemplateProvider;
+use Prosopo\Views\ViewNamespaceConfig;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
  * We reserve the right to change its name and implementation.
  */
-final class ViewNamespace implements ViewNamespaceInterface
+final class ViewNamespace
 {
-    private ViewNamespaceConfigInterface $config;
+    private ViewNamespaceConfig $config;
 
     /**
      * Using the external ViewFactory and ViewRenderer enables us to seamlessly mix Models from different namespaces,
@@ -38,7 +37,7 @@ final class ViewNamespace implements ViewNamespaceInterface
      * (see the Views class)
      */
     public function __construct(
-        ViewNamespaceConfigInterface $config,
+        ViewNamespaceConfig $config,
         ModelFactoryInterface $modelFactoryWithNamespaces,
         ModelRendererInterface $modelRendererWithNamespace
     ) {
@@ -155,7 +154,7 @@ final class ViewNamespace implements ViewNamespaceInterface
                 ->setModelNameProvider($modelNameProvider);
     }
 
-    public function getConfig(): ViewNamespaceConfigInterface
+    public function getConfig(): ViewNamespaceConfig
     {
         return $this->config;
     }

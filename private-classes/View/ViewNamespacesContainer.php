@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\View;
 
-use Prosopo\Views\Interfaces\Views\ViewNamespaceInterface;
-use Prosopo\Views\Interfaces\Views\ViewNamespacesContainerInterface;
+use Prosopo\Views\Interfaces\View\ViewNamespacesContainerInterface;
 
 class ViewNamespacesContainer implements ViewNamespacesContainerInterface
 {
     /**
-     * @var array<string, ViewNamespaceInterface>
+     * @var array<string, ViewNamespace>
      */
     private array $viewNamespaces;
 
@@ -19,7 +18,7 @@ class ViewNamespacesContainer implements ViewNamespacesContainerInterface
         $this->viewNamespaces = [];
     }
 
-    public function addViewNamespace(ViewNamespaceInterface $viewNamespace): void
+    public function addViewNamespace(ViewNamespace $viewNamespace): void
     {
         $modelsRootNamespace = $viewNamespace->getConfig()->getModelsRootNamespace();
         $this->viewNamespaces[$modelsRootNamespace] = $viewNamespace;
@@ -31,15 +30,17 @@ class ViewNamespacesContainer implements ViewNamespacesContainerInterface
         });
     }
 
-    public function getViewNamespaceByModelNamespace(string $modelNamespace): ?ViewNamespaceInterface
+    public function getViewNamespaceByModelNamespace(string $modelNamespace): ?ViewNamespace
     {
         $matchedNamespaces = array_filter($this->viewNamespaces, function (
-            ViewNamespaceInterface $viewNamespace,
+            ViewNamespace $viewNamespace,
             string $modelsRootNamespace
         ) use ($modelNamespace) {
-            return 0 === strpos($modelsRootNamespace, $modelNamespace);
+            return 0 === strpos($modelNamespace, $modelsRootNamespace);
         }, ARRAY_FILTER_USE_BOTH);
 
-        return array_pop($matchedNamespaces);
+        return count($matchedNamespaces) > 0 ?
+            reset($matchedNamespaces) :
+            null;
     }
 }

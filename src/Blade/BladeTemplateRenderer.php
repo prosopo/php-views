@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\Blade;
 
-use Prosopo\Views\Interfaces\Config\BladeRendererConfigInterface;
 use Prosopo\Views\Interfaces\Modules\RendererModulesContainerInterface;
 use Prosopo\Views\Interfaces\Modules\RendererModulesInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
@@ -28,7 +27,7 @@ final class BladeTemplateRenderer implements TemplateRendererInterface, Renderer
     private TemplateRendererInterface $templateRenderer;
     private RendererModulesInterface $modules;
 
-    public function __construct(BladeRendererConfigInterface $config)
+    public function __construct(BladeRendererConfig $config)
     {
         $modules = clone $config->getModules();
 

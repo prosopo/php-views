@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\Blade;
 
-use Prosopo\Views\Interfaces\Config\BladeRendererConfigInterface;
 use Prosopo\Views\Interfaces\Modules\RendererModulesInterface;
 use Prosopo\Views\PrivateClasses\Blade\BladeRendererModules;
 
@@ -12,7 +11,7 @@ use Prosopo\Views\PrivateClasses\Blade\BladeRendererModules;
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties and introduce new public ones.
  */
-final class BladeRendererConfig implements BladeRendererConfigInterface
+final class BladeRendererConfig
 {
     private bool $isFileBasedTemplate;
     private string $escapeVariableName;

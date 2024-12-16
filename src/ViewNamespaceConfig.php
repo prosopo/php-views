@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Prosopo\Views;
 
-use Prosopo\Views\Interfaces\Config\ViewNamespaceConfigInterface;
 use Prosopo\Views\Interfaces\Modules\ViewNamespaceModulesInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\PrivateClasses\Modules\ViewNamespaceModules;
@@ -13,7 +12,7 @@ use Prosopo\Views\PrivateClasses\Modules\ViewNamespaceModules;
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties and introduce new public ones.
  */
-final class ViewNamespaceConfig implements ViewNamespaceConfigInterface
+final class ViewNamespaceConfig
 {
     private string $templatesRootPath;
     private string $modelsRootNamespace;
