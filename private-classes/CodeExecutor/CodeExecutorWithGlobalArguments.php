@@ -27,7 +27,7 @@ final class CodeExecutorWithGlobalArguments implements CodeExecutorInterface
         $this->globalArguments = $globalArguments;
     }
 
-    public function executeCode(string $code, array $arguments): void
+    public function executeCode(string $code, array $arguments = []): void
     {
         $arguments = array_merge($this->globalArguments, $arguments);
 

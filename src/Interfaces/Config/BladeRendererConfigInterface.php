@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\Interfaces\Config;
 
+use Prosopo\Views\Interfaces\Modules\RendererModulesInterface;
+
 interface BladeRendererConfigInterface extends RendererConfigInterface
 {
     //// Getters.
@@ -34,4 +36,6 @@ interface BladeRendererConfigInterface extends RendererConfigInterface
     public function setCustomOutputEscapeCallback(?callable $customOutputEscapeCallback): self;
 
     public function setEscapeVariableName(string $escapeVariableName): self;
+
+    public function setModules(RendererModulesInterface $modules): self;
 }

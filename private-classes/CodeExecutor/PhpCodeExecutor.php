@@ -12,7 +12,7 @@ use Prosopo\Views\Interfaces\CodeExecutorInterface;
  */
 final class PhpCodeExecutor implements CodeExecutorInterface
 {
-    public function executeCode(string $code, array $arguments): void
+    public function executeCode(string $code, array $arguments = []): void
     {
         // @phpcs:ignore
         extract($arguments);

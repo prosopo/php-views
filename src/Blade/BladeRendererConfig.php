@@ -143,4 +143,11 @@ final class BladeRendererConfig implements BladeRendererConfigInterface
 
         return $this;
     }
+
+    public function setModules(RendererModulesInterface $modules): self
+    {
+        $this->modules = $modules;
+
+        return  $this;
+    }
 }

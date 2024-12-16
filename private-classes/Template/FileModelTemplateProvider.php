@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\Template;
 
+use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
 use Prosopo\Views\PrivateClasses\Object\ObjectClassReader;
@@ -17,25 +18,25 @@ final class FileModelTemplateProvider implements ModelTemplateProviderInterface
     private string $templatesRootPath;
     private string $viewsRootNamespace;
     private string $extension;
-    private ObjectClassReader $objectClassReader;
+    private ModelNamespaceProviderInterface $modelNamespaceProvider;
 
     public function __construct(
         string $templatesRootPath,
         string $viewsRootNamespace,
         string $extension,
-        ObjectClassReader $objectClassReader
+        ModelNamespaceProviderInterface $modelNamespaceProvider
     ) {
         $this->templatesRootPath = $templatesRootPath;
         $this->viewsRootNamespace = $viewsRootNamespace;
         $this->extension = $extension;
-        $this->objectClassReader = $objectClassReader;
+        $this->modelNamespaceProvider = $modelNamespaceProvider;
     }
 
     public function getModelTemplate(TemplateModelInterface $model): string
     {
-        $modelClass = $this->objectClassReader->getObjectClass($model);
+        $modelNamespace = $this->modelNamespaceProvider->getModelNamespace($model);
 
-        $relativeTemplatePath = $this->getRelativeTemplatePath($modelClass, $this->viewsRootNamespace);
+        $relativeTemplatePath = $this->getRelativeTemplatePath($modelNamespace, $this->viewsRootNamespace);
 
         $absoluteTemplatePath = $this->getAbsoluteTemplatePath($relativeTemplatePath);
 
@@ -57,11 +58,9 @@ final class FileModelTemplateProvider implements ModelTemplateProviderInterface
         return $this->templatesRootPath . DIRECTORY_SEPARATOR . $relativeTemplatePath . $this->extension;
     }
 
-    protected function getRelativeTemplatePath(string $modelClass, string $rootNamespace): string
+    // fixme
+    protected function getRelativeTemplatePath(string $modelNamespace, string $rootNamespace): string
     {
-        $relativeNamespace = str_replace($rootNamespace, '', $modelClass);
-        $relativeNamespace = ltrim($relativeNamespace, '\\');
-
         $shortClassName = str_replace('\\', DIRECTORY_SEPARATOR, $relativeNamespace);
 
         $dashedShortName = (string)preg_replace('/([a-z])([A-Z])/', '$1-$2', $shortClassName);

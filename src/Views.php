@@ -8,10 +8,13 @@ use Closure;
 use Exception;
 use Prosopo\Views\Interfaces\Config\ViewsNamespaceConfigInterface;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
+use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Modules\ModulesInterface;
 use Prosopo\Views\Interfaces\Views\ViewsInterface;
 use Prosopo\Views\Interfaces\Views\ViewsNamespaceInterface;
+use Prosopo\Views\PrivateClasses\Model\ModelNamespaceProvider;
+use Prosopo\Views\PrivateClasses\Object\ObjectClassReader;
 use Prosopo\Views\PrivateClasses\ViewsNamespace;
 
 /**
@@ -29,11 +32,17 @@ final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendere
      */
     private array $renderers;
     private string $notFoundErrorMessage;
+    private ModelNamespaceProviderInterface $modelNamespaceProvider;
 
-    public function __construct(string $notFoundErrorMessage = 'Namespace for the given View class is not registered')
-    {
+    public function __construct(
+        string $notFoundErrorMessage = 'Namespace for the given Model is not registered',
+        ?ModelNamespaceProviderInterface $modelNamespaceProvider = null
+    ) {
         $this->renderers = [];
         $this->factories = [];
+        $this->modelNamespaceProvider = null === $modelNamespaceProvider ?
+            new ModelNamespaceProvider(new ObjectClassReader()) :
+            $modelNamespaceProvider;
 
         $this->notFoundErrorMessage = $notFoundErrorMessage;
     }
@@ -70,10 +79,12 @@ final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendere
 
     public function makeModel(string $modelClass)
     {
-        $factory = $this->getItemByClassName($modelClass, $this->factories);
+        $modelNamespace = $this->modelNamespaceProvider->getModelNamespace($modelClass);
+
+        $factory = $this->getItemByKeyMatch($modelNamespace, $this->factories);
 
         if (null === $factory) {
-            throw $this->makeNamespaceNotRegisteredException($modelClass);
+            throw $this->makeNamespaceNotRegisteredException($modelNamespace);
         }
 
         return $factory->makeModel($modelClass);
@@ -81,14 +92,12 @@ final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendere
 
     public function renderModel($modelOrClass, Closure $setupCallback = null, bool $doPrint = false): string
     {
-        $viewClass = false === is_string($modelOrClass) ?
-            get_class($modelOrClass) :
-            $modelOrClass;
+        $modelNamespace = $this->modelNamespaceProvider->getModelNamespace($modelOrClass);
 
-        $renderer = $this->getItemByClassName($viewClass, $this->renderers);
+        $renderer = $this->getItemByKeyMatch($modelNamespace, $this->renderers);
 
         if (null === $renderer) {
-            throw $this->makeNamespaceNotRegisteredException($viewClass);
+            throw $this->makeNamespaceNotRegisteredException($modelNamespace);
         }
 
         return $renderer->renderModel($modelOrClass, $setupCallback, $doPrint);
@@ -99,9 +108,9 @@ final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendere
         return new ViewsNamespace($config, $this, $this);
     }
 
-    protected function makeNamespaceNotRegisteredException(string $viewClass): Exception
+    protected function makeNamespaceNotRegisteredException(string $namespace): Exception
     {
-        $message = sprintf('%s : %s', $this->notFoundErrorMessage, $viewClass);
+        $message = sprintf('%s : %s', $this->notFoundErrorMessage, $namespace);
 
         return new Exception($message);
     }
@@ -125,18 +134,18 @@ final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendere
     /**
      * @template T
      *
-     * @param class-string $className
+     * @param string $key
      * @param array<string, T> $items
      *
      * @return T|null
      */
-    protected function getItemByClassName(string $className, array $items)
+    protected function getItemByKeyMatch(string $key, array $items)
     {
         $matchedItems = array_filter($items, function (
             $item,
-            string $viewsRootNamespace
-        ) use ($className) {
-            return 0 === strpos($viewsRootNamespace, $className);
+            string $itemKey
+        ) use ($key) {
+            return 0 === strpos($itemKey, $key);
         }, ARRAY_FILTER_USE_BOTH);
 
         return array_pop($matchedItems);

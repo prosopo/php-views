@@ -28,7 +28,7 @@ final class CodeExecutorWithErrorEvent implements CodeExecutorInterface
         $this->errorEventName = $errorEventName;
     }
 
-    public function executeCode(string $code, array $arguments): void
+    public function executeCode(string $code, array $arguments = []): void
     {
         $errorDetails = [
             'arguments' => $arguments,

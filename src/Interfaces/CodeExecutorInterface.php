@@ -9,5 +9,5 @@ interface CodeExecutorInterface
     /**
      * @param array<string,mixed> $arguments
      */
-    public function executeCode(string $code, array $arguments): void;
+    public function executeCode(string $code, array $arguments = []): void;
 }

@@ -22,7 +22,7 @@ final class CodeExecutorWithTemplateCompilation implements CodeExecutorInterface
         $this->templateCompiler = $templateCompiler;
     }
 
-    public function executeCode(string $code, array $arguments): void
+    public function executeCode(string $code, array $arguments = []): void
     {
         $code = $this->templateCompiler->compileTemplate($code);
 
