@@ -8,6 +8,7 @@ use Mockery;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
+use Prosopo\Views\PrivateClasses\Object\ObjectClassReader;
 use Prosopo\Views\PrivateClasses\Template\FileModelTemplateProvider;
 
 class FileModelTemplateProviderTest extends TestCase
@@ -17,45 +18,83 @@ class FileModelTemplateProviderTest extends TestCase
         // given
          vfsStream::setup('templates', null, ['sample-view.blade.php' => 'View Content']);
          $templateModel = Mockery::mock(TemplateModelInterface::class);
-         $provider = new FileModelTemplateProvider(vfsStream::url('templates'), 'App\\Views', '.blade.php');
+         $classReaderMock = Mockery::mock(ObjectClassReader::class);
+         $provider = new FileModelTemplateProvider(
+             vfsStream::url('templates'),
+             'App\\Views',
+             '.blade.php',
+             $classReaderMock
+         );
 
         // when
         $result = fn() => $provider->getModelTemplate($templateModel);
 
         // then
+        $classReaderMock->shouldReceive('getObjectClass')
+            ->once()
+            ->with($templateModel)
+            ->andReturn('App\\Views\\SampleView');
+
         $this->assertSame('View Content', $result());
 
+        // apply
         Mockery::close();
     }
 
-   /* public function testGetTemplateReturnsEmptyStringForMissingFile(): void
+    public function testGetTemplateReturnsEmptyStringForMissingFile(): void
     {
         // given
-        vfsStream::setup('templates'); // Empty directory
-        $provider = new FileModelTemplateProvider(vfsStream::url('templates'), 'App\\Views', '.blade.php');
-
-        $viewClass = 'App\\Views\\MissingView';
+        vfsStream::setup('templates');
+        $templateModel = Mockery::mock(TemplateModelInterface::class);
+        $classReaderMock = Mockery::mock(ObjectClassReader::class);
+        $provider = new FileModelTemplateProvider(
+            vfsStream::url('templates'),
+            'App\\Views',
+            '.blade.php',
+            $classReaderMock
+        );
 
         // when
-        $result = fn() => $provider->getModelTemplate($viewClass);
+        $result = fn() => $provider->getModelTemplate($templateModel);
 
         // then
+        $classReaderMock->shouldReceive('getObjectClass')
+            ->once()
+            ->with($templateModel)
+            ->andReturn('App\\Views\\SampleView');
+
         $this->assertSame('', $result());
+
+        // apply
+        Mockery::close();
     }
 
     public function testGetTemplateHandlesCamelCaseConversion(): void
     {
         // given
         vfsStream::setup('templates', null, ['some-camel-case-view.blade.php' => 'Camel Case Content']);
-        $provider = new FileModelTemplateProvider(vfsStream::url('templates'), 'App\\Views', '.blade.php');
-
-        $viewClass = 'App\\Views\\SomeCamelCaseView';
+        $templateModel = Mockery::mock(TemplateModelInterface::class);
+        $classReaderMock = Mockery::mock(ObjectClassReader::class);
+        $provider = new FileModelTemplateProvider(
+            vfsStream::url('templates'),
+            'App\\Views',
+            '.blade.php',
+            $classReaderMock
+        );
 
         // when
-        $result = fn() => $provider->getModelTemplate($viewClass);
+        $result = fn() => $provider->getModelTemplate($templateModel);
 
         // then
+        $classReaderMock->shouldReceive('getObjectClass')
+            ->once()
+            ->with($templateModel)
+            ->andReturn('App\\Views\\SomeCamelCaseView');
+
         $this->assertSame('Camel Case Content', $result());
+
+        // apply
+        Mockery::close();
     }
 
     public function testGetTemplateHandlesNestedNamespaces(): void
@@ -64,14 +103,27 @@ class FileModelTemplateProviderTest extends TestCase
         vfsStream::setup('templates', null, [
             'admin/dashboard-view.blade.php' => 'Dashboard Content'
         ]);
-        $provider = new FileModelTemplateProvider(vfsStream::url('templates'), 'App\\Views', '.blade.php');
-
-        $viewClass = 'App\\Views\\Admin\\DashboardView';
+        $templateModel = Mockery::mock(TemplateModelInterface::class);
+        $classReaderMock = Mockery::mock(ObjectClassReader::class);
+        $provider = new FileModelTemplateProvider(
+            vfsStream::url('templates'),
+            'App\\Views',
+            '.blade.php',
+            $classReaderMock
+        );
 
         // when
-        $result = fn() => $provider->getModelTemplate($viewClass);
+        $result = fn() => $provider->getModelTemplate($templateModel);
 
         // then
+        $classReaderMock->shouldReceive('getObjectClass')
+            ->once()
+            ->with($templateModel)
+            ->andReturn('App\\Views\\Admin\\DashboardView');
+
         $this->assertSame('Dashboard Content', $result());
-    }*/
+
+        // apply
+        Mockery::close();
+    }
 }

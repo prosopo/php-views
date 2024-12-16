@@ -9,7 +9,8 @@ use Prosopo\Views\Interfaces\Modules\ModulesInterface;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Views\ViewsNamespaceInterface;
-use Prosopo\Views\PrivateClasses\Object\{PropertyValueProviderForModels,
+use Prosopo\Views\PrivateClasses\Object\{ObjectClassReader,
+    PropertyValueProviderForModels,
     ObjectReader,
     ObjectReaderWithRendering,
     ObjectPropertyWriter,
@@ -75,7 +76,8 @@ final class ViewsNamespace implements ViewsNamespaceInterface
             new FileModelTemplateProvider(
                 $config->getTemplatesRootPath(),
                 $config->getModelsRootNamespace(),
-                $config->getTemplateFileExtension()
+                $config->getTemplateFileExtension(),
+                new ObjectClassReader()
             ) :
             $templateProvider;
 

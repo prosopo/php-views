@@ -6,6 +6,7 @@ namespace Prosopo\Views\PrivateClasses\Template;
 
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
+use Prosopo\Views\PrivateClasses\Object\ObjectClassReader;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
@@ -16,28 +17,29 @@ final class FileModelTemplateProvider implements ModelTemplateProviderInterface
     private string $templatesRootPath;
     private string $viewsRootNamespace;
     private string $extension;
+    private ObjectClassReader $objectClassReader;
 
-    public function __construct(string $templatesRootPath, string $viewsRootNamespace, string $extension)
-    {
+    public function __construct(
+        string $templatesRootPath,
+        string $viewsRootNamespace,
+        string $extension,
+        ObjectClassReader $objectClassReader
+    ) {
         $this->templatesRootPath = $templatesRootPath;
         $this->viewsRootNamespace = $viewsRootNamespace;
         $this->extension = $extension;
+        $this->objectClassReader = $objectClassReader;
     }
 
     public function getModelTemplate(TemplateModelInterface $model): string
     {
-        $modelClass = $this->getModelClass($model);
+        $modelClass = $this->objectClassReader->getObjectClass($model);
 
         $relativeTemplatePath = $this->getRelativeTemplatePath($modelClass, $this->viewsRootNamespace);
 
         $absoluteTemplatePath = $this->getAbsoluteTemplatePath($relativeTemplatePath);
 
         return $this->getFileContent($absoluteTemplatePath);
-    }
-
-    protected function getModelClass(TemplateModelInterface $model): string
-    {
-        return get_class($model);
     }
 
     protected function getFileContent(string $file): string
