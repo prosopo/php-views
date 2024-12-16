@@ -6,6 +6,8 @@ namespace Prosopo\Views\PrivateClasses;
 
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
+use Prosopo\Views\Interfaces\Model\ModelNameProviderInterface;
+use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Modules\ModulesInterface;
 use Prosopo\Views\Interfaces\Object\ObjectPropertyWriterInterface;
@@ -33,6 +35,8 @@ final class Modules implements ModulesInterface
     private ?PropertyValueProviderInterface $propertyValueProvider;
     private ?ModelRendererInterface $viewRenderer;
     private ?EventDispatcherInterface $eventDispatcher;
+    private ?ModelNameProviderInterface $modelNameProvider;
+    private ?ModelNamespaceProviderInterface $modelNamespaceProvider;
 
     public function __construct(TemplateRendererInterface $templateRenderer)
     {
@@ -44,6 +48,8 @@ final class Modules implements ModulesInterface
         $this->propertyValueProvider = null;
         $this->viewRenderer = null;
         $this->eventDispatcher = null;
+        $this->modelNameProvider = null;
+        $this->modelNamespaceProvider = null;
     }
 
     //// Getters.
@@ -86,6 +92,16 @@ final class Modules implements ModulesInterface
     public function getEventDispatcher(): ?EventDispatcherInterface
     {
         return $this->eventDispatcher;
+    }
+
+    public function getModelNameProvider(): ?ModelNameProviderInterface
+    {
+        return $this->modelNameProvider;
+    }
+
+    public function getModelNamespaceProvider(): ?ModelNamespaceProviderInterface
+    {
+        return $this->modelNamespaceProvider;
     }
 
     //// Setters.
@@ -142,6 +158,20 @@ final class Modules implements ModulesInterface
     public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self
     {
         $this->eventDispatcher = $eventDispatcher;
+
+        return $this;
+    }
+
+    public function setModelNameProvider(?ModelNameProviderInterface $modelNameProvider): self
+    {
+        $this->modelNameProvider = $modelNameProvider;
+
+        return $this;
+    }
+
+    public function setModelNamespaceProvider(?ModelNamespaceProviderInterface $modelNamespaceProvider): self
+    {
+        $this->modelNamespaceProvider = $modelNamespaceProvider;
 
         return $this;
     }

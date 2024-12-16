@@ -18,6 +18,8 @@ use Prosopo\Views\PrivateClasses\Object\{ObjectClassReader,
     PropertyValueProviderByTypes};
 use Prosopo\Views\PrivateClasses\Model\{ModelFactory,
     ModelFactoryWithPropertyInitialization,
+    ModelNameProvider,
+    ModelNamespaceProvider,
     ModelRenderer,
     ModelRendererWithEventDetails};
 use Prosopo\Views\PrivateClasses\Template\FileModelTemplateProvider;
@@ -71,13 +73,24 @@ final class ViewsNamespace implements ViewsNamespaceInterface
             new ObjectPropertyWriter() :
             $objectPropertyWriter;
 
+        $modelNamespaceProvider = $modules->getModelNamespaceProvider();
+        $modelNamespaceProvider = null === $modelNamespaceProvider ?
+            new ModelNamespaceProvider(new ObjectClassReader()) :
+            $modelNamespaceProvider;
+
+        $modelNameProvider = $modules->getModelNameProvider();
+        $modelNameProvider = null === $modelNameProvider ?
+            new ModelNameProvider(new ObjectClassReader()) :
+            $modelNameProvider;
+
         $templateProvider = $modules->getModelTemplateProvider();
         $templateProvider = null === $templateProvider ?
             new FileModelTemplateProvider(
                 $config->getTemplatesRootPath(),
                 $config->getModelsRootNamespace(),
                 $config->getTemplateFileExtension(),
-                new ObjectClassReader()
+                $modelNamespaceProvider,
+                $modelNameProvider
             ) :
             $templateProvider;
 
@@ -135,7 +148,9 @@ final class ViewsNamespace implements ViewsNamespaceInterface
                 ->setModelTemplateProvider($templateProvider)
                 ->setPropertyValueProvider($propertyValueProvider)
                 ->setModelFactory($realViewFactory)
-                ->setModelRenderer($realViewRenderer);
+                ->setModelRenderer($realViewRenderer)
+                ->setModelNamespaceProvider($modelNamespaceProvider)
+                ->setModelNameProvider($modelNameProvider);
 
         $this->modules = $modules;
     }

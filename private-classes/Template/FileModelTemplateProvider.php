@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\Template;
 
+use Prosopo\Views\Interfaces\Model\ModelNameProviderInterface;
 use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
-use Prosopo\Views\PrivateClasses\Object\ObjectClassReader;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
@@ -18,25 +18,30 @@ final class FileModelTemplateProvider implements ModelTemplateProviderInterface
     private string $templatesRootPath;
     private string $viewsRootNamespace;
     private string $extension;
+    private ModelNameProviderInterface $modelNameProvider;
     private ModelNamespaceProviderInterface $modelNamespaceProvider;
 
     public function __construct(
         string $templatesRootPath,
         string $viewsRootNamespace,
         string $extension,
-        ModelNamespaceProviderInterface $modelNamespaceProvider
+        ModelNamespaceProviderInterface $modelNamespaceProvider,
+        ModelNameProviderInterface $modelNameProvider
     ) {
         $this->templatesRootPath = $templatesRootPath;
         $this->viewsRootNamespace = $viewsRootNamespace;
         $this->extension = $extension;
+        $this->modelNameProvider = $modelNameProvider;
         $this->modelNamespaceProvider = $modelNamespaceProvider;
     }
 
     public function getModelTemplate(TemplateModelInterface $model): string
     {
         $modelNamespace = $this->modelNamespaceProvider->getModelNamespace($model);
+        $relativeModelNamespace = substr($modelNamespace, strlen($this->viewsRootNamespace));
+        $modelName = $this->modelNameProvider->getModelName($model);
 
-        $relativeTemplatePath = $this->getRelativeTemplatePath($modelNamespace, $this->viewsRootNamespace);
+        $relativeTemplatePath = $this->getRelativeTemplatePath($relativeModelNamespace, $modelName);
 
         $absoluteTemplatePath = $this->getAbsoluteTemplatePath($relativeTemplatePath);
 
@@ -58,13 +63,13 @@ final class FileModelTemplateProvider implements ModelTemplateProviderInterface
         return $this->templatesRootPath . DIRECTORY_SEPARATOR . $relativeTemplatePath . $this->extension;
     }
 
-    // fixme
-    protected function getRelativeTemplatePath(string $modelNamespace, string $rootNamespace): string
+    protected function getRelativeTemplatePath(string $relativeModelNamespace, string $modelName): string
     {
-        $shortClassName = str_replace('\\', DIRECTORY_SEPARATOR, $relativeNamespace);
+        $relativeModelPath = str_replace('\\', DIRECTORY_SEPARATOR, $relativeModelNamespace);
+        $modelName = (string)preg_replace('/([a-z])([A-Z])/', '$1-$2', $modelName);
 
-        $dashedShortName = (string)preg_replace('/([a-z])([A-Z])/', '$1-$2', $shortClassName);
+        $relativeTemplatePath = $relativeModelPath . DIRECTORY_SEPARATOR . $modelName;
 
-        return strtolower($dashedShortName);
+        return strtolower($relativeTemplatePath);
     }
 }

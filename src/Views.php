@@ -31,11 +31,12 @@ final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendere
      * @var array<string, ModelRendererInterface> namespace => ViewFactoryInterface
      */
     private array $renderers;
-    private string $notFoundErrorMessage;
+    private string $namespaceNotFoundErrorMessage;
     private ModelNamespaceProviderInterface $modelNamespaceProvider;
 
     public function __construct(
-        string $notFoundErrorMessage = 'Namespace for the given Model is not registered',
+        // fixme move into config.
+        string $namespaceNotFoundErrorMessage = 'Namespace for the given Model is not registered',
         ?ModelNamespaceProviderInterface $modelNamespaceProvider = null
     ) {
         $this->renderers = [];
@@ -44,7 +45,7 @@ final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendere
             new ModelNamespaceProvider(new ObjectClassReader()) :
             $modelNamespaceProvider;
 
-        $this->notFoundErrorMessage = $notFoundErrorMessage;
+        $this->namespaceNotFoundErrorMessage = $namespaceNotFoundErrorMessage;
     }
 
     public function addNamespace(ViewsNamespaceConfigInterface $config): ModulesInterface
@@ -108,9 +109,11 @@ final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendere
         return new ViewsNamespace($config, $this, $this);
     }
 
+    // fixme move the methods below into separate class.
+
     protected function makeNamespaceNotRegisteredException(string $namespace): Exception
     {
-        $message = sprintf('%s : %s', $this->notFoundErrorMessage, $namespace);
+        $message = sprintf('%s : %s', $this->namespaceNotFoundErrorMessage, $namespace);
 
         return new Exception($message);
     }

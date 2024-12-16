@@ -6,6 +6,8 @@ namespace Prosopo\Views\Interfaces\Modules;
 
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
+use Prosopo\Views\Interfaces\Model\ModelNameProviderInterface;
+use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Object\ObjectPropertyWriterInterface;
 use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
@@ -33,6 +35,10 @@ interface ModulesInterface
 
     public function getEventDispatcher(): ?EventDispatcherInterface;
 
+    public function getModelNameProvider(): ?ModelNameProviderInterface;
+
+    public function getModelNamespaceProvider(): ?ModelNamespaceProviderInterface;
+
     //// Setters.
 
     public function setTemplateRenderer(TemplateRendererInterface $templateRenderer): self;
@@ -50,4 +56,8 @@ interface ModulesInterface
     public function setModelRenderer(?ModelRendererInterface $viewRenderer): self;
 
     public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self;
+
+    public function setModelNameProvider(?ModelNameProviderInterface $modelNameProvider): self;
+
+    public function setModelNamespaceProvider(?ModelNamespaceProviderInterface $modelNamespaceProvider): self;
 }

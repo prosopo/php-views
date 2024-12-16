@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\Model;
 
-use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
+use Prosopo\Views\Interfaces\Model\ModelNameProviderInterface;
+use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 use Prosopo\Views\PrivateClasses\Object\ObjectClassReader;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
  * We reserve the right to change its name and implementation.
  */
-final class ModelNamespaceProvider implements ModelNamespaceProviderInterface
+final class ModelNameProvider implements ModelNameProviderInterface
 {
     private ObjectClassReader $objectClassReader;
 
@@ -20,11 +21,9 @@ final class ModelNamespaceProvider implements ModelNamespaceProviderInterface
         $this->objectClassReader = $objectClassReader;
     }
 
-    public function getModelNamespace($modelOrClass): string
+    public function getModelName(TemplateModelInterface $model): string
     {
-        $modelNamespaceWithClassName = false === is_string($modelOrClass) ?
-            $this->objectClassReader->getObjectClass($modelOrClass) :
-            $modelOrClass;
+        $modelNamespaceWithClassName = $this->objectClassReader->getObjectClass($model) ;
 
         $lastDelimiterPosition = strrpos($modelNamespaceWithClassName, '\\');
 
@@ -32,11 +31,6 @@ final class ModelNamespaceProvider implements ModelNamespaceProviderInterface
             return '';
         }
 
-        $className = substr(
-            $modelNamespaceWithClassName,
-            $lastDelimiterPosition
-        );
-
-        return substr($modelNamespaceWithClassName, 0, -strlen($className));
+        return substr($modelNamespaceWithClassName, $lastDelimiterPosition + 1);
     }
 }

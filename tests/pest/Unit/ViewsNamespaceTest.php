@@ -8,6 +8,8 @@ use Mockery;
 use PHPUnit\Framework\TestCase;
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
+use Prosopo\Views\Interfaces\Model\ModelNameProviderInterface;
+use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 use Prosopo\Views\Interfaces\Modules\ModulesInterface;
@@ -92,6 +94,26 @@ class ViewsNamespaceTest extends TestCase
             null,
             function (ModulesInterface $modules) {
                 $this->assertNotNull($modules->getEventDispatcher());
+            }
+        );
+    }
+
+    public function testMakesModelNameProvider()
+    {
+        $this->testUsesGivenModule(
+            null,
+            function (ModulesInterface $modules) {
+                $this->assertNotNull($modules->getModelNameProvider());
+            }
+        );
+    }
+
+    public function testMakesModelNamespaceProvider()
+    {
+        $this->testUsesGivenModule(
+            null,
+            function (ModulesInterface $modules) {
+                $this->assertNotNull($modules->getModelNamespaceProvider());
             }
         );
     }
@@ -308,6 +330,58 @@ class ViewsNamespaceTest extends TestCase
 
         // then
         $module->shouldReceive('attachEventDetails')
+            ->once();
+
+        // apply
+        $test();
+        Mockery::close();
+        $this->addToAssertionCount(1);
+    }
+
+    public function testUsesGivenModelNameProvider(): void
+    {
+        // given
+        $module = Mockery::mock(ModelNameProviderInterface::class);
+
+        // when
+        $test = fn()=>$this->testUsesGivenModule(
+            function (ModulesInterface $modules) use ($module) {
+                $modules->setModelNameProvider($module);
+            },
+            function (ModulesInterface $modules) {
+                $model = Mockery::mock(TemplateModelInterface::class);
+
+                $modules->getModelNameProvider()->getModelName($model);
+            }
+        );
+
+        // then
+        $module->shouldReceive('getModelName')
+            ->once();
+
+        // apply
+        $test();
+        Mockery::close();
+        $this->addToAssertionCount(1);
+    }
+
+    public function testUsesGivenModelNamespaceProvider(): void
+    {
+        // given
+        $module = Mockery::mock(ModelNamespaceProviderInterface::class);
+
+        // when
+        $test = fn()=>$this->testUsesGivenModule(
+            function (ModulesInterface $modules) use ($module) {
+                $modules->setModelNamespaceProvider($module);
+            },
+            function (ModulesInterface $modules) {
+                $modules->getModelNamespaceProvider()->getModelNamespace('test');
+            }
+        );
+
+        // then
+        $module->shouldReceive('getModelNamespace')
             ->once();
 
         // apply
