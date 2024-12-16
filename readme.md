@@ -82,15 +82,15 @@ from which {{ $salary }} is a salary, and {{ $bonus }} is a bonus.
 2. Reduced Routine: During object creation, public fields of the model without default values are automatically
    initialized with default values.
 3. Enhanced Access: Public methods are made available to the template alongside the variables.
-4. Unified Interface:  Use the `ViewInterface` in your application when accepting or returning a `View` to maintain
+4. Unified Interface:  Use the `TemplateModelInterface` in your application when accepting or returning a Model to maintain
    flexibility and avoid specifying the exact component.
 
-The `View` class implements the `View_Interface`. During rendering, any inner objects that also implement
-`View_Interface` will be automatically rendered and passed into the template as strings.
+The `TemplateModel` class implements the `TemplateModelInterface`. During rendering, any inner objects that also implement
+`TemplateModelInterface` will be automatically rendered and passed into the template as strings.
 
 ### 1.3) Custom property defaults
 
-Note: In the `View` class, in order to satisfy the Model creator, the constructor is marked as final. If you need to
+Note: In the `TemplateModel` class, in order to satisfy the Model factory, the constructor is marked as final. If you need to
 set custom default values, consider using one of the following approaches:
 
 ```php
@@ -120,7 +120,7 @@ class EmployeeTemplateModel extends TemplateModel
 ### 1.4) Custom Model implementation (advanced usage)
 
 The only requirement for a Model is to implement the `TemplateModelInterface`. This means you can transform any class
-into a Model without needing to extend a specific base class, or define public properties:
+into a Model without needing to extend a specific base class, or even define public properties:
 
 ```php
 namespace MyPackage\Views;
