@@ -5,7 +5,7 @@ custom [Blade](https://laravel.com/docs/11.x/blade) implementation as a default 
 
 ### Benefits
 
-* **Blazing fast:** Outperforms than the origin Laravel's Blade (see the [Benchmark chapter](#4-benchmark)).
+* **Blazing fast:** Outperforms the original Laravel Blade (see the [Benchmark chapter](#4-benchmark)).
 * **Zero Dependencies:** Lightweight and easy to integrate into any project.
 * **Wide Compatibility:** PHP 7.4+, 8.0+
 * **Adherence to the [SOLID principles](https://en.wikipedia.org/wiki/SOLID):** The architecture allows you to easily
