@@ -27,13 +27,13 @@ jobs:
         run: cd ${{ github.workspace }}/code-quality; composer install
 
       - name: Validate code style with PHP Code Sniffer
-        run: composer phpcs
+        run: cd ${{ github.workspace }}/code-quality; composer phpcs
 
       - name: Perform static code analysis with PHPStan
-        run: composer phpstan
+        run: cd ${{ github.workspace }}/code-quality; composer phpstan
 
       - name: Install composer packages for tests
         run: cd ${{ github.workspace }}/tests; composer install
 
       - name: Run Pest tests
-        run: composer pest
+        run: cd ${{ github.workspace }}/tests; composer pest
