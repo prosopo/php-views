@@ -22,6 +22,7 @@ use Prosopo\Views\PrivateClasses\Model\{ModelFactory,
     ModelRendererWithEventDetails};
 use Prosopo\Views\PrivateClasses\EventDispatcher;
 use Prosopo\Views\PrivateClasses\Template\FileModelTemplateProvider;
+use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithModelsRender;
 use Prosopo\Views\View\ViewNamespaceConfig;
 use Prosopo\Views\View\ViewNamespaceModules;
 
@@ -64,11 +65,6 @@ final class ViewNamespace
         $objectReader = null === $objectReader ?
             new ObjectReader() :
             $objectReader;
-
-        $objectReader = new ObjectReaderWithRendering(
-            $objectReader,
-            $modelRendererWithNamespace
-        );
 
         $objectPropertyWriter = $modules->getObjectPropertyWriter();
         $objectPropertyWriter = null === $objectPropertyWriter ?
@@ -114,6 +110,10 @@ final class ViewNamespace
 
         $propertyValueProvider = new PropertyValueProviderForNullable($propertyValueProvider);
 
+        // Without null check - templateRenderer is a mandatory module.
+        $templateRenderer = $modules->getTemplateRenderer();
+        $templateRenderer = new TemplateRendererWithModelsRender($templateRenderer, $modelRendererWithNamespace);
+
         //// 2. Real Factory and Renderer creation (used in the Views class):
 
         $realModelFactory = $modules->getModelFactory();
@@ -131,7 +131,7 @@ final class ViewNamespace
         $realModelRenderer = $modules->getModelRenderer();
         $realModelRenderer = null === $realModelRenderer ?
             new ModelRenderer(
-                $modules->getTemplateRenderer(),
+                $templateRenderer,
                 $modelFactoryWithNamespaces,
                 $templateProvider
             ) :

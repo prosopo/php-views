@@ -27,12 +27,12 @@ final class ViewNamespaceModules
 
     //// Custom modules: define them only when you need to override the default behavior:
 
-    private ?ModelFactoryInterface $viewFactory;
+    private ?ModelFactoryInterface $modelFactory;
     private ?ModelTemplateProviderInterface $modelTemplateProvider;
     private ?ObjectReaderInterface $objectReader;
     private ?ObjectPropertyWriterInterface $objectPropertyWriter;
     private ?PropertyValueProviderInterface $propertyValueProvider;
-    private ?ModelRendererInterface $viewRenderer;
+    private ?ModelRendererInterface $modelRenderer;
     private ?EventDispatcherInterface $eventDispatcher;
     private ?ModelNameProviderInterface $modelNameProvider;
     private ?ModelNamespaceProviderInterface $modelNamespaceProvider;
@@ -40,12 +40,12 @@ final class ViewNamespaceModules
     public function __construct(TemplateRendererInterface $templateRenderer)
     {
         $this->templateRenderer = $templateRenderer;
-        $this->viewFactory = null;
+        $this->modelFactory = null;
         $this->modelTemplateProvider = null;
         $this->objectReader = null;
         $this->objectPropertyWriter = null;
         $this->propertyValueProvider = null;
-        $this->viewRenderer = null;
+        $this->modelRenderer = null;
         $this->eventDispatcher = null;
         $this->modelNameProvider = null;
         $this->modelNamespaceProvider = null;
@@ -60,7 +60,7 @@ final class ViewNamespaceModules
 
     public function getModelFactory(): ?ModelFactoryInterface
     {
-        return $this->viewFactory;
+        return $this->modelFactory;
     }
 
     public function getModelTemplateProvider(): ?ModelTemplateProviderInterface
@@ -85,7 +85,7 @@ final class ViewNamespaceModules
 
     public function getModelRenderer(): ?ModelRendererInterface
     {
-        return $this->viewRenderer;
+        return $this->modelRenderer;
     }
 
     public function getEventDispatcher(): ?EventDispatcherInterface
@@ -114,7 +114,7 @@ final class ViewNamespaceModules
 
     public function setModelFactory(?ModelFactoryInterface $viewFactory): self
     {
-        $this->viewFactory = $viewFactory;
+        $this->modelFactory = $viewFactory;
 
         return $this;
     }
@@ -149,7 +149,7 @@ final class ViewNamespaceModules
 
     public function setModelRenderer(?ModelRendererInterface $viewRenderer): self
     {
-        $this->viewRenderer = $viewRenderer;
+        $this->modelRenderer = $viewRenderer;
 
         return $this;
     }
