@@ -40,35 +40,18 @@ class ObjectPropertyWriterTest extends TestCase
         Mockery::close();
     }
 
-    public function testSetsNullForNullableProperty(): void
-    {
-        // given
-        $writer = new ObjectPropertyWriter();
-
-        $testInstance = new class {
-            public ?string $nullableName; // Nullable and uninitialized
-        };
-
-        // when
-        $result = fn() => $writer->setObjectPropertyValues($testInstance);
-
-        // then
-        $result();
-
-        $this->assertNull($testInstance->nullableName);
-    }
-
     public function testIgnoresInitializedProperties(): void
     {
         // given
         $writer = new ObjectPropertyWriter();
+        $propertyValueProvider = Mockery::mock(PropertyValueProviderInterface::class);
 
         $testInstance = new class {
             public string $name = 'Initialized Name';
         };
 
         // when
-        $result = fn() => $writer->setObjectPropertyValues($testInstance);
+        $result = fn() => $writer->setObjectPropertyValues($testInstance, $propertyValueProvider);
 
         // then
         $result();

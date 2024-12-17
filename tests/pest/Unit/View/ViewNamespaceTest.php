@@ -215,8 +215,9 @@ class ViewNamespaceTest extends TestCase
             },
             function (ViewNamespaceModules $modules) {
                 $instance = Mockery::mock(StdClass::class);
+                $propertyValueProvider = Mockery::mock(PropertyValueProviderInterface::class);
 
-                $modules->getObjectPropertyWriter()->setObjectPropertyValues($instance);
+                $modules->getObjectPropertyWriter()->setObjectPropertyValues($instance, $propertyValueProvider);
             }
         );
 
