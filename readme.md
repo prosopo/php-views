@@ -27,7 +27,7 @@ You're free to use the package in your own way:
 
 - [1. Model-driven approach](#1-model-driven-approach)
 - [2. Views](#2-views)
-- [3. Built-in standalone Blade implementation](#3-built-in-standalone-blade-implementation)
+- [3. View Renderer](#3-view-renderer)
 - [4. Contribution](#4-contribution)
 - [5. Credits](#5-credits)
 
@@ -43,9 +43,9 @@ Model class:
 namespace MyPackage\Views;
 
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
-use Prosopo\Views\TemplateTemplateModel;
+use Prosopo\Views\TemplateModel;
 
-class EmployeeTemplateModel extends TemplateTemplateModel
+class EmployeeTemplateModel extends TemplateModel
 {
     public int $salary;
     public int $bonus;
@@ -99,9 +99,9 @@ set custom default values, consider using one of the following approaches:
 ```php
 namespace MyPackage\Views;
 
-use Prosopo\Views\TemplateTemplateModel;
+use Prosopo\Views\TemplateModel;
 
-class EmployeeTemplateModel extends TemplateTemplateModel
+class EmployeeTemplateModel extends TemplateModel
 {
     // approach for plain field types.
     public int $varWithCustomDefaultValue = 'custom default value';
@@ -152,19 +152,18 @@ corresponding templates.
 ### 2.1) Setup
 
 ```php
-use Prosopo\Views\Blade\BladeTemplateRenderer;
 use Prosopo\Views\View\ViewNamespaceConfig;
+use Prosopo\Views\View\ViewTemplateRenderer;
 use Prosopo\Views\Views;
 
 // 1. Make the Template Renderer.
-// It can be the built-in Blade or any external one
-// (we'll showcase the usage of the external one in a separate chapter)
+// (By default it uses the built-in Blade, but you can connect any)
 
-$bladeRenderer = new BladeTemplateRenderer();
+$viewTemplateRenderer = new ViewTemplateRenderer();
 
 // 2. Make the namespace config
 
-$namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
+$namespaceConfig = (new ViewNamespaceConfig($viewTemplateRenderer))
     // required settings:
     ->setTemplatesRootPath(__DIR__ . './templates')
     ->setTemplateFileExtension('.blade.php')
@@ -175,7 +174,7 @@ $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
 
 // (This line is necessary only if you defined the templateErrorHandler)
 $namespaceConfig->getModules()
-    ->setEventDispatcher($bladeRenderer->getModules()->getEventDispatcher());
+    ->setEventDispatcher($viewTemplateRenderer->getModules()->getEventDispatcher());
 
 // 3. Make the Views instance:
 
@@ -240,8 +239,7 @@ you expect are accessible, promoting cleaner and more maintainable code.
 ### 2.4) Automated templates matching
 
 The built-in `ModelTemplateProvider` automatically matches templates based on the Model names and their relative
-namespaces.
-This automates the process of associating templates with their corresponding Models.
+namespaces. This automates the process of associating templates with their corresponding Models.
 
 Example:
 
@@ -271,7 +269,7 @@ configuration and the package will use the specified implementation.
 
 > Tip: You can see the full list of the modules in the `ViewNamespaceModules` class.
 
-#### Example: Using Twig as a Template Renderer (instead of the built-in Blade Renderer)
+#### Example: Using Twig as a Template Renderer (instead of the built-in Blade)
 
 ```php
 // 1. Make a facade (for Twig or another template engine)
@@ -316,6 +314,7 @@ You can override any namespace module in the following way:
 
 ```php
 $namespaceConfig->getModules()
+     // override any module, like Factory:
     ->setModelFactory(new MyFactory());
 ```
 
@@ -336,7 +335,13 @@ Additionally, you have a namespace for Twig templates, with a `Popup` model and 
 Here’s the cool part: you can safely use `Button` as a property of the `Popup` model. The package will first render the
 `Button` using Twig, converting it to a string, and then pass it seamlessly into the Blade template of the `Popup`.
 
-## 3. Built-in standalone Blade implementation
+## 3. View Renderer
+
+`ViewTemplateRenderer` is the class responsible for rendering templates in this package. By default, it integrates the
+Blade compiler, but it is fully customizable. You can replace the Blade compiler with your own implementation or use a
+simple stub to enable support for plain PHP template files.
+
+### 3.1) Built-in Blade integration
 
 [Blade](https://laravel.com/docs/11.x/blade) is an elegant and powerful template engine originally designed
 for [Laravel](https://laravel.com/).
@@ -345,8 +350,6 @@ However, since it isn't available as a standalone package, this package includes
 
 It provides full support for [Blade's key features](https://laravel.com/docs/11.x/blade)
 while remaining completely independent of Laravel.
-
-### 3.1) Supported features
 
 The following Blade tokens are supported:
 
@@ -359,14 +362,30 @@ The following Blade tokens are supported:
 
 Visit the [official Blade docs](https://laravel.com/docs/11.x/blade) to learn about their usage.
 
-### 3.2) Setup
+#### Notes on the standalone Blade implementation
+
+You may have come across packages that attempt to adapt the official Blade engine by creating
+stubs for its Laravel dependencies, such as the [jenssegers/blade](https://github.com/jenssegers/blade) package.
+However, we chose not to adopt this approach for several reasons:
+
+* PHP Version Requirements: It mandates PHP 8.2 or higher.
+* External Dependencies: It introduces additional external dependencies.
+* Potential Breakage: It can become unstable with future Laravel updates (as demonstrated
+  by [past incidents](https://github.com/jenssegers/blade/issues/74).
+* Limited Flexibility: Since it wasn’t designed as a standalone component, it lacks some of the customization abilities.
+* Global functions: Laravel's implementation includes global helper functions, which becomes a problem when you need to
+  [scope the package](https://github.com/humbug/php-scoper).
+
+Thanks to great Blade's conceptual design, our compiler implementation required fewer than 200 lines of code.
+
+### 3.2) View Renderer setup
 
 ```php
-use Prosopo\Views\Blade\BladeTemplateRenderer;
+use Prosopo\Views\View\ViewTemplateRenderer;
 
-$bladeRenderer = new BladeTemplateRenderer();
+$viewTemplateRenderer = new ViewTemplateRenderer();
 
-echo $bladeRenderer->renderTemplate('/my-template.blade.php', [
+echo $viewTemplateRenderer->renderTemplate('/my-template.blade.php', [
     'var' => true
 ]);
 ```
@@ -375,33 +394,35 @@ echo $bladeRenderer->renderTemplate('/my-template.blade.php', [
 > plain strings:
 
 ```php
-use Prosopo\Views\Blade\BladeRendererConfig;
-use Prosopo\Views\Blade\BladeTemplateRenderer;
+use Prosopo\Views\View\ViewTemplateRenderer;
+use Prosopo\Views\View\ViewTemplateRendererConfig;
 
-$bladeRendererConfig = new BladeRendererConfig();
-$bladeRendererConfig->setIsFileBasedTemplate(false);
+$viewRendererConfig = new ViewTemplateRendererConfig();
+$viewRendererConfig->setIsFileBasedTemplate(false);
 
-$bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+$viewTemplateRenderer = new ViewTemplateRenderer($viewRendererConfig);
 
-echo $bladeRenderer->renderTemplate('@if($var)The variable is set.@endif', [
+echo $viewTemplateRenderer->renderTemplate('@if($var)The variable is set.@endif', [
     'var' => true
 ]);
 ```
 
-> Tip #2: As you see, the built-in Blade implementation is fully standalone and independent of the `Views` class. This
+> Tip #2: As you see, the built-in TemplateRenderer implementation is fully standalone and independent of the `Views`
+> class. This
 > means that even if you can't or don't want to use the model-driven approach, you can still utilize it as an
 > independent Blade compiler.
 
-### 3.3) Available Blade Renderer settings
+### 3.3) Available View Renderer settings
 
-The built-in Blade implementation includes a variety of settings that let you customize features such as escaping,
+The `ViewTemplateRenderer` supports a variety of settings that let you customize features such as
+escaping,
 error handling, and more:
 
 ```php
-use Prosopo\Views\Blade\BladeRendererConfig;
-use Prosopo\Views\Blade\BladeTemplateRenderer;
+use Prosopo\Views\View\ViewTemplateRenderer;
+use Prosopo\Views\View\ViewTemplateRendererConfig;
 
-$bladeRendererConfig = (new BladeRendererConfig())
+$viewRendererConfig = (new ViewTemplateRendererConfig())
 // By default, the Renderer expect a file name.
 // Set to false if to work with strings
     ->setIsFileBasedTemplate(true)
@@ -431,52 +452,56 @@ $bladeRendererConfig = (new BladeRendererConfig())
         return (string)preg_replace('/@use\s*\((["\'])(.*?)\1\)/s', '<?php use $2; ?>', $template);
     });
 
-$bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+$viewTemplateRenderer = new ViewTemplateRenderer($viewRendererConfig);
 ```
 
-### 3.4) Notes on the standalone Blade implementation
+### 3.4) Custom View Renderer modules
 
-You may have come across packages that attempt to adapt the official Blade engine by creating
-stubs for its Laravel dependencies, such as the [jenssegers/blade](https://github.com/jenssegers/blade) package.
-However, we chose not to adopt this approach for several reasons:
-
-* PHP Version Requirements: It mandates PHP 8.2 or higher.
-* External Dependencies: It introduces additional external dependencies.
-* Potential Breakage: It can become unstable with future Laravel updates (as demonstrated
-  by [past incidents](https://github.com/jenssegers/blade/issues/74).
-* Limited Flexibility: Since it wasn’t designed as a standalone component, it lacks some of the customization abilities.
-
-Thanks to great Blade's conceptual design, our compiler implementation required fewer than 200 lines of code.
-
-### 3.5) Custom Blade Renderer modules
-
-By default, the `BladeTemplateRenderer` creates module instances using classes from the current package.
+By default, the `ViewTemplateRenderer` creates module instances using classes from the current package, including the
+Blade compiler.
 
 If you need to override the default module behavior, you can define a custom implementation in the
-configuration. The `BladeTemplateRenderer` will use the specified implementation.
+configuration. The `ViewTemplateRenderer` will use the specified implementation.
 
-> Tip: You can see the full list of the modules in the `BladeRendererModules`.
+> Tip: You can see the full list of the modules in the `ViewTemplateRendererModules`.
 
-#### Example: Defining a custom Blade compiler
+#### Example: Overriding the default Blade compiler to use plain PHP views
 
 ```php
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
+use Prosopo\Views\View\ViewNamespaceConfig;
+use Prosopo\Views\View\ViewTemplateRenderer;
+use Prosopo\Views\View\ViewTemplateRendererConfig;
+use Prosopo\Views\Views;
 
-class MyOwnBladeCompiler implements TemplateCompilerInterface {
-    public function compileTemplate(string $template): string {
-       // todo your custom compiler.
+class CompilerStubForPlainPhpSupport implements TemplateCompilerInterface
+{
+    public function compileTemplate(string $template): string
+    {
+        return $template;
     }
 }
 
 // ...
 
-$bladeRendererConfig->getModules()
-    ->setTemplateCompiler(new MyOwnBladeCompiler());
+$viewTemplateRendererConfig = new ViewTemplateRendererConfig();
+$viewTemplateRendererConfig->getModules()
+    ->setTemplateCompiler(new CompilerStubForPlainPhpSupport());
+
+$viewTemplateRenderer = new ViewTemplateRenderer($viewTemplateRendererConfig);
+
+$views = new Views();
+
+$viewNamespaceConfig = new ViewNamespaceConfig($viewTemplateRenderer);
+$viewNamespaceConfig
+    ->setTemplatesRootPath(__DIR__ . './templates')
+    ->setTemplateFileExtension('.php');
+
+$views->addNamespace('MyApp\Models', $viewNamespaceConfig);
 ```
 
-> Note: Carefully review the `BladeRendererConfig` settings before creating a custom implementation. For example, in the
-> case of the `BladeComplier`, it includes the `compilerExtensionCallback` setting, which allows you to add a
-> custom directive without the need to make the custom compiler from scratch.
+Now this namespace is configured to deal with plain PHP template files, while having all the package features, including
+model-driven approach and template error handling.
 
 ## 4. Contribution
 

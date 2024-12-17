@@ -7,11 +7,12 @@ namespace Tests\Feature;
 use org\bovigo\vfs\vfsStream;
 use ParseError;
 use PHPUnit\Framework\TestCase;
-use Prosopo\Views\Blade\BladeRendererConfig;
-use Prosopo\Views\Blade\BladeTemplateRenderer;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
-use Prosopo\Views\TemplateTemplateModel;
+use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
+use Prosopo\Views\TemplateModel;
 use Prosopo\Views\View\ViewNamespaceConfig;
+use Prosopo\Views\View\ViewTemplateRenderer;
+use Prosopo\Views\View\ViewTemplateRendererConfig;
 use Prosopo\Views\Views;
 
 class ViewsTest extends TestCase
@@ -22,7 +23,7 @@ class ViewsTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['first-model.blade.php' => '{{ $message }}']);
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('templates'))
             ->setTemplateFileExtension('.blade.php');
@@ -55,7 +56,7 @@ class ViewsTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['first-model.blade.php' => '{{ $message }}{{ $data }}']);
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('templates'))
             ->setTemplateFileExtension('.blade.php');
@@ -95,7 +96,7 @@ class ViewsTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['first-model.blade.php' => '{{ $message }}']);
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('templates'))
             ->setTemplateFileExtension('.blade.php');
@@ -129,7 +130,7 @@ class ViewsTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['first-model.blade.php' => '{{ $message }}']);
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('templates'))
             ->setTemplateFileExtension('.blade.php');
@@ -163,9 +164,9 @@ class ViewsTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['first-model.blade.php' => '{{ $message }}']);
-        $bladeConfig = new BladeRendererConfig();
+        $bladeConfig = new ViewTemplateRendererConfig();
         $bladeConfig->setIsFileBasedTemplate(false);
-        $bladeRenderer = new BladeTemplateRenderer($bladeConfig);
+        $bladeRenderer = new ViewTemplateRenderer($bladeConfig);
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('templates'))
             ->setTemplateFileExtension('.blade.php')
@@ -199,7 +200,7 @@ class ViewsTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['first-model.blade.php' => '@if($message)wrong template']);
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $receivedEventDetails = null;
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('templates'))
@@ -246,7 +247,7 @@ class ViewsTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['first-model.blade.php' => '@if($message)good template@endif']);
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $receivedEventDetails = null;
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('templates'))
@@ -292,7 +293,7 @@ class ViewsTest extends TestCase
                 'first-model.blade.php' => '{{ $message }}'
             ],
         ]);
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('templates'))
             ->setTemplateFileExtension('.blade.php');
@@ -329,7 +330,7 @@ class ViewsTest extends TestCase
            'folder1' => ['first-model.blade.php' => '{{ $message }}'],
             'folder2' => ['second-model.blade.php' => '{{ $result }}'],
         ]);
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $firstNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('top/folder1'))
             ->setTemplateFileExtension('.blade.php');
@@ -384,7 +385,7 @@ class ViewsTest extends TestCase
             'inner-model.blade.php' => 'inner!',
             'top-model.blade.php' => 'Hey {!! $inner !!}',
         ]);
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('templates'))
             ->setTemplateFileExtension('.blade.php');
@@ -419,14 +420,95 @@ class ViewsTest extends TestCase
         $this->assertSame('Hey inner!', $views->renderModel($topModel));
     }
 
-    public function testRenderIncludesInnerModelFromDifferentNamespace(): void
-    {
-        // fixme
-    }
-
     public function testRenderSupportsCustomCompiler(): void
     {
-        // fixme
+        // given
+        vfsStream::setup('templates', null, [
+            'pure.php' => '<?php echo $message; $new = " and again: ".$message; echo $new; ?>',
+        ]);
+        $compilerStub = new class implements TemplateCompilerInterface{
+            public function compileTemplate(string $template): string
+            {
+                return $template;
+            }
+        };
+        $viewTemplateRendererConfig = new ViewTemplateRendererConfig();
+        $viewTemplateRendererConfig->getModules()
+            ->setTemplateCompiler($compilerStub);
+        $viewTemplateRenderer = new ViewTemplateRenderer($viewTemplateRendererConfig);
+        $views = new Views();
+        $viewNamespaceConfig = new ViewNamespaceConfig($viewTemplateRenderer);
+        $modelNamespace = $this->defineRealModelClass(
+            __METHOD__,
+            'Pure',
+            [
+                [
+                    'name' => 'message',
+                    'visibility' => 'public',
+                ]
+            ],
+            false
+        );
+
+        // when
+        $viewNamespaceConfig
+            ->setTemplatesRootPath(vfsStream::url('templates'))
+            ->setTemplateFileExtension('.php');
+
+        $views->addNamespace($modelNamespace, $viewNamespaceConfig);
+
+        $modelClass = $modelNamespace . '\\Pure';
+        $model = new $modelClass();
+        $model->message = 'Hello World!';
+
+        // then
+        $this->assertSame('Hello World! and again: Hello World!', $views->renderModel($model));
+    }
+
+    public function testRenderIncludesInnerModelFromDifferentNamespace(): void
+    {
+        // given
+        vfsStream::setup('top', null, [
+            'folder1' => ['top-model.blade.php' => 'Hey {!! $inner !!}'],
+            'folder2' => [ 'inner-model.blade.php' => 'inner!'],
+        ]);
+        $bladeRenderer = new ViewTemplateRenderer();
+        $firstNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
+            ->setTemplatesRootPath(vfsStream::url('top/folder1'))
+            ->setTemplateFileExtension('.blade.php');
+        $secondNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
+            ->setTemplatesRootPath(vfsStream::url('top/folder2'))
+            ->setTemplateFileExtension('.blade.php');
+        $secondNamespace = $this->defineRealModelClass(
+            __METHOD__ . '__second',
+            'InnerModel',
+            [],
+            false
+        );
+        $firstNamespace = $this->defineRealModelClass(
+            __METHOD__,
+            'TopModel',
+            [
+                [
+                    'name' => 'inner',
+                    'visibility' => 'public',
+                ]
+            ],
+            false
+        );
+        $views = new Views();
+
+        // when
+        $views->addNamespace($firstNamespace, $firstNamespaceConfig);
+        $views->addNamespace($secondNamespace, $secondNamespaceConfig);
+
+        $innerModelClass = $secondNamespace . '\\InnerModel';
+        $topModelClass = $firstNamespace . '\\TopModel';
+        $topModel = new $topModelClass();
+        $topModel->inner = new $innerModelClass();
+
+        // then
+        $this->assertSame('Hey inner!', $views->renderModel($topModel));
     }
 
     /// makeModel
@@ -434,7 +516,7 @@ class ViewsTest extends TestCase
     public function testMakeModelThatExtendsBaseClass(): void
     {
         // given
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
         $views = new Views();
 
@@ -458,7 +540,7 @@ class ViewsTest extends TestCase
     public function testMakeModelImplementsInterface(): void
     {
         // given
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
         $views = new Views();
 
@@ -488,7 +570,7 @@ class ViewsTest extends TestCase
     public function testMakeModelSetsDefaultsForModelsThatExtendBaseClass(): void
     {
         // given
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
         $views = new Views();
 
@@ -518,7 +600,7 @@ class ViewsTest extends TestCase
     public function testMakeModelNotSetDefaultsForModelsWithoutDefaultsInterface(): void
     {
         // given
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
         $views = new Views();
 
@@ -548,7 +630,7 @@ class ViewsTest extends TestCase
     public function testMakeModelSupportsDifferentNamespaces(): void
     {
         // given
-        $bladeRenderer = new BladeTemplateRenderer();
+        $bladeRenderer = new ViewTemplateRenderer();
         $firstNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
         $secondNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
         $firstNamespace = $this->defineRealModelClass(
@@ -594,7 +676,7 @@ class ViewsTest extends TestCase
         $namespace = '_views_test_' . strtolower($methodName);
         $classContent = $this->getClassProperties($properties);
         $extends = true === $extendsClass ?
-            'extends \\' . TemplateTemplateModel::class :
+            'extends \\' . TemplateModel::class :
             'implements \\' . TemplateModelInterface::class;
 
         if (false === $extendsClass) {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\Blade;
+namespace Prosopo\Views\View;
 
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\PrivateClasses\Blade\BladeCompiler;
@@ -20,15 +20,15 @@ use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithFileTemplate;
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties, and introduce new public ones.
  */
-final class BladeTemplateRenderer implements TemplateRendererInterface
+final class ViewTemplateRenderer implements TemplateRendererInterface
 {
     private TemplateRendererInterface $templateRenderer;
-    private BladeRendererModules $modules;
+    private ViewTemplateRendererModules $modules;
 
-    public function __construct(?BladeRendererConfig $config = null)
+    public function __construct(?ViewTemplateRendererConfig $config = null)
     {
         $config = null === $config ?
-            new BladeRendererConfig() :
+            new ViewTemplateRendererConfig() :
             $config;
 
         // Clone, as we're going to modify it.
@@ -90,7 +90,7 @@ final class BladeTemplateRenderer implements TemplateRendererInterface
         return $this->templateRenderer->renderTemplate($template, $variables, $doPrint);
     }
 
-    public function getModules(): BladeRendererModules
+    public function getModules(): ViewTemplateRendererModules
     {
         return $this->modules;
     }

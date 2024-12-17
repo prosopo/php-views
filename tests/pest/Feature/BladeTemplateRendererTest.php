@@ -7,8 +7,8 @@ namespace Tests\Feature;
 use org\bovigo\vfs\vfsStream;
 use ParseError;
 use PHPUnit\Framework\TestCase;
-use Prosopo\Views\Blade\BladeRendererConfig;
-use Prosopo\Views\Blade\BladeTemplateRenderer;
+use Prosopo\Views\View\ViewTemplateRendererConfig;
+use Prosopo\Views\View\ViewTemplateRenderer;
 
 class BladeTemplateRendererTest extends TestCase
 {
@@ -16,8 +16,8 @@ class BladeTemplateRendererTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['template.blade.php' => '@if($var)The variable is set.@endif']);
-        $bladeRendererConfig = new BladeRendererConfig();
-        $bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+        $bladeRendererConfig = new ViewTemplateRendererConfig();
+        $bladeRenderer = new ViewTemplateRenderer($bladeRendererConfig);
 
         // when
         $result = $bladeRenderer->renderTemplate(vfsStream::url('templates/template.blade.php'), [
@@ -31,9 +31,9 @@ class BladeTemplateRendererTest extends TestCase
     public function testRendersStringWhenFileBasedFlagIsDisabled(): void
     {
         // given
-        $bladeRendererConfig = new BladeRendererConfig();
+        $bladeRendererConfig = new ViewTemplateRendererConfig();
         $bladeRendererConfig->setIsFileBasedTemplate(false);
-        $bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+        $bladeRenderer = new ViewTemplateRenderer($bladeRendererConfig);
 
         // when
         $result = $bladeRenderer->renderTemplate('@if($var)The variable is set.@endif', [
@@ -47,13 +47,13 @@ class BladeTemplateRendererTest extends TestCase
     public function testTemplateErrorHandlerIsCalledOnError(): void
     {
         // given
-        $bladeRendererConfig = new BladeRendererConfig();
+        $bladeRendererConfig = new ViewTemplateRendererConfig();
         $bladeRendererConfig->setIsFileBasedTemplate(false);
         $receivedEventDetails = null;
         $bladeRendererConfig->setTemplateErrorHandler(function (array $eventDetails) use (&$receivedEventDetails) {
             $receivedEventDetails = $eventDetails;
         });
-        $bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+        $bladeRenderer = new ViewTemplateRenderer($bladeRendererConfig);
 
         // when
         $bladeRenderer->renderTemplate('@if($var)wrong template', [
@@ -72,13 +72,13 @@ class BladeTemplateRendererTest extends TestCase
     public function testTemplateErrorHandlerNotCalledWithoutReason(): void
     {
         // given
-        $bladeRendererConfig = new BladeRendererConfig();
+        $bladeRendererConfig = new ViewTemplateRendererConfig();
         $bladeRendererConfig->setIsFileBasedTemplate(false);
         $receivedEventDetails = null;
         $bladeRendererConfig->setTemplateErrorHandler(function (array $eventDetails) use (&$receivedEventDetails) {
             $receivedEventDetails = $eventDetails;
         });
-        $bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+        $bladeRenderer = new ViewTemplateRenderer($bladeRendererConfig);
 
         // when
         $bladeRenderer->renderTemplate('@if($var)good template@endif', [
@@ -93,8 +93,8 @@ class BladeTemplateRendererTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['template.blade.php' => '{{ $var }}']);
-        $bladeRendererConfig = new BladeRendererConfig();
-        $bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+        $bladeRendererConfig = new ViewTemplateRendererConfig();
+        $bladeRenderer = new ViewTemplateRenderer($bladeRendererConfig);
 
         // when
         $result = $bladeRenderer->renderTemplate(vfsStream::url('templates/template.blade.php'), [
@@ -109,9 +109,9 @@ class BladeTemplateRendererTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['template.blade.php' => '{{ $var }}']);
-        $bladeRendererConfig = new BladeRendererConfig();
+        $bladeRendererConfig = new ViewTemplateRendererConfig();
         $bladeRendererConfig->setCustomOutputEscapeCallback(fn($value) => 'custom-escaped-' . $value);
-        $bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+        $bladeRenderer = new ViewTemplateRenderer($bladeRendererConfig);
 
         // when
 
@@ -127,9 +127,9 @@ class BladeTemplateRendererTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['template.blade.php' => '{{ $global }}']);
-        $bladeRendererConfig = new BladeRendererConfig();
+        $bladeRendererConfig = new ViewTemplateRendererConfig();
         $bladeRendererConfig->setGlobalVariables(['global' => 'Top-Level']);
-        $bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+        $bladeRenderer = new ViewTemplateRenderer($bladeRendererConfig);
 
         // when
 
@@ -143,11 +143,11 @@ class BladeTemplateRendererTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['template.blade.php' => '{{ $calc(1,2) }}']);
-        $bladeRendererConfig = new BladeRendererConfig();
+        $bladeRendererConfig = new ViewTemplateRendererConfig();
         $bladeRendererConfig->setGlobalVariables(['calc' => function ($a, $b) {
             return $a + $b;
         }]);
-        $bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+        $bladeRenderer = new ViewTemplateRenderer($bladeRendererConfig);
 
         // when
 
@@ -161,11 +161,11 @@ class BladeTemplateRendererTest extends TestCase
     {
         // given
         vfsStream::setup('templates', null, ['template.blade.php' => '@custom template']);
-        $bladeRendererConfig = new BladeRendererConfig();
+        $bladeRendererConfig = new ViewTemplateRendererConfig();
         $bladeRendererConfig->setCompilerExtensionCallback(function (string $template) {
             return str_replace('@custom', '_custom_', $template);
         });
-        $bladeRenderer = new BladeTemplateRenderer($bladeRendererConfig);
+        $bladeRenderer = new ViewTemplateRenderer($bladeRendererConfig);
 
         // when
 

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\Blade;
+namespace Prosopo\Views\View;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties and introduce new public ones.
  */
-final class BladeRendererConfig
+final class ViewTemplateRendererConfig
 {
     private bool $isFileBasedTemplate;
     private string $escapeVariableName;
@@ -31,7 +31,7 @@ final class BladeRendererConfig
      */
     private $compilerExtensionCallback;
 
-    private BladeRendererModules $modules;
+    private ViewTemplateRendererModules $modules;
 
     public function __construct()
     {
@@ -44,7 +44,7 @@ final class BladeRendererConfig
         $this->customOutputEscapeCallback = null;
         $this->compilerExtensionCallback = null;
 
-        $this->modules = new BladeRendererModules();
+        $this->modules = new ViewTemplateRendererModules();
     }
 
     //// Getters:
@@ -96,7 +96,7 @@ final class BladeRendererConfig
         return $this->templateErrorEventName;
     }
 
-    public function getModules(): BladeRendererModules
+    public function getModules(): ViewTemplateRendererModules
     {
         return $this->modules;
     }
@@ -164,7 +164,7 @@ final class BladeRendererConfig
         return $this;
     }
 
-    public function setModules(BladeRendererModules $modules): self
+    public function setModules(ViewTemplateRendererModules $modules): self
     {
         $this->modules = $modules;
 

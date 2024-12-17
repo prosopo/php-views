@@ -9,7 +9,7 @@ use Prosopo\Views\Interfaces\Model\TemplateModelWithDefaultsInterface;
 use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
 
-abstract class TemplateTemplateModel implements TemplateModelInterface, TemplateModelWithDefaultsInterface
+abstract class TemplateModel implements TemplateModelInterface, TemplateModelWithDefaultsInterface
 {
     private ObjectReaderInterface $objectReader;
     private PropertyValueProviderInterface $propertyValueProviderForDefaults;

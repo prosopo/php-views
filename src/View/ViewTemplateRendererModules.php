@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\Blade;
+namespace Prosopo\Views\View;
 
 use Prosopo\Views\Interfaces\CodeExecutorInterface;
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
@@ -13,7 +13,7 @@ use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties, and introduce new public ones.
  */
-final class BladeRendererModules
+final class ViewTemplateRendererModules
 {
     //// Custom modules: define them only when you need to override the default behavior:
 
@@ -31,7 +31,6 @@ final class BladeRendererModules
     }
 
     //// Getters.
-
 
     public function getTemplateRenderer(): ?TemplateRendererInterface
     {
