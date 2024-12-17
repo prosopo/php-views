@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\Template;
 
+use Exception;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
@@ -49,7 +50,8 @@ final class TemplateRendererWithModelsRender implements TemplateRendererInterfac
      * @param mixed $item
      *
      * @return mixed
-     * @throws
+     *
+     * @throws Exception
      */
     protected function renderIfModel($item)
     {
