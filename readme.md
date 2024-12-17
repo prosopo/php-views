@@ -5,13 +5,14 @@ built-in [Blade](https://laravel.com/docs/11.x/blade) implementation as a defaul
 
 ### Benefits
 
-* Zero Dependencies: Lightweight and easy to integrate into any project.
-* Wide Compatibility: PHP 7.4+, 8.0+
-* Adherence to the [SOLID principles](https://en.wikipedia.org/wiki/SOLID): The architecture allows you to easily
+* **Blazing fast:** Up to 4x faster than Laravel's Blade and 7x faster than Twig (See
+  the [Benchmark chapter](#4-benchmark)).
+* **Zero Dependencies:** Lightweight and easy to integrate into any project.
+* **Wide Compatibility:** PHP 7.4+, 8.0+
+* **Adherence to the [SOLID principles](https://en.wikipedia.org/wiki/SOLID):** The architecture allows you to easily
   override any module to meet specific requirements.
-* Namespace Support: Manage different templates seamlessly under a unified structure.
-* Test Coverage: Covered by [Pest](https://pestphp.com/) Unit and Feature tests.
-* Static Analysis: Checked by [PHPStan](https://phpstan.org/).
+* **Namespace Support**: Manage different templates seamlessly under a unified structure.
+* **Reliable**: Covered by [Pest](https://pestphp.com/) tests and checked by [PHPStan](https://phpstan.org/).
 
 ### Flexible Usage
 
@@ -28,8 +29,9 @@ You're free to use the package in your own way:
 - [1. Model-driven approach](#1-model-driven-approach)
 - [2. Views](#2-views)
 - [3. View Renderer](#3-view-renderer)
-- [4. Contribution](#4-contribution)
-- [5. Credits](#5-credits)
+- [4. Benchmark](#4-benchmark)
+- [5. Contribution](#4-contribution)
+- [6. Credits](#5-credits)
 
 ## 1. Model-driven approach
 
@@ -503,13 +505,47 @@ $views->addNamespace('MyApp\Models', $viewNamespaceConfig);
 Now this namespace is configured to deal with plain PHP template files, while having all the package features, including
 model-driven approach and template error handling.
 
-## 4. Contribution
+## 4. Benchmark
+
+We conducted a [PHP performance benchmark](https://github.com/prosopo/php-views/blob/main/benchmark/src/Benchmark.php)
+to compare this package with Laravel's Blade (mocked using [jenssegers/blade](https://github.com/jenssegers/blade))
+and [Twig](https://twig.symfony.com/). Here are the results:
+
+| Contestant                 | Renders Count | Spent time, MS |
+|----------------------------|---------------|----------------|
+| PHP Views (without models) | 1000x         | 18.16          |
+| PHP Views (with models)    | 1000x         | 45.1           |
+| Blade from Laravel         | 1000x         | 171.89         |
+| Twig                       | 1000x         | 326.33         |
+
+We used the following package versions:
+
+* [illuminate/view](https://packagist.org/packages/illuminate/view) `11.7.0`
+* [twig/twig](https://packagist.org/packages/twig/twig) `3.17.1`
+* [jenssegers/blade](https://packagist.org/packages/jenssegers/blade) `2.0.1`
+
+> As you can see, even with the model class-related overhead, this package delivers performance that is approximately 4 times
+> faster than the Laravel's Blade and 7 times faster than Twig.
+
+Cache-note: The benchmark is designed to measure raw performance by avoiding any caching mechanisms.
+
+Since the [benchmark](https://github.com/prosopo/php-views/blob/main/benchmark/src/Benchmark.php) is included in this
+repository, you can easily run it locally to verify the results.
+
+1. `git clone https://github.com/prosopo/php-views.git`
+2. `composer install; cd benchmark; composer install`
+3. `php benchmark {1000}` - pass your renders count
+
+We encourage you to enhance the benchmark further - feel free to make it more advanced and submit a pull request. We're
+happy to review and accept contributions! 🚀
+
+## 5. Contribution
 
 We would be excited if you decide to contribute! Please read
 the [for-devs.md](https://github.com/prosopo/php-views/blob/main/for-devs.md) file for project guidelines and
 agreements.
 
-## 5. Credits
+## 6. Credits
 
 This package was created by [Maxim Akimov](https://github.com/light-source/) during the development of
 the [WordPress integration for Prosopo Procaptcha](https://wordpress.org/plugins/prosopo-procaptcha/).

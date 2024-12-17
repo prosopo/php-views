@@ -17,77 +17,214 @@ class Benchmark
     public function run(): void
     {
         $rootDir = __DIR__ . '/../tmp';
-        $twigDir = $rootDir . '/twig';
-        $bladeOriginDir = $rootDir . '/origin-blade';
-        $bladeOriginCacheDir = $rootDir . '/origin-blade-cache';
-        $phpViewsDir = $rootDir . '/php-views';
-        $phpViewsModelsDir = $rootDir . '/php-views-models';
 
         mkdir($rootDir);
-        mkdir($twigDir);
-        mkdir($bladeOriginDir);
-        mkdir($bladeOriginCacheDir);
-        mkdir($phpViewsDir);
 
-        $twigLoader = new FilesystemLoader($twigDir);
-        $twig = new Environment($twigLoader);
-
-        $blade = new Blade($bladeOriginDir, $bladeOriginCacheDir);
-
-        $phpViewsRenderer = new ViewTemplateRenderer();
-        $phpViews=new Views();
-        $phpViewsNamespace=new ViewNamespaceConfig($phpViewsRenderer);
-        $phpViewsNamespace->setTemplatesRootPath($phpViewsModelsDir);
-        $phpViewsNamespace->setTemplateFileExtension('.blade.php');
-        $phpViews->addNamespace('Test', $phpViewsNamespace);
-
-
-        $twigTemplate = $this->getTestTemplate('.twig');
-        $bladeTemplate = $this->getTestTemplate('.blade.php');
-
-        $templatesCount = 1000;
+        $templatesCount = $_SERVER['argc'] > 1 ?
+            (int)$_SERVER['argv'][1] :
+            1000;
         $templateNameLength = 10;
         $itemsInTemplateCount = 100;
-
-        $twigFiles = $this->writeUniqueTemplates(
-            $twigDir,
-            '.twig',
-            $twigTemplate,
-            $templatesCount,
-            $templateNameLength,
-            true
-        );
-        $bladeOriginFiles = $this->writeUniqueTemplates(
-            $bladeOriginDir,
-            '.blade.php',
-            $bladeTemplate,
-            $templatesCount,
-            $templateNameLength,
-            true
-        );
-        $phpViewFiles = $this->writeUniqueTemplates(
-            $phpViewsDir,
-            '.blade.php',
-            $bladeTemplate,
-            $templatesCount,
-            $templateNameLength,
-            false
-        );
-        $phpModelFiles = $this->writeUniqueTemplates(
-            $phpViewsModelsDir,
-            '.blade.php',
-            $bladeTemplate,
-            $templatesCount,
-            $templateNameLength,
-            false
-        );
-
         $templateArguments = [
             'items' => array_fill(0, $itemsInTemplateCount, 'item'),
         ];
         $validationString = sprintf('[%s]', $itemsInTemplateCount);
 
-        $twigSpentMs = $this->measureFileRenders(
+        $twigSpentMs = $this->benchmarkForTwig(
+            $rootDir,
+            $this->getTestTemplate('.twig'),
+            $templatesCount,
+            $templateNameLength,
+            $templateArguments,
+            $validationString
+        );
+
+        $bladeOriginSpentMs = $this->benchmarkForBladeOrigin(
+            $rootDir,
+            $this->getTestTemplate('.blade.php'),
+            $templatesCount,
+            $templateNameLength,
+            $templateArguments,
+            $validationString
+        );
+
+        $phpViewsSpentMs = $this->benchmarkForPhpViews(
+            $rootDir,
+            $this->getTestTemplate('.blade.php'),
+            $templatesCount,
+            $templateNameLength,
+            $templateArguments,
+            $validationString
+        );
+
+        $phpViewsWithModelsSpentMs = $this->benchmarkForPhpViewsWithModels(
+            $rootDir,
+            $this->getTestTemplate('.blade.php'),
+            $templatesCount,
+            $templateNameLength,
+            $templateArguments,
+            $validationString
+        );
+
+        $results = [
+            'Blade from Laravel' => $bladeOriginSpentMs,
+            'PHP Views with Models (built-in Blade)' => $phpViewsWithModelsSpentMs,
+            'PHP Views without Models (using built-in Blade)' => $phpViewsSpentMs,
+            'Twig' => $twigSpentMs,
+        ];
+
+        // sort asc
+        asort($results);
+
+        printf("Renders Count: %sx\n", $templatesCount);
+
+        array_walk($results, function ($contestant, $spentMs) {
+            printf("%s: %s ms\n", $contestant, $spentMs);
+        });
+
+        $this->removeDir($rootDir);
+    }
+
+    public function benchmarkForBladeOrigin(
+        string $rootDir,
+        string $template,
+        int $templatesCount,
+        int $templateNameLength,
+        array $templateArguments,
+        string $validationString
+    ): float {
+        $bladeOriginDir = $rootDir . '/origin-blade';
+        $bladeOriginCacheDir = $rootDir . '/origin-blade-cache';
+
+        mkdir($bladeOriginDir);
+        mkdir($bladeOriginCacheDir);
+
+        $blade = new Blade($bladeOriginDir, $bladeOriginCacheDir);
+
+        $bladeFiles = $this->writeUniqueTemplates(
+            $bladeOriginDir,
+            '.blade.php',
+            $template,
+            $templatesCount,
+            $templateNameLength,
+            true
+        );
+
+        return $this->measureFileRenders(
+            'blade-origin',
+            function ($templateFile) use ($blade, $templateArguments) {
+                return $blade->render($templateFile, $templateArguments);
+            },
+            $bladeFiles,
+            $validationString
+        );
+    }
+
+    protected function benchmarkForPhpViews(
+        string $rootDir,
+        string $template,
+        int $templatesCount,
+        int $templateNameLength,
+        array $templateArguments,
+        string $validationString
+    ): float {
+        $phpViewsDir = $rootDir . '/php-views';
+
+        mkdir($phpViewsDir);
+
+        $phpViewsRenderer = new ViewTemplateRenderer();
+
+        $phpViewsFiles = $this->writeUniqueTemplates(
+            $phpViewsDir,
+            '.blade.php',
+            $template,
+            $templatesCount,
+            $templateNameLength,
+            false
+        );
+
+        return $this->measureFileRenders(
+            'php-views',
+            function ($templateFile) use ($phpViewsRenderer, $templateArguments) {
+                return $phpViewsRenderer->renderTemplate($templateFile, $templateArguments);
+            },
+            $phpViewsFiles,
+            $validationString
+        );
+    }
+
+    protected function benchmarkForPhpViewsWithModels(
+        string $rootDir,
+        string $template,
+        int $templatesCount,
+        int $templateNameLength,
+        array $templateArguments,
+        string $validationString
+    ): float {
+        $phpViewsWithModelsDir = $rootDir . '/php-views-with-models';
+
+        mkdir($phpViewsWithModelsDir);
+
+        $phpViewsRenderer = new ViewTemplateRenderer();
+        $phpViews = new Views();
+
+        $namespaceConfig = new ViewNamespaceConfig($phpViewsRenderer);
+        $namespaceConfig->setTemplateFileExtension('.blade.php');
+        $namespaceConfig->setTemplatesRootPath($phpViewsWithModelsDir);
+
+        $namespace = '_php_views_with_models';
+
+        $phpViews->addNamespace($namespace, $namespaceConfig);
+
+        $phpViewsWithModelFiles = $this->writeUniqueTemplates(
+            $phpViewsWithModelsDir,
+            '.blade.php',
+            $template,
+            $templatesCount,
+            $templateNameLength,
+            true
+        );
+
+        return $this->measureFileRenders(
+            'php-views-with-models',
+            function ($templateFile) use ($namespace, $phpViews, $templateArguments) {
+
+                $modelClass = $this->defineModelClass($namespace, $templateFile);
+
+                return $phpViews->renderModel($modelClass, function ($model) use ($templateArguments) {
+                    $model->items = $templateArguments['items'];
+                });
+            },
+            $phpViewsWithModelFiles,
+            $validationString
+        );
+    }
+
+    protected function benchmarkForTwig(
+        string $rootDir,
+        string $template,
+        int $templatesCount,
+        int $templateNameLength,
+        array $templateArguments,
+        string $validationString
+    ): float {
+        $twigDir = $rootDir . '/twig';
+
+        mkdir($twigDir);
+
+        $twigLoader = new FilesystemLoader($twigDir);
+        $twig = new Environment($twigLoader);
+
+        $twigFiles = $this->writeUniqueTemplates(
+            $twigDir,
+            '.twig',
+            $template,
+            $templatesCount,
+            $templateNameLength,
+            true
+        );
+
+        return $this->measureFileRenders(
             'twig',
             function ($templateFile) use ($twig, $templateArguments) {
                 return $twig->render($templateFile . '.twig', $templateArguments);
@@ -95,42 +232,19 @@ class Benchmark
             $twigFiles,
             $validationString
         );
+    }
 
-        $bladeOriginSpentMs = $this->measureFileRenders(
-            'blade-origin',
-            function ($templateFile) use ($blade, $templateArguments) {
-                return $blade->render($templateFile, $templateArguments);
-            },
-            $bladeOriginFiles,
-            $validationString
+    protected function defineModelClass(string $namespace, string $className): string
+    {
+        $code = sprintf(
+            'namespace %s; class %s extends \Prosopo\Views\TemplateModel { public array $items;  }',
+            $namespace,
+            $className
         );
 
-        $phpViewsSpentMs = $this->measureFileRenders(
-            'php-views',
-            function ($templateFile) use ($phpViewsRenderer, $templateArguments) {
-                return $phpViewsRenderer->renderTemplate($templateFile, $templateArguments);
-            },
-            $phpViewFiles,
-            $validationString
-        );
+        eval($code);
 
-        $phpViewsWithModelsSpentMs = $this->measureFileRenders(
-            'php-views',
-            function ($templateFile) use ($phpViewsRenderer, $templateArguments) {
-                // fixme
-                return $phpViewsRenderer->renderTemplate($templateFile, $templateArguments);
-            },
-            $phpViewFiles,
-            $validationString
-        );
-
-        printf("String Renders: %sx\n", $templatesCount);
-        printf("Twig: %s ms\n", $twigSpentMs);
-        printf("Blade Origin: %s ms\n", $bladeOriginSpentMs);
-        printf("PHP Views with built-in Blade: %s ms\n", $phpViewsSpentMs);
-        printf("PHP Views with built-in Blade and Models: %s ms\n", $phpViewsWithModelsSpentMs);
-
-        $this->removeDir($rootDir);
+        return $namespace . '\\' . $className;
     }
 
     protected function removeDir(string $directory): void
@@ -171,23 +285,23 @@ class Benchmark
     ): array {
         $randomStrings = $this->getRandomUniqueStrings($count, $nameLength);
 
-         return array_reduce(
-             $randomStrings,
-                function ($templateFiles, $randomString) use ($rootPath, $extension, $template, $isNameOnly) {
-                    $templateFile = $rootPath . '/' . $randomString . $extension;
-                    // add name to the content to avoid any potential content-related cache.
-                    $templateContent = $template . ' ' . $randomString;
+        return array_reduce(
+            $randomStrings,
+            function ($templateFiles, $randomString) use ($rootPath, $extension, $template, $isNameOnly) {
+                $templateFile = $rootPath . '/' . $randomString . $extension;
+                // add name to the content to avoid any potential content-related cache.
+                $templateContent = $template . ' ' . $randomString;
 
-                    file_put_contents($templateFile, $templateContent);
+                file_put_contents($templateFile, $templateContent);
 
-                    $templateFiles[] = true === $isNameOnly ?
-                     $randomString :
-                     $templateFile;
+                $templateFiles[] = true === $isNameOnly ?
+                    $randomString :
+                    $templateFile;
 
-                    return $templateFiles;
-                },
-             []
-         );
+                return $templateFiles;
+            },
+            []
+        );
     }
 
     protected function getSpentTimeInMilliseconds(float $start): float
@@ -231,7 +345,6 @@ class Benchmark
     protected function getRandomString(int $length): string
     {
         $characters = array_merge(
-            range('0', '9'),
             range('a', 'z'),
         );
 

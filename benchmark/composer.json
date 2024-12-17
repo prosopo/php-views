@@ -1,0 +1,12 @@
+{
+    "require": {
+        "illuminate/view": "~11.7.0",
+        "twig/twig": "^3.17",
+        "jenssegers/blade": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Benchmark\\": "./src"
+        }
+    }
+}
