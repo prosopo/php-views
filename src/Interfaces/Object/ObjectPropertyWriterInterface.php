@@ -8,6 +8,6 @@ interface ObjectPropertyWriterInterface
 {
     public function setObjectPropertyValues(
         object $instance,
-        ?PropertyValueProviderInterface $propertyValueProvider = null
+        PropertyValueProviderInterface $propertyValueProvider
     ): void;
 }

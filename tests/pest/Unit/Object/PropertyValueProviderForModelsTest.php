@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
 use Prosopo\Views\PrivateClasses\Object\PropertyValueProviderForModels;
-use Prosopo\Views\TemplateModel;
+use Prosopo\Views\TemplateTemplateModel;
 use ReflectionProperty;
 
 class PropertyValueProviderForModelsTest extends TestCase
@@ -51,7 +51,7 @@ class PropertyValueProviderForModelsTest extends TestCase
         // then
         $propertyMock->shouldReceive('getType->getName')
             ->once()
-            ->andReturn(TemplateModel::class);
+            ->andReturn(TemplateTemplateModel::class);
 
         $propertyValueProviderMock->shouldReceive('supportsProperty')
             ->once()
@@ -126,7 +126,7 @@ class PropertyValueProviderForModelsTest extends TestCase
         $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
         $provider = new PropertyValueProviderForModels($propertyValueProviderMock, $modelFactoryMock);
         $propertyMock = Mockery::mock(ReflectionProperty::class);
-        $model = Mockery::mock(TemplateModel::class);
+        $model = Mockery::mock(TemplateTemplateModel::class);
 
         // when
         $result = fn() => $provider->getPropertyValue($propertyMock);
@@ -134,7 +134,7 @@ class PropertyValueProviderForModelsTest extends TestCase
         // then
         $propertyMock->shouldReceive('getType->getName')
             ->once()
-            ->andReturn(TemplateModel::class);
+            ->andReturn(TemplateTemplateModel::class);
 
         $propertyValueProviderMock->shouldReceive('supportsProperty')
             ->once()
@@ -143,7 +143,7 @@ class PropertyValueProviderForModelsTest extends TestCase
 
         $modelFactoryMock->shouldReceive('makeModel')
             ->once()
-            ->with(TemplateModel::class)
+            ->with(TemplateTemplateModel::class)
             ->andReturn($model);
 
         $this->assertSame($model, $result());

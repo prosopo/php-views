@@ -8,27 +8,68 @@ use Mockery;
 use PHPUnit\Framework\TestCase;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
+use Prosopo\Views\Interfaces\Model\TemplateModelWithDefaultsInterface;
 use Prosopo\Views\Interfaces\Object\ObjectPropertyWriterInterface;
 use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
-use Prosopo\Views\PrivateClasses\Model\ModelFactoryWithPropertyInitialization;
-use stdClass;
+use Prosopo\Views\PrivateClasses\Model\ModelFactoryWithDefaultsManagement;
 
-class ModelFactoryWithPropertyInitializationTest extends TestCase
+class ModelFactoryWithDefaultsManagementTest extends TestCase
 {
-    public function testMakeModelInitializesProperties(): void
+    public function testMakeModelInitializesPropertiesWhenObjectImplementsWithDefaultsInterface(): void
     {
         // given
         $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
         $objectReaderMock = Mockery::mock(ObjectReaderInterface::class);
         $objectPropertyWriterMock = Mockery::mock(ObjectPropertyWriterInterface::class);
         $propertyValueProviderMock = Mockery::mock(PropertyValueProviderInterface::class);
-        $modelMock = Mockery::mock(TemplateModelInterface::class);
-        $factory = new ModelFactoryWithPropertyInitialization(
+        $modelWithDefaultsMock = Mockery::mock(TemplateModelWithDefaultsInterface::class);
+        $factory = new ModelFactoryWithDefaultsManagement(
             $modelFactoryMock,
             $objectReaderMock,
-            $objectPropertyWriterMock,
-            $propertyValueProviderMock
+            $objectPropertyWriterMock
+        );
+
+        // when
+        $result = fn() =>$factory->makeModel('ModelClass');
+
+        // then
+        $modelFactoryMock->shouldReceive('makeModel')
+            ->once()
+            ->with('ModelClass')
+            ->andReturn($modelWithDefaultsMock);
+
+        $modelWithDefaultsMock
+            ->shouldReceive('getDefaultsPropertyValueProvider')
+            ->once()
+            ->andReturn($propertyValueProviderMock);
+
+        $objectReaderMock->shouldReceive('getObjectVariables')
+            ->once()
+            ->with($modelWithDefaultsMock)
+            ->andReturn([]);
+
+        $objectPropertyWriterMock->shouldReceive('setObjectPropertyValues')
+            ->once()
+            ->with($modelWithDefaultsMock, $propertyValueProviderMock);
+
+        $this->assertSame($modelWithDefaultsMock, $result());
+
+        // apply
+        Mockery::close();
+    }
+
+    public function testMakeModelSkipsPropertiesInitializationWhenObjectWithoutDefaultsInterface(): void
+    {
+        // given
+        $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
+        $objectReaderMock = Mockery::mock(ObjectReaderInterface::class);
+        $objectPropertyWriterMock = Mockery::mock(ObjectPropertyWriterInterface::class);
+        $modelMock = Mockery::mock(TemplateModelInterface::class);
+        $factory = new ModelFactoryWithDefaultsManagement(
+            $modelFactoryMock,
+            $objectReaderMock,
+            $objectPropertyWriterMock
         );
 
         // when
@@ -40,36 +81,26 @@ class ModelFactoryWithPropertyInitializationTest extends TestCase
             ->with('ModelClass')
             ->andReturn($modelMock);
 
-        $objectReaderMock->shouldReceive('getObjectVariables')
-            ->once()
-            ->with($modelMock)
-            ->andReturn([]);
-
-        $objectPropertyWriterMock->shouldReceive('setObjectPropertyValues')
-            ->once()
-            ->with($modelMock, $propertyValueProviderMock);
-
         $this->assertSame($modelMock, $result());
 
         // apply
         Mockery::close();
     }
 
-    public function testMakeModelHandlesInnerModels(): void
+    public function testMakeModelHandlesInnerObjectsWithDefaultsInterface(): void
     {
         // given
         $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
         $objectReaderMock = Mockery::mock(ObjectReaderInterface::class);
         $objectPropertyWriterMock = Mockery::mock(ObjectPropertyWriterInterface::class);
         $propertyValueProviderMock = Mockery::mock(PropertyValueProviderInterface::class);
-        $mainModelMock = Mockery::mock(TemplateModelInterface::class);
-        $innerModelMock1 = Mockery::mock(TemplateModelInterface::class);
-        $innerModelMock2 = Mockery::mock(TemplateModelInterface::class);
-        $factory = new ModelFactoryWithPropertyInitialization(
+        $mainModelMock = Mockery::mock(TemplateModelWithDefaultsInterface::class);
+        $innerModelMock1 = Mockery::mock(TemplateModelWithDefaultsInterface::class);
+        $innerModelMock2 = Mockery::mock(TemplateModelWithDefaultsInterface::class);
+        $factory = new ModelFactoryWithDefaultsManagement(
             $modelFactoryMock,
             $objectReaderMock,
-            $objectPropertyWriterMock,
-            $propertyValueProviderMock
+            $objectPropertyWriterMock
         );
 
         // when
@@ -81,6 +112,11 @@ class ModelFactoryWithPropertyInitializationTest extends TestCase
             ->with('ModelClass')
             ->andReturn($mainModelMock);
 
+        $mainModelMock
+            ->shouldReceive('getDefaultsPropertyValueProvider')
+            ->once()
+            ->andReturn($propertyValueProviderMock);
+
         $objectReaderMock->shouldReceive('getObjectVariables')
             ->once()
             ->with($mainModelMock)
@@ -90,6 +126,10 @@ class ModelFactoryWithPropertyInitializationTest extends TestCase
             ->once()
             ->with($mainModelMock, $propertyValueProviderMock);
 
+        $innerModelMock1
+            ->shouldReceive('getDefaultsPropertyValueProvider')
+            ->once()
+            ->andReturn($propertyValueProviderMock);
 
         $objectReaderMock->shouldReceive('getObjectVariables')
             ->once()
@@ -99,6 +139,11 @@ class ModelFactoryWithPropertyInitializationTest extends TestCase
         $objectPropertyWriterMock->shouldReceive('setObjectPropertyValues')
             ->once()
             ->with($innerModelMock1, $propertyValueProviderMock);
+
+        $innerModelMock2
+            ->shouldReceive('getDefaultsPropertyValueProvider')
+            ->once()
+            ->andReturn($propertyValueProviderMock);
 
         $objectReaderMock->shouldReceive('getObjectVariables')
             ->once()
@@ -115,21 +160,19 @@ class ModelFactoryWithPropertyInitializationTest extends TestCase
         Mockery::close();
     }
 
-    public function testMakeModelSkipsNonModelInners(): void
+    public function testMakeModelSkipsInnerObjectsWithoutDefaultsInterface(): void
     {
         // given
         $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
         $objectReaderMock = Mockery::mock(ObjectReaderInterface::class);
         $objectPropertyWriterMock = Mockery::mock(ObjectPropertyWriterInterface::class);
         $propertyValueProviderMock = Mockery::mock(PropertyValueProviderInterface::class);
-        $mainModelMock = Mockery::mock(TemplateModelInterface::class);
-        $innerModelMock = Mockery::mock(TemplateModelInterface::class);
-        $nonModelMock = new stdClass();
-        $factory = new ModelFactoryWithPropertyInitialization(
+        $mainModelMock = Mockery::mock(TemplateModelWithDefaultsInterface::class);
+        $innerModelMock1 = Mockery::mock(TemplateModelInterface::class);
+        $factory = new ModelFactoryWithDefaultsManagement(
             $modelFactoryMock,
             $objectReaderMock,
-            $objectPropertyWriterMock,
-            $propertyValueProviderMock
+            $objectPropertyWriterMock
         );
 
         // when
@@ -141,23 +184,19 @@ class ModelFactoryWithPropertyInitializationTest extends TestCase
             ->with('ModelClass')
             ->andReturn($mainModelMock);
 
+        $mainModelMock
+            ->shouldReceive('getDefaultsPropertyValueProvider')
+            ->once()
+            ->andReturn($propertyValueProviderMock);
+
         $objectReaderMock->shouldReceive('getObjectVariables')
             ->once()
             ->with($mainModelMock)
-            ->andReturn(['inner1' => $innerModelMock, 'inner2' => $nonModelMock]);
+            ->andReturn(['inner1' => $innerModelMock1,]);
 
         $objectPropertyWriterMock->shouldReceive('setObjectPropertyValues')
             ->once()
             ->with($mainModelMock, $propertyValueProviderMock);
-
-        $objectReaderMock->shouldReceive('getObjectVariables')
-            ->once()
-            ->with($innerModelMock)
-            ->andReturn([]);
-
-        $objectPropertyWriterMock->shouldReceive('setObjectPropertyValues')
-            ->once()
-            ->with($innerModelMock, $propertyValueProviderMock);
 
         $this->assertSame($mainModelMock, $result());
 

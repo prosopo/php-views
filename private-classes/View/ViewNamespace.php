@@ -12,9 +12,10 @@ use Prosopo\Views\PrivateClasses\Object\{ObjectClassReader,
     ObjectReaderWithRendering,
     ObjectPropertyWriter,
     PropertyValueProvider,
-    PropertyValueProviderByTypes};
+    PropertyValueProviderByTypes,
+    PropertyValueProviderForNullable};
 use Prosopo\Views\PrivateClasses\Model\{ModelFactory,
-    ModelFactoryWithPropertyInitialization,
+    ModelFactoryWithDefaultsManagement,
     ModelNameProvider,
     ModelNamespaceProvider,
     ModelRenderer,
@@ -111,32 +112,33 @@ final class ViewNamespace
             $modelFactoryWithNamespaces
         );
 
-        $modelFactory = new ModelFactoryWithPropertyInitialization(
-            $modelFactoryWithNamespaces,
-            // Plain reader, without rendering.
-            $objectReader,
-            $objectPropertyWriter,
-            $propertyValueProvider
-        );
+        $propertyValueProvider = new PropertyValueProviderForNullable($propertyValueProvider);
 
         //// 2. Real Factory and Renderer creation (used in the Views class):
 
-        $realViewFactory = $modules->getModelFactory();
-        $realViewFactory = null === $realViewFactory ?
-            new ModelFactory($objectReader) :
-            $realViewFactory;
+        $realModelFactory = $modules->getModelFactory();
+        $realModelFactory = null === $realModelFactory ?
+            new ModelFactory($objectReader, $propertyValueProvider) :
+            $realModelFactory;
 
-        $realViewRenderer = $modules->getModelRenderer();
-        $realViewRenderer = null === $realViewRenderer ?
+        $realModelFactory = new ModelFactoryWithDefaultsManagement(
+            $realModelFactory,
+            // Plain reader, without rendering.
+            $objectReader,
+            $objectPropertyWriter
+        );
+
+        $realModelRenderer = $modules->getModelRenderer();
+        $realModelRenderer = null === $realModelRenderer ?
             new ModelRenderer(
                 $modules->getTemplateRenderer(),
-                $modelFactory,
+                $modelFactoryWithNamespaces,
                 $templateProvider
             ) :
-            $realViewRenderer;
+            $realModelRenderer;
 
-        $realViewRenderer = new ModelRendererWithEventDetails(
-            $realViewRenderer,
+        $realModelRenderer = new ModelRendererWithEventDetails(
+            $realModelRenderer,
             $eventDispatcher,
             $templateErrorEventName
         );
@@ -148,8 +150,8 @@ final class ViewNamespace
                 ->setObjectPropertyWriter($objectPropertyWriter)
                 ->setModelTemplateProvider($templateProvider)
                 ->setPropertyValueProvider($propertyValueProvider)
-                ->setModelFactory($realViewFactory)
-                ->setModelRenderer($realViewRenderer)
+                ->setModelFactory($realModelFactory)
+                ->setModelRenderer($realModelRenderer)
                 ->setModelNamespaceProvider($modelNamespaceProvider)
                 ->setModelNameProvider($modelNameProvider);
 

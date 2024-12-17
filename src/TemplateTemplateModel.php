@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Prosopo\Views;
 
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
+use Prosopo\Views\Interfaces\Model\TemplateModelWithDefaultsInterface;
 use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
+use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
 
-abstract class TemplateModel implements TemplateModelInterface
+abstract class TemplateTemplateModel implements TemplateModelInterface, TemplateModelWithDefaultsInterface
 {
     private ObjectReaderInterface $objectReader;
+    private PropertyValueProviderInterface $propertyValueProviderForDefaults;
 
     /**
      * The constructor is marked as final to prevent accidental argument overrides.
@@ -32,9 +35,12 @@ abstract class TemplateModel implements TemplateModelInterface
      * But in this approach, you need also to create a custom parent TemplateModel class
      * that implements TemplateModelInterface without the final constructor.
      */
-    final public function __construct(ObjectReaderInterface $objectPropertyReader)
-    {
+    final public function __construct(
+        ObjectReaderInterface $objectPropertyReader,
+        PropertyValueProviderInterface $propertyValueProviderForDefaults
+    ) {
         $this->objectReader = $objectPropertyReader;
+        $this->propertyValueProviderForDefaults = $propertyValueProviderForDefaults;
 
         $this->setCustomDefaults();
     }
@@ -42,6 +48,11 @@ abstract class TemplateModel implements TemplateModelInterface
     public function getTemplateArguments(): array
     {
         return $this->objectReader->getObjectVariables($this);
+    }
+
+    public function getDefaultsPropertyValueProvider(): PropertyValueProviderInterface
+    {
+        return $this->propertyValueProviderForDefaults;
     }
 
     protected function setCustomDefaults(): void

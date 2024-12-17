@@ -43,9 +43,9 @@ Model class:
 namespace MyPackage\Views;
 
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
-use Prosopo\Views\TemplateModel;
+use Prosopo\Views\TemplateTemplateModel;
 
-class EmployeeTemplateModel extends TemplateModel
+class EmployeeTemplateModel extends TemplateTemplateModel
 {
     public int $salary;
     public int $bonus;
@@ -99,9 +99,9 @@ set custom default values, consider using one of the following approaches:
 ```php
 namespace MyPackage\Views;
 
-use Prosopo\Views\TemplateModel;
+use Prosopo\Views\TemplateTemplateModel;
 
-class EmployeeTemplateModel extends TemplateModel
+class EmployeeTemplateModel extends TemplateTemplateModel
 {
     // approach for plain field types.
     public int $varWithCustomDefaultValue = 'custom default value';
@@ -257,6 +257,10 @@ Example:
 
 **Naming Note:** Use dashes in template names, as camelCase in Model names is automatically converted to dash-separated
 names.
+
+> Tip: In case this approach doesn't work for your setup, you can override the `ModelTemplateProvider` module to
+> implement your own logic. In case the reason is the name-specific only, consider overriding the `ModelNameProvider`
+> module instead.
 
 ### 2.5) Custom modules
 

@@ -17,7 +17,7 @@ final class ObjectPropertyWriter implements ObjectPropertyWriterInterface
 {
     public function setObjectPropertyValues(
         object $instance,
-        ?PropertyValueProviderInterface $propertyValueProvider = null
+        PropertyValueProviderInterface $propertyValueProvider
     ): void {
         $reflectionClass       = new ReflectionClass($instance);
         $publicTypedVariables = $this->getPublicTypedVariables($reflectionClass);
@@ -28,16 +28,11 @@ final class ObjectPropertyWriter implements ObjectPropertyWriterInterface
                     return;
                 }
 
-                $isDefaultValueSet = null !== $propertyValueProvider &&
-                    $this->setDefaultValueForSupportedType(
-                        $instance,
-                        $propertyValueProvider,
-                        $reflectionProperty
-                    );
-
-                if (false === $isDefaultValueSet) {
-                    $this->setNullForNullableProperty($instance, $reflectionProperty);
-                }
+                $this->setDefaultValueForSupportedType(
+                    $instance,
+                    $propertyValueProvider,
+                    $reflectionProperty
+                );
             },
             $publicTypedVariables
         );
@@ -69,20 +64,6 @@ final class ObjectPropertyWriter implements ObjectPropertyWriterInterface
         $reflectionProperty->setValue($instance, $value);
 
         return true;
-    }
-
-    protected function setNullForNullableProperty(object $instance, ReflectionProperty $reflectionProperty): void
-    {
-        $type = $reflectionProperty->getType();
-
-        if (
-            null === $type ||
-            false === $type->allowsNull()
-        ) {
-            return;
-        }
-
-        $reflectionProperty->setValue($instance, null);
     }
 
     /**

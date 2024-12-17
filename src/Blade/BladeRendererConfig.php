@@ -111,7 +111,7 @@ final class BladeRendererConfig
     }
 
     /**
-     * @var callable(array<string,mixed> $eventDetails):void|null $templateErrorHandler
+     * @param callable(array<string,mixed> $eventDetails):void|null $templateErrorHandler
      */
     public function setTemplateErrorHandler(?callable $templateErrorHandler): self
     {
