@@ -54,6 +54,9 @@ final class BladeRendererConfig
         return $this->isFileBasedTemplate;
     }
 
+    /**
+     * @return  callable(array<string,mixed> $eventDetails):void|null
+     */
     public function getTemplateErrorHandler(): ?callable
     {
         return $this->templateErrorHandler;
@@ -67,6 +70,9 @@ final class BladeRendererConfig
         return $this->globalVariables;
     }
 
+    /**
+     * @return  callable(mixed $variable): string|null
+     */
     public function getCustomOutputEscapeCallback(): ?callable
     {
         return $this->customOutputEscapeCallback;
@@ -77,6 +83,9 @@ final class BladeRendererConfig
         return $this->escapeVariableName;
     }
 
+    /**
+     * @return callable(string $template): string|null
+     */
     public function getCompilerExtensionCallback(): ?callable
     {
         return $this->compilerExtensionCallback;
@@ -101,6 +110,9 @@ final class BladeRendererConfig
         return $this;
     }
 
+    /**
+     * @var callable(array<string,mixed> $eventDetails):void|null $templateErrorHandler
+     */
     public function setTemplateErrorHandler(?callable $templateErrorHandler): self
     {
         $this->templateErrorHandler = $templateErrorHandler;
@@ -118,6 +130,9 @@ final class BladeRendererConfig
         return $this;
     }
 
+    /**
+     * @param callable(string $template): string|null $compilerExtensionCallback
+     */
     public function setCompilerExtensionCallback(?callable $compilerExtensionCallback): self
     {
         $this->compilerExtensionCallback = $compilerExtensionCallback;
@@ -125,6 +140,9 @@ final class BladeRendererConfig
         return $this;
     }
 
+    /**
+     * @param callable(mixed $variable): string|null $customOutputEscapeCallback
+     */
     public function setCustomOutputEscapeCallback(?callable $customOutputEscapeCallback): self
     {
         $this->customOutputEscapeCallback = $customOutputEscapeCallback;

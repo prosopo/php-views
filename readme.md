@@ -82,15 +82,18 @@ from which {{ $salary }} is a salary, and {{ $bonus }} is a bonus.
 2. Reduced Routine: During object creation, public fields of the model without default values are automatically
    initialized with default values.
 3. Enhanced Access: Public methods are made available to the template alongside the variables.
-4. Unified Interface:  Use the `TemplateModelInterface` in your application when accepting or returning a Model to maintain
+4. Unified Interface:  Use the `TemplateModelInterface` in your application when accepting or returning a Model to
+   maintain
    flexibility and avoid specifying the exact component.
 
-The `TemplateModel` class implements the `TemplateModelInterface`. During rendering, any inner objects that also implement
+The `TemplateModel` class implements the `TemplateModelInterface`. During rendering, any inner objects that also
+implement
 `TemplateModelInterface` will be automatically rendered and passed into the template as strings.
 
 ### 1.3) Custom property defaults
 
-Note: In the `TemplateModel` class, in order to satisfy the Model factory, the constructor is marked as final. If you need to
+Note: In the `TemplateModel` class, in order to satisfy the Model factory, the constructor is marked as final. If you
+need to
 set custom default values, consider using one of the following approaches:
 
 ```php
@@ -151,7 +154,7 @@ corresponding templates.
 ```php
 use Prosopo\Views\Blade\BladeTemplateRenderer;
 use Prosopo\Views\View\ViewNamespaceConfig;
-use Prosopo\Views\Views;
+use Prosopo\Views\View;
 
 // 1. Make the Template Renderer.
 // It can be the built-in Blade or any external one
@@ -176,7 +179,7 @@ $namespaceConfig->getModules()
 
 // 3. Make the Views instance:
 
-$views = new Views();
+$views = new View();
 
 // 4. Add the root namespace of your Template Models
 
@@ -224,6 +227,16 @@ echo $views->renderModel($employee);
 // to customize the Model properties before rendering. 
 ```
 
+Advice: The `Views` class implements three interfaces: `ViewNamespaceManagerInterface` (for `addNamespace`),
+`ModelFactoryInterface` (for
+`makeModel`), and `ModelRendererInterface` (for `renderModel`).
+
+When passing the `Views` instance to your methods, use
+one of these interfaces as the argument type instead of the `Views` class itself.
+
+This approach ensures that only the specific actions
+you expect are accessible, promoting cleaner and more maintainable code.
+
 ### 2.4) Automated templates matching
 
 The built-in `ModelTemplateProvider` automatically matches templates based on the Model names and their relative
@@ -261,7 +274,7 @@ configuration and the package will use the specified implementation.
 
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\View\ViewNamespaceConfig;
-use Prosopo\Views\Views;
+use Prosopo\Views\View;
 
 class TwigDecorator implements TemplateRendererInterface
 {
@@ -288,7 +301,7 @@ $namespaceConfig = (new ViewNamespaceConfig($twigDecorator))
 
 // 3. Make the Views:
 
-$views = new Views();
+$views = new View();
 
 // 4. Add the namespace (you can have multiple namespaces)
 

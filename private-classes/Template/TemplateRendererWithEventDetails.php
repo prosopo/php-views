@@ -27,7 +27,7 @@ final class TemplateRendererWithEventDetails implements TemplateRendererInterfac
         $this->eventName = $eventName;
     }
 
-    public function renderTemplate(string $template, array $variables, bool $doPrint = false): string
+    public function renderTemplate(string $template, array $variables = [], bool $doPrint = false): string
     {
         $eventDetails = [
             'template' => $template,

@@ -20,7 +20,7 @@ final class TemplateRenderer implements TemplateRendererInterface
         $this->codeExecutor = $codeExecutor;
     }
 
-    public function renderTemplate(string $template, array $variables, bool $doPrint = false): string
+    public function renderTemplate(string $template, array $variables = [], bool $doPrint = false): string
     {
         ob_start();
 

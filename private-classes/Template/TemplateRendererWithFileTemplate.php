@@ -19,7 +19,7 @@ final class TemplateRendererWithFileTemplate implements TemplateRendererInterfac
         $this->templateRenderer = $templateRenderer;
     }
 
-    public function renderTemplate(string $template, array $variables, bool $doPrint = false): string
+    public function renderTemplate(string $template, array $variables = [], bool $doPrint = false): string
     {
         $template = $this->getFileContent($template);
 

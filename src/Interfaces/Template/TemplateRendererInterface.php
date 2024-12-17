@@ -9,5 +9,5 @@ interface TemplateRendererInterface
     /**
      * @param array<string,mixed> $variables
      */
-    public function renderTemplate(string $template, array $variables, bool $doPrint = false): string;
+    public function renderTemplate(string $template, array $variables = [], bool $doPrint = false): string;
 }

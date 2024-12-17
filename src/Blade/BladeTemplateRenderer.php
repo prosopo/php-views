@@ -85,7 +85,7 @@ final class BladeTemplateRenderer implements TemplateRendererInterface
         $this->templateRenderer = $templateRenderer;
     }
 
-    public function renderTemplate(string $template, array $variables, bool $doPrint = false): string
+    public function renderTemplate(string $template, array $variables = [], bool $doPrint = false): string
     {
         return $this->templateRenderer->renderTemplate($template, $variables, $doPrint);
     }

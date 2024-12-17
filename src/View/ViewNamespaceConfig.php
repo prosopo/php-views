@@ -62,6 +62,9 @@ final class ViewNamespaceConfig
         return $this->isFileBasedTemplate;
     }
 
+    /**
+     * @return  callable(array<string,mixed> $eventDetails): void|null
+     */
     public function getTemplateErrorHandler(): ?callable
     {
         return $this->templateErrorHandler;
@@ -108,6 +111,9 @@ final class ViewNamespaceConfig
         return $this;
     }
 
+    /**
+     * @param callable(array<string,mixed> $eventDetails): void|null $templateErrorHandler
+     */
     public function setTemplateErrorHandler(?callable $templateErrorHandler): self
     {
         $this->templateErrorHandler = $templateErrorHandler;

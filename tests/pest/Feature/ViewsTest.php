@@ -8,7 +8,7 @@ use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use Prosopo\Views\Blade\BladeTemplateRenderer;
 use Prosopo\Views\View\ViewNamespaceConfig;
-use Prosopo\Views\Views;
+use Prosopo\Views\View;
 use Tests\Helpers\TestTemplateModel;
 
 class ViewsTest extends TestCase
@@ -21,7 +21,7 @@ class ViewsTest extends TestCase
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('templates'))
             ->setTemplateFileExtension('.blade.php');
-        $views = new Views();
+        $views = new View();
         $model = new TestTemplateModel([
             'message' => 'Hello World!',
         ]);

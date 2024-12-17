@@ -9,8 +9,8 @@ use Exception;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
+use Prosopo\Views\Interfaces\View\ViewNamespaceManagerInterface;
 use Prosopo\Views\Interfaces\View\ViewNamespaceModulesContainerInterface;
-use Prosopo\Views\Interfaces\View\ViewsInterface;
 use Prosopo\Views\PrivateClasses\Model\ModelNamespaceProvider;
 use Prosopo\Views\PrivateClasses\Object\ObjectClassReader;
 use Prosopo\Views\PrivateClasses\View\ViewNamespace;
@@ -22,7 +22,7 @@ use Prosopo\Views\View\ViewNamespaceModules;
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties and introduce new public ones.
  */
-final class Views implements ViewsInterface, ModelFactoryInterface, ModelRendererInterface
+final class View implements ViewNamespaceManagerInterface, ModelFactoryInterface, ModelRendererInterface
 {
     private string $namespaceNotFoundErrorMessage;
     private ModelNamespaceProviderInterface $modelNamespaceProvider;
