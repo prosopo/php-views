@@ -20,7 +20,7 @@ You're free to use the package in your own way:
 * Use it as your Views provider, combining model-driven approach with the built-in Blade.
 * Employ its standalone [Blade](https://laravel.com/docs/11.x/blade) implementation as a template engine for your
   Blade templates.
-* Leverage its model-driven approach for any template engine (e.g., [Twig](https://twig.symfony.com/)).
+* Leverage its model-driven approach for any templates (e.g., [Twig](https://twig.symfony.com/), or pure PHP).
 * Use it as a connector for templates that utilize different template engines.
 
 ## Table of Contents
@@ -505,7 +505,8 @@ model-driven approach and template error handling.
 
 ## 4. Contribution
 
-We would be excited if you decide to contribute! Please read the `for-devs.md` file for project guidelines and
+We would be excited if you decide to contribute! Please read
+the [for-devs.md](https://github.com/prosopo/php-views/blob/main/for-devs.md) file for project guidelines and
 agreements.
 
 ## 5. Credits

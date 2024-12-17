@@ -27,3 +27,7 @@ The project uses [PHPStan](https://phpstan.org/) for static analysis. Configure 
 The tests are powered by [Pest](https://pestphp.com/). To run the tests:
 
 `cd tests; composer install; composer pest`
+
+## 5. Pull Requests
+
+Please open your Pull Requests against the `main` branch.
