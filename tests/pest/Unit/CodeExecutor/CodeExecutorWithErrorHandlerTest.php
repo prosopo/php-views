@@ -9,18 +9,18 @@ use Exception;
 use Mockery;
 use Prosopo\Views\Interfaces\CodeExecutorInterface;
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
-use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithErrorEvent;
+use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithErrorHandler;
 use Tests\TestCase;
 use Throwable;
 
-class CodeExecutorWithErrorEventTest extends TestCase
+class CodeExecutorWithErrorHandlerTest extends TestCase
 {
     public function testNotCallsDispatcherWithoutReason(): void
     {
         // given
         $codeExecutor = Mockery::mock(CodeExecutorInterface::class);
         $eventDispatcher = Mockery::mock(EventDispatcherInterface::class);
-        $contestant = new CodeExecutorWithErrorEvent(
+        $contestant = new CodeExecutorWithErrorHandler(
             $codeExecutor,
             $eventDispatcher,
             'error'
@@ -50,12 +50,17 @@ class CodeExecutorWithErrorEventTest extends TestCase
         $this->testCallsDispatcher(new Exception());
     }
 
-    protected function testCallsDispatcher(Throwable $error): void
+    public function testCallsDispatcherOnWarning(): void
+    {
+        $this->testCallsDispatcher(null, true);
+    }
+
+    protected function testCallsDispatcher(?Throwable $error, bool $isWarning = false): void
     {
         // given
         $codeExecutor = Mockery::mock(CodeExecutorInterface::class);
         $eventDispatcher = Mockery::mock(EventDispatcherInterface::class);
-        $contestant = new CodeExecutorWithErrorEvent(
+        $contestant = new CodeExecutorWithErrorHandler(
             $codeExecutor,
             $eventDispatcher,
             'errorEventName'
@@ -65,21 +70,27 @@ class CodeExecutorWithErrorEventTest extends TestCase
         $executeCode = fn() => $contestant->executeCode('wrong code', ['var' => 1]);
 
         // then
-         $codeExecutor->shouldReceive('executeCode')
-            ->once()
-            ->andThrow($error);
+         $executorRule = $codeExecutor->shouldReceive('executeCode')
+            ->once();
+
+        if (null !== $error) {
+            $executorRule->andThrow($error);
+        }
+
+        if (true === $isWarning) {
+            $executorRule->andReturnUsing(fn() => trigger_error('test', E_USER_WARNING));
+        }
 
          $eventDispatcher->shouldReceive('dispatchEvent')
             ->once()
             ->with(
                 'errorEventName',
-                [
-                    'arguments' => [
-                        'var' => 1,
-                    ],
-                    'code' => 'wrong code',
-                    'error' => $error,
-                ]
+                Mockery::on(function ($details) {
+                    return isset($details['arguments'], $details['code'], $details['error'])
+                        && $details['arguments'] === ['var' => 1]
+                        && $details['code'] === 'wrong code'
+                        && $details['error'] instanceof Throwable;
+                })
             );
 
         // apply

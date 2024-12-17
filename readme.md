@@ -154,7 +154,7 @@ corresponding templates.
 ```php
 use Prosopo\Views\Blade\BladeTemplateRenderer;
 use Prosopo\Views\View\ViewNamespaceConfig;
-use Prosopo\Views\View;
+use Prosopo\Views\Views;
 
 // 1. Make the Template Renderer.
 // It can be the built-in Blade or any external one
@@ -179,7 +179,7 @@ $namespaceConfig->getModules()
 
 // 3. Make the Views instance:
 
-$views = new View();
+$views = new Views();
 
 // 4. Add the root namespace of your Template Models
 
@@ -274,7 +274,7 @@ configuration and the package will use the specified implementation.
 
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\View\ViewNamespaceConfig;
-use Prosopo\Views\View;
+use Prosopo\Views\Views;
 
 class TwigDecorator implements TemplateRendererInterface
 {
@@ -301,7 +301,7 @@ $namespaceConfig = (new ViewNamespaceConfig($twigDecorator))
 
 // 3. Make the Views:
 
-$views = new View();
+$views = new Views();
 
 // 4. Add the namespace (you can have multiple namespaces)
 

@@ -6,7 +6,7 @@ namespace Prosopo\Views\Blade;
 
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\PrivateClasses\Blade\BladeCompiler;
-use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithErrorEvent;
+use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithErrorHandler;
 use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithGlobalArguments;
 use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithTemplateCompilation;
 use Prosopo\Views\PrivateClasses\CodeExecutor\PhpCodeExecutor;
@@ -56,7 +56,7 @@ final class BladeTemplateRenderer implements TemplateRendererInterface
             new PhpCodeExecutor() :
             $codeExecutor;
 
-        $codeExecutor = new CodeExecutorWithErrorEvent($codeExecutor, $eventDispatcher, $errorEventName);
+        $codeExecutor = new CodeExecutorWithErrorHandler($codeExecutor, $eventDispatcher, $errorEventName);
         $codeExecutor = new CodeExecutorWithGlobalArguments($codeExecutor, $config->getGlobalVariables());
         $codeExecutor = new CodeExecutorWithTemplateCompilation($codeExecutor, $templateCompiler);
 

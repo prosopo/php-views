@@ -14,6 +14,7 @@ use Prosopo\Views\Interfaces\View\ViewNamespaceModulesContainerInterface;
 final class ViewsConfig
 {
     private string $namespaceNotFoundErrorMessage;
+    private string $wrongModelErrorMessage;
     private ?ModelNamespaceProviderInterface $modelNamespaceProvider;
     private ?ViewNamespaceModulesContainerInterface $namespaceModulesContainer;
 
@@ -22,6 +23,7 @@ final class ViewsConfig
         $this->modelNamespaceProvider = null;
         $this->namespaceModulesContainer = null;
         $this->namespaceNotFoundErrorMessage = 'Model namespace cannot be resolved';
+        $this->wrongModelErrorMessage = 'Passed Model does not implement TemplateModelInterface';
     }
 
     //// Getters:
@@ -29,6 +31,11 @@ final class ViewsConfig
     public function getNamespaceNotFoundErrorMessage(): string
     {
         return $this->namespaceNotFoundErrorMessage;
+    }
+
+    public function getWrongModelErrorMessage(): string
+    {
+        return $this->wrongModelErrorMessage;
     }
 
     public function getModelNamespaceProvider(): ?ModelNamespaceProviderInterface
@@ -46,6 +53,13 @@ final class ViewsConfig
     public function setNamespaceNotFoundErrorMessage(string $namespaceNotFoundErrorMessage): self
     {
         $this->namespaceNotFoundErrorMessage = $namespaceNotFoundErrorMessage;
+
+        return $this;
+    }
+
+    public function setWrongModelErrorMessage(string $wrongModelErrorMessage): self
+    {
+        $this->wrongModelErrorMessage = $wrongModelErrorMessage;
 
         return $this;
     }
