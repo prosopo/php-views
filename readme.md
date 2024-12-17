@@ -7,8 +7,8 @@ built-in [Blade](https://laravel.com/docs/11.x/blade) implementation as a defaul
 
 * Zero Dependencies: Lightweight and easy to integrate into any project.
 * Wide Compatibility: PHP 7.4+, 8.0+
-* Adherence to the [SOLID principles](https://en.wikipedia.org/wiki/SOLID): You can override any module without
-  affecting the rest of the system.
+* Adherence to the [SOLID principles](https://en.wikipedia.org/wiki/SOLID): The architecture allows you to easily
+  override any module to meet specific requirements.
 * Namespace Support: Manage different templates seamlessly under a unified structure.
 * Test Coverage: Covered by [Pest](https://pestphp.com/) Unit and Feature tests.
 * Static Analysis: Checked by [PHPStan](https://phpstan.org/).
