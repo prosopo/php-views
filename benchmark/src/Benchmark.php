@@ -78,8 +78,8 @@ class Benchmark
 
         printf("Renders Count: %sx\n", $templatesCount);
 
-        array_walk($results, function ($contestant, $spentMs) {
-            printf("%s: %s ms\n", $contestant, $spentMs);
+        array_walk($results, function ($spentMs, $contestant) {
+            printf("%s ms: %s\n", $spentMs, $contestant);
         });
 
         $this->removeDir($rootDir);
