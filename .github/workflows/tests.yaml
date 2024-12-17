@@ -1,0 +1,34 @@
+name: Tests
+
+on:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Note: 8.2+ is required only for the test tools, not for the package's code itself.
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, opcache
+
+      - name: Install composer packages for code-quality
+        run: cd ${{ github.workspace }}/code-quality; composer install
+
+      - name: Validate code style with PHP Code Sniffer
+        run: composer phpcs
+
+      - name: Perform static code analysis with PHPStan
+        run: composer phpstan
+
+      - name: Install composer packages for tests
+        run: cd ${{ github.workspace }}/tests; composer install
+
+      - name: Run Pest tests
+        run: composer pest
