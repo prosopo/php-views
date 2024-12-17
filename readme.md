@@ -1,7 +1,7 @@
 # PHP Views
 
 Blazing fast PHP Views with model-driven approach, multi-namespace support and
-built-in [Blade](https://laravel.com/docs/11.x/blade) implementation as a default template engine.
+custom [Blade](https://laravel.com/docs/11.x/blade) implementation as a default template engine.
 
 ### Benefits
 
@@ -508,15 +508,15 @@ model-driven approach and template error handling.
 ## 4. Benchmark
 
 We conducted a [PHP performance benchmark](https://github.com/prosopo/php-views/blob/main/benchmark/src/Benchmark.php)
-to compare this package with Laravel's Blade (mocked using [jenssegers/blade](https://github.com/jenssegers/blade))
+to compare this package with the Laravel's Blade (mocked using [jenssegers/blade](https://github.com/jenssegers/blade))
 and [Twig](https://twig.symfony.com/). Here are the results:
 
-| Contestant                 | Renders Count | Spent time, MS |
-|----------------------------|---------------|----------------|
-| PHP Views (without models) | 1000x         | 18.16          |
-| PHP Views (with models)    | 1000x         | 45.1           |
-| Blade from Laravel         | 1000x         | 171.89         |
-| Twig                       | 1000x         | 326.33         |
+| Contestant                             | Renders Count | Spent time, MS |
+|----------------------------------------|---------------|----------------|
+| `prosopo/views` (without models)       | 1000x         | 18.16          |
+| `prosopo/views` (with models)          | 1000x         | 45.1           |
+| `illuminate/view` (Blade from Laravel) | 1000x         | 171.89         |
+| `twig/twig`                            | 1000x         | 326.33         |
 
 We used the following package versions:
 
@@ -524,7 +524,8 @@ We used the following package versions:
 * [twig/twig](https://packagist.org/packages/twig/twig) `3.17.1`
 * [jenssegers/blade](https://packagist.org/packages/jenssegers/blade) `2.0.1`
 
-> As you can see, even with the model class-related overhead, this package delivers performance that is approximately 4 times
+> As you can see, even with the model class-related overhead, this package delivers performance that is approximately 4
+> times
 > faster than the Laravel's Blade and 7 times faster than Twig.
 
 Cache-note: The benchmark is designed to measure raw performance by avoiding any caching mechanisms.
