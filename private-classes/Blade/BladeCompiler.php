@@ -31,9 +31,6 @@ final class BladeCompiler implements TemplateCompilerInterface
     {
         $template = $this->removeComments($template);
 
-        $template = $this->replaceOpeningEcho($template, $this->escapeVariableName);
-        $template = $this->replaceClosingEcho($template);
-
         $template = $this->replaceOpeningTagWithBrackets('for', $template);
         $template = $this->replaceOpeningTagWithBrackets('foreach', $template);
         $template = $this->replaceClosingLoops($template);
@@ -42,6 +39,10 @@ final class BladeCompiler implements TemplateCompilerInterface
         $template = $this->replaceOpeningTagWithBrackets('elseif', $template);
         $template = $this->replaceClosingIf($template);
         $template = $this->replaceElse($template);
+
+        // With the current regex, it's important to replace echo after 'for' and 'if'
+        $template = $this->replaceOpeningEcho($template, $this->escapeVariableName);
+        $template = $this->replaceClosingEcho($template);
 
         $template = $this->replaceOpeningPhp($template);
         $template = $this->replaceClosingPhp($template);

@@ -20,13 +20,11 @@ class ModelRendererTest extends TestCase
         // given
         $templateRendererMock = Mockery::mock(TemplateRendererInterface::class);
         $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
-        $objectReaderMock = Mockery::mock(ObjectReaderInterface::class);
         $templateProviderMock = Mockery::mock(ModelTemplateProviderInterface::class);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
         $renderer = new ModelRenderer(
             $templateRendererMock,
             $modelFactoryMock,
-            $objectReaderMock,
             $templateProviderMock
         );
 
@@ -34,9 +32,8 @@ class ModelRendererTest extends TestCase
         $result = fn() => $renderer->renderModel($modelMock);
 
         // then
-        $objectReaderMock->shouldReceive('getObjectVariables')
+        $modelMock->shouldReceive('getTemplateArguments')
             ->once()
-            ->with($modelMock)
             ->andReturn(['key' => 'value']);
 
         $templateProviderMock->shouldReceive('getModelTemplate')
@@ -61,13 +58,11 @@ class ModelRendererTest extends TestCase
         // given
         $templateRendererMock = Mockery::mock(TemplateRendererInterface::class);
         $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
-        $objectReaderMock = Mockery::mock(ObjectReaderInterface::class);
         $templateProviderMock = Mockery::mock(ModelTemplateProviderInterface::class);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
         $renderer = new ModelRenderer(
             $templateRendererMock,
             $modelFactoryMock,
-            $objectReaderMock,
             $templateProviderMock
         );
 
@@ -80,9 +75,8 @@ class ModelRendererTest extends TestCase
             ->with('ModelClass')
             ->andReturn($modelMock);
 
-        $objectReaderMock->shouldReceive('getObjectVariables')
+        $modelMock->shouldReceive('getTemplateArguments')
             ->once()
-            ->with($modelMock)
             ->andReturn(['key' => 'value']);
 
         $templateProviderMock->shouldReceive('getModelTemplate')
@@ -106,13 +100,11 @@ class ModelRendererTest extends TestCase
         // given
         $templateRendererMock = Mockery::mock(TemplateRendererInterface::class);
         $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
-        $objectReaderMock = Mockery::mock(ObjectReaderInterface::class);
         $templateProviderMock = Mockery::mock(ModelTemplateProviderInterface::class);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
         $renderer = new ModelRenderer(
             $templateRendererMock,
             $modelFactoryMock,
-            $objectReaderMock,
             $templateProviderMock
         );
         $setupCallback = function ($model) {
@@ -128,9 +120,8 @@ class ModelRendererTest extends TestCase
             ->with('ModelClass')
             ->andReturn($modelMock);
 
-        $objectReaderMock->shouldReceive('getObjectVariables')
+        $modelMock->shouldReceive('getTemplateArguments')
             ->once()
-            ->with($modelMock)
             ->andReturn(['key' => 'modified_value']);
 
         $templateProviderMock->shouldReceive('getModelTemplate')
@@ -154,13 +145,11 @@ class ModelRendererTest extends TestCase
         // given
         $templateRendererMock = Mockery::mock(TemplateRendererInterface::class);
         $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
-        $objectReaderMock = Mockery::mock(ObjectReaderInterface::class);
         $templateProviderMock = Mockery::mock(ModelTemplateProviderInterface::class);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
         $renderer = new ModelRenderer(
             $templateRendererMock,
             $modelFactoryMock,
-            $objectReaderMock,
             $templateProviderMock
         );
 
@@ -168,9 +157,8 @@ class ModelRendererTest extends TestCase
         $renderModel = fn()=>$renderer->renderModel($modelMock, null, true);
 
         // then
-        $objectReaderMock->shouldReceive('getObjectVariables')
+        $modelMock->shouldReceive('getTemplateArguments')
             ->once()
-            ->with($modelMock)
             ->andReturn(['key' => 'value']);
 
         $templateProviderMock->shouldReceive('getModelTemplate')

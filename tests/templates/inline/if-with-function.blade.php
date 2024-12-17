@@ -1,0 +1,1 @@
+@if($right())item@endif

@@ -1,0 +1,1 @@
+<?php if( $right() ): ?>item<?php endif; ?>

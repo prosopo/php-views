@@ -43,10 +43,12 @@ final class FileModelTemplateProvider implements ModelTemplateProviderInterface
         $modelNamespace = $this->modelNamespaceProvider->getModelNamespace($model);
 
         $relativeModelNamespace = substr($modelNamespace, strlen($this->namespace));
+        $relativeModelNamespace = ltrim($relativeModelNamespace, '\\');
 
         $modelName = $this->modelNameProvider->getModelName($model);
 
         $relativeTemplatePath = $this->getRelativeTemplatePath($relativeModelNamespace, $modelName);
+
 
         $absoluteTemplatePath = $this->getAbsoluteTemplatePath($relativeTemplatePath);
 
@@ -67,7 +69,7 @@ final class FileModelTemplateProvider implements ModelTemplateProviderInterface
 
     protected function getAbsoluteTemplatePath(string $relativeTemplatePath): string
     {
-        return $this->templatesRootPath . DIRECTORY_SEPARATOR . $relativeTemplatePath . $this->extension;
+        return rtrim($this->templatesRootPath, '/') . DIRECTORY_SEPARATOR . $relativeTemplatePath . $this->extension;
     }
 
     protected function getRelativeTemplatePath(string $relativeModelNamespace, string $modelName): string
@@ -75,7 +77,10 @@ final class FileModelTemplateProvider implements ModelTemplateProviderInterface
         $relativeModelPath = str_replace('\\', DIRECTORY_SEPARATOR, $relativeModelNamespace);
         $modelName = (string)preg_replace('/([a-z])([A-Z])/', '$1-$2', $modelName);
 
-        $relativeTemplatePath = $relativeModelPath . DIRECTORY_SEPARATOR . $modelName;
+        $relativeTemplatePath = $relativeModelPath;
+        $relativeTemplatePath .= '' !== $relativeTemplatePath ? DIRECTORY_SEPARATOR
+            : '';
+        $relativeTemplatePath .= $modelName;
 
         return strtolower($relativeTemplatePath);
     }

@@ -1,0 +1,1 @@
+@foreach($getItems() as $item)item@endforeach

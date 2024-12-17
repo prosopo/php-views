@@ -1,0 +1,2 @@
+@elseif($var)
+{{ $output }}

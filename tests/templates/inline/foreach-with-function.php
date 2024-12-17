@@ -1,0 +1,1 @@
+<?php foreach( $getItems() as $item ): ?>item<?php endforeach; ?>

@@ -1,0 +1,1 @@
+@if($var){{ $output }}@endif
