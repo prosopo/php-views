@@ -30,7 +30,7 @@ class Benchmark
         ];
         $validationString = sprintf('[%s]', $itemsInTemplateCount);
 
-        $twigSpentMs = $this->benchmarkForTwig(
+        list($twigSpentMs, $twigSpentMsWithCache) = $this->benchmarkForTwig(
             $rootDir,
             $this->getTestTemplate('.twig'),
             $templatesCount,
@@ -39,7 +39,7 @@ class Benchmark
             $validationString
         );
 
-        $bladeOriginSpentMs = $this->benchmarkForBladeOrigin(
+        list($bladeOriginSpentMs, $bladeOriginSpentMsWithCache) = $this->benchmarkForBladeOrigin(
             $rootDir,
             $this->getTestTemplate('.blade.php'),
             $templatesCount,
@@ -67,10 +67,12 @@ class Benchmark
         );
 
         $results = [
-            'Blade from Laravel' => $bladeOriginSpentMs,
+            'Blade from Laravel (raw)' => $bladeOriginSpentMs,
+            'Blade from Laravel (with cache)' => $bladeOriginSpentMsWithCache,
             'PHP Views with Models (built-in Blade)' => $phpViewsWithModelsSpentMs,
             'PHP Views without Models (using built-in Blade)' => $phpViewsSpentMs,
-            'Twig' => $twigSpentMs,
+            'Twig (raw)' => $twigSpentMs,
+            'Twig (with cache)' => $twigSpentMsWithCache,
         ];
 
         // sort asc
@@ -92,7 +94,7 @@ class Benchmark
         int $templateNameLength,
         array $templateArguments,
         string $validationString
-    ): float {
+    ): array {
         $bladeOriginDir = $rootDir . '/origin-blade';
         $bladeOriginCacheDir = $rootDir . '/origin-blade-cache';
 
@@ -110,7 +112,7 @@ class Benchmark
             true
         );
 
-        return $this->measureFileRenders(
+        $calc = fn()=> $this->measureFileRenders(
             'blade-origin',
             function ($templateFile) use ($blade, $templateArguments) {
                 return $blade->render($templateFile, $templateArguments);
@@ -118,6 +120,8 @@ class Benchmark
             $bladeFiles,
             $validationString
         );
+
+        return [$calc(),$calc()];
     }
 
     protected function benchmarkForPhpViews(
@@ -207,13 +211,16 @@ class Benchmark
         int $templateNameLength,
         array $templateArguments,
         string $validationString
-    ): float {
+    ): array {
         $twigDir = $rootDir . '/twig';
+        $twigCacheDir = $rootDir . '/twig-cache';
 
         mkdir($twigDir);
 
         $twigLoader = new FilesystemLoader($twigDir);
-        $twig = new Environment($twigLoader);
+        $twig = new Environment($twigLoader, [
+            'cache' => $twigCacheDir,
+        ]);
 
         $twigFiles = $this->writeUniqueTemplates(
             $twigDir,
@@ -224,7 +231,7 @@ class Benchmark
             true
         );
 
-        return $this->measureFileRenders(
+        $calc = fn() => $this->measureFileRenders(
             'twig',
             function ($templateFile) use ($twig, $templateArguments) {
                 return $twig->render($templateFile . '.twig', $templateArguments);
@@ -232,6 +239,8 @@ class Benchmark
             $twigFiles,
             $validationString
         );
+
+        return [$calc(),$calc()];
     }
 
     protected function defineModelClass(string $namespace, string $className): string

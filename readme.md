@@ -5,8 +5,7 @@ custom [Blade](https://laravel.com/docs/11.x/blade) implementation as a default 
 
 ### Benefits
 
-* **Blazing fast:** Up to 4x faster than Laravel's Blade and 7x faster than Twig (See
-  the [Benchmark chapter](#4-benchmark)).
+* **Blazing fast:** Outperforms than the origin Laravel's Blade (see the [Benchmark chapter](#4-benchmark)).
 * **Zero Dependencies:** Lightweight and easy to integrate into any project.
 * **Wide Compatibility:** PHP 7.4+, 8.0+
 * **Adherence to the [SOLID principles](https://en.wikipedia.org/wiki/SOLID):** The architecture allows you to easily
@@ -509,26 +508,20 @@ model-driven approach and template error handling.
 
 We conducted a [PHP performance benchmark](https://github.com/prosopo/php-views/blob/main/benchmark/src/Benchmark.php)
 to compare this package with the Laravel's Blade (mocked using [jenssegers/blade](https://github.com/jenssegers/blade))
-and [Twig](https://twig.symfony.com/). Here are the results:
+and [Twig](https://twig.symfony.com/). Here are the results for 1000x renders:
 
-| Contestant                             | Renders Count | Spent time, MS |
-|----------------------------------------|---------------|----------------|
-| `prosopo/views` (without models)       | 1000x         | 18.16          |
-| `prosopo/views` (with models)          | 1000x         | 45.1           |
-| `illuminate/view` (Blade from Laravel) | 1000x         | 171.89         |
-| `twig/twig`                            | 1000x         | 326.33         |
+| Contestant                             | First Rendering, MS | Cached Rendering, MS |
+|----------------------------------------|---------------------|----------------------|
+| `prosopo/views` (without models)       | 19.75               | 19.75 (no cache atm) |
+| `prosopo/views` (with models)          | 43.78               | 43.78 (no cache atm) |
+| `illuminate/view` (Blade from Laravel) | 181.24              | 56.77 ms             |
+| `twig/twig`                            | 441.13              | 9.47 ms              |
 
 We used the following package versions:
 
 * [illuminate/view](https://packagist.org/packages/illuminate/view) `11.7.0`
 * [twig/twig](https://packagist.org/packages/twig/twig) `3.17.1`
 * [jenssegers/blade](https://packagist.org/packages/jenssegers/blade) `2.0.1`
-
-> As you can see, even with the model class-related overhead, this package delivers performance that is approximately 4
-> times
-> faster than the Laravel's Blade and 7 times faster than Twig.
-
-Cache-note: The benchmark is designed to measure raw performance by avoiding any caching mechanisms.
 
 Since the [benchmark](https://github.com/prosopo/php-views/blob/main/benchmark/src/Benchmark.php) is included in this
 repository, you can easily run it locally to verify the results.
