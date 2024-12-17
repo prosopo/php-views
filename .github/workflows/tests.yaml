@@ -18,6 +18,11 @@ jobs:
           php-version: '8.2'
           extensions: mbstring, opcache
 
+      - name: Install Composer
+        run: |
+          curl -sS https://getcomposer.org/installer | php
+          sudo mv composer.phar /usr/local/bin/composer
+
       - name: Install composer packages for code-quality
         run: cd ${{ github.workspace }}/code-quality; composer install
 
