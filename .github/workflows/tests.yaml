@@ -18,17 +18,25 @@ jobs:
           php-version: '8.2'
           extensions: mbstring, opcache
 
+      - name: Install Composer
+        run: |
+          curl -sS https://getcomposer.org/installer | php
+          sudo mv composer.phar /usr/local/bin/composer
+
       - name: Install composer packages for code-quality
         run: cd ${{ github.workspace }}/code-quality; composer install
 
       - name: Validate code style with PHP Code Sniffer
-        run: composer phpcs
+        run: cd ${{ github.workspace }}/code-quality; composer phpcs
 
       - name: Perform static code analysis with PHPStan
-        run: composer phpstan
+        run: cd ${{ github.workspace }}/code-quality; composer phpstan
+
+      - name: Generate package autoloader files
+        run: cd ${{ github.workspace }}; composer install
 
       - name: Install composer packages for tests
         run: cd ${{ github.workspace }}/tests; composer install
 
       - name: Run Pest tests
-        run: composer pest
+        run: cd ${{ github.workspace }}/tests; composer pest
