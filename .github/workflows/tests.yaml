@@ -32,6 +32,9 @@ jobs:
       - name: Perform static code analysis with PHPStan
         run: cd ${{ github.workspace }}/code-quality; composer phpstan
 
+      - name: Generate package autoloader files
+        run: cd ${{ github.workspace }}; composer install
+
       - name: Install composer packages for tests
         run: cd ${{ github.workspace }}/tests; composer install
 
