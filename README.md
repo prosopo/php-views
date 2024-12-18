@@ -7,13 +7,13 @@
 
 ## Table of Contents
 
-- [1. Introduction](#1-introduction)
-- [2. Installation and minimal usage](#2-installation-and-minimal-usage)
-- [3. Model-driven approach](#3-model-driven-approach)
-- [4. Views Manager](#4-views-manager)
-- [5. View Renderer](#5-view-renderer)
-- [6. Contribution](#6-contribution)
-- [7. Credits](#7-credits)
+[1. Introduction](#1-introduction)  
+[2. Installation and minimal usage](#2-installation-and-minimal-usage)  
+[3. Model-driven approach](#3-model-driven-approach)  
+[4. Views Manager](#4-views-manager)  
+[5. View Renderer](#5-view-renderer)  
+[6. Contribution](#6-contribution)  
+[7. Credits](#7-credits)
 
 ## 1. Introduction
 
@@ -23,7 +23,8 @@ make templating simple, flexible, and accessible to anyone.
 
 ### Freedom to choose your template engine
 
-This package includes a custom Blade compiler and uses it as the default template engine.
+This package includes a custom [Blade](https://laravel.com/docs/11.x/blade) compiler and uses it as the default template
+engine.
 However, flexibility is key. You can integrate [Twig](https://twig.symfony.com/), or any other template engine, with
 just a few lines of code while
 still enjoying the benefits of the model-driven approach and other features that PHP Views brings to the table.
@@ -216,12 +217,13 @@ $viewsManager = new ViewsManager();
 $viewsManager->registerNamespace('MyPackage\Views', $namespaceConfig);
 ```
 
-**Naming Note:** Use dashes in template names, as camelCase in Model names is automatically converted to dash-separated
+**Naming Note:** Use dashes in template names, as `camelCase` in Model names is automatically converted to
+`dash-separated`
 names.
 
 ### 2.5) Usage
 
-The `ViewsManager` instance we created during setup provides the `createModel` and `renderModel` methods.
+The `ViewsManager` instance (which we created during the setup) provides the `createModel` and `renderModel` methods.
 
 You can create, set values, and render a Model in a single step using the callback argument of the `renderView` method,
 as shown below:
@@ -539,7 +541,8 @@ $viewsManager = new ViewsManager();
 $viewsManager->registerNamespace('MyPackage\Views', $namespaceConfig);
 ```
 
-**Naming Note:** Use dashes in template names, as camelCase in Model names is automatically converted to dash-separated
+**Naming Note:** Use dashes in template names, as `camelCase` in Model names is automatically converted to
+`dash-separated`
 names.
 
 > Tip: In case this approach doesn't work for your setup, you can override the `ModelTemplateResolver` module to
@@ -595,13 +598,17 @@ $viewsManager = new ViewsManager();
 // 4. Add the namespace (you can have multiple namespaces)
 
 $viewsManager->registerNamespace('MyPackage\Views', $namespaceConfig);
+
+// ...
+
+$viewsManager->renderModel(MyTwigModel::class);
 ```
 
 You can override any namespace module in the following way:
 
 ```php
 $namespaceConfig->getModules()
-     // override any module, like Factory:
+     // override any available module, like TemplateRenderer or Factory:
     ->setModelFactory(new MyFactory());
 ```
 
@@ -712,13 +719,17 @@ simple stub to enable support for plain PHP template files.
 
 ### 5.1) Built-in Blade integration
 
-[Blade](https://laravel.com/docs/11.x/blade) is an elegant and powerful template engine originally designed
-for [Laravel](https://laravel.com/).
+[Blade](https://laravel.com/docs/11.x/blade) is an elegant and powerful template engine originally developed
+for [Laravel](https://laravel.com/). Unlike [Twig](https://twig.symfony.com/), Blade embraces PHP usage
+rather than restricting it. It enhances templates with syntax sugar (which we all love), making them clean and easy to
+read.
 
-However, since it isn't available as a standalone package, this package includes its own Blade compiler.
+Blade introduces special shorthand tokens that simplify the most cumbersome syntax constructions, while still being
+fully-fledged PHP with access to all its functions and capabilities.
 
-It provides full support for [Blade's key features](https://laravel.com/docs/11.x/blade)
-while remaining completely independent of Laravel.
+Unfortunately, Blade isn't available as a standalone package, so this package includes its own Blade compiler. It
+provides full support for [Blade's key features](https://laravel.com/docs/11.x/blade) while remaining completely
+independent of Laravel.
 
 The following Blade tokens are supported:
 
