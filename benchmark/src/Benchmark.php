@@ -246,7 +246,7 @@ class Benchmark
     protected function defineModelClass(string $namespace, string $className): string
     {
         $code = sprintf(
-            'namespace %s; class %s extends \Prosopo\Views\TemplateModel { public array $items;  }',
+            'namespace %s; class %s extends \Prosopo\Views\BaseTemplateModel { public array $items;  }',
             $namespace,
             $className
         );
