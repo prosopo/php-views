@@ -20,9 +20,9 @@ final class CodeRunnerWithErrorHandler implements CodeRunnerInterface
     private string $errorEventName;
 
     public function __construct(
-        CodeRunnerInterface      $codeExecutor,
+        CodeRunnerInterface $codeExecutor,
         EventDispatcherInterface $eventDispatcher,
-        string                   $errorEventName
+        string $errorEventName
     ) {
         $this->codeExecutor = $codeExecutor;
         $this->eventDispatcher = $eventDispatcher;

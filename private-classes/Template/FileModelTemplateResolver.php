@@ -23,12 +23,12 @@ final class FileModelTemplateResolver implements ModelTemplateResolverInterface
     private ModelNamespaceResolverInterface $modelNamespaceProvider;
 
     public function __construct(
-        string                          $namespace,
-        string                          $templatesRootPath,
-        string                          $extension,
-        bool                            $isFileBasedTemplate,
+        string $namespace,
+        string $templatesRootPath,
+        string $extension,
+        bool $isFileBasedTemplate,
         ModelNamespaceResolverInterface $modelNamespaceProvider,
-        ModelNameResolverInterface      $modelNameProvider
+        ModelNameResolverInterface $modelNameProvider
     ) {
         $this->templatesRootPath = $templatesRootPath;
         $this->namespace = $namespace;

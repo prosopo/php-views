@@ -65,7 +65,7 @@ final class ViewTemplateRenderer implements TemplateRendererInterface
             new TemplateRenderer($codeExecutor) :
             $templateRenderer;
 
-        if (true === $config->isFileBasedTemplate()) {
+        if (true === $config->fileBasedTemplates()) {
             $templateRenderer = new TemplateRendererWithFileTemplate($templateRenderer);
         }
 

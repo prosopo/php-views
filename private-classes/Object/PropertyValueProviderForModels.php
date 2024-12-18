@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\Object;
 
+use Prosopo\Views\BaseTemplateModel;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
-use Prosopo\Views\BaseTemplateModel;
 use ReflectionProperty;
 
 /**

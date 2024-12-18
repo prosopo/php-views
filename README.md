@@ -5,7 +5,7 @@ custom [Blade](https://laravel.com/docs/11.x/blade) implementation as a default 
 
 ### Benefits
 
-* **Blazing fast:** Outperforms the original Laravel Blade (see the [Benchmark chapter](#4-benchmark)).
+* **Blazing fast:** Outperforms the original Laravel Blade (see the [Benchmark section](#4-benchmark)).
 * **Zero Dependencies:** Lightweight and easy to integrate into any project.
 * **Wide Compatibility:** PHP 7.4+, 8.0+
 * **Adherence to the [SOLID principles](https://en.wikipedia.org/wiki/SOLID):** The architecture allows you to easily
@@ -68,6 +68,7 @@ Model template (Blade is used in this example):
 <p>
 Your month income is {{ $total() }}, 
 from which {{ $salary }} is a salary, and {{ $bonus }} is a bonus.
+Est. taxes: {{ $innerModel->taxes($salary) }}
 </p>
 
 {!! $innerModel !!}
@@ -87,9 +88,18 @@ from which {{ $salary }} is a salary, and {{ $bonus }} is a bonus.
    maintain
    flexibility and avoid specifying the exact component.
 
-The `BaseTemplateModel` class implements the `TemplateModelInterface`. During rendering, any inner objects that also
-implement
-`TemplateModelInterface` will be automatically rendered and passed into the template as strings.
+By default, inner models are passed to templates as objects, enabling you to call their public methods directly. For
+example:
+
+`{{ $$innerModel->calc($localVar) }}`.
+
+The `BaseTemplateModel` class overrides the `__toString()` method, allowing inner models to be rendered as strings using
+echo statements, which supports HTML output. For instance:
+
+`{!! $innerModel !!}`
+
+If you prefer, you can configure the `ViewsManager` to pass models as strings instead of objects. Refer to the `
+ViewsManager` section for details.
 
 ### 1.3) Custom property defaults
 
@@ -144,6 +154,17 @@ class AnyClass implements TemplateModelInterface
 }
 ```
 
+Note: If you plan to define inner models, remember that the default `__toString()` implementation is not provided. You
+will need to either implement it yourself or enable the option to pass models as strings in the `ViewsManager`
+configuration:
+
+```php
+$namespaceConfig->setModelsAsStringsInTemplates(true);
+```
+
+When this option is enabled, the renderer will automatically convert objects implementing `TemplateModelInterface` into
+strings before passing them to the template.
+
 ## 2. Views Manager
 
 The `ViewsManager` class provides the `registerNamespace`, `createModel` and `renderModel` methods. It acts as a
@@ -174,7 +195,9 @@ $namespaceConfig = (new ViewNamespaceConfig($viewTemplateRenderer))
     // optional setting:
     ->setTemplateErrorHandler(function (array $eventDetails) {
         // logging, notifying, whatever.
-    });
+    })
+    // this option enables inner models rendering before passing them into the template
+    ->setModelsAsStringsInTemplates(true);
 
 // (This line is necessary only if you defined the templateErrorHandler)
 $namespaceConfig->getModules()
@@ -234,7 +257,8 @@ Advice: The `ViewsManager` class implements three interfaces: `ViewNamespaceMana
 When passing the `ViewsManager` instance to your methods, use one of these interfaces as the argument type instead of
 the `ViewsManager` class itself.
 
-This approach ensures that only the specific actions you expect are accessible, promoting cleaner and more maintainable code.
+This approach ensures that only the specific actions you expect are accessible, promoting cleaner and more maintainable
+code.
 
 ### 2.4) Automated templates matching
 
@@ -324,7 +348,8 @@ $namespaceConfig->getModules()
 
 ### 2.6) Namespace mixing
 
-> Fun Fact: The `ViewsManager` class not only supporting multiple namespaces, but also enabling you to use Models from one
+> Fun Fact: The `ViewsManager` class not only supporting multiple namespaces, but also enabling you to use Models from
+> one
 > namespace within another, preserving their individual setup.
 
 Example of multi-namespace usage:
@@ -399,7 +424,7 @@ use Prosopo\Views\View\ViewTemplateRenderer;
 use Prosopo\Views\View\ViewTemplateRendererConfig;
 
 $viewRendererConfig = new ViewTemplateRendererConfig();
-$viewRendererConfig->setIsFileBasedTemplate(false);
+$viewRendererConfig->setFileBasedTemplates(false);
 
 $viewTemplateRenderer = new ViewTemplateRenderer($viewRendererConfig);
 
@@ -425,7 +450,7 @@ use Prosopo\Views\View\ViewTemplateRendererConfig;
 $viewRendererConfig = (new ViewTemplateRendererConfig())
 // By default, the Renderer expect a file name.
 // Set to false if to work with strings
-    ->setIsFileBasedTemplate(true)
+    ->setFileBasedTemplates(true)
     ->setTemplateErrorHandler(function (array $eventDetails): void {
         // Can be used for logging, notifying, etc.
     })

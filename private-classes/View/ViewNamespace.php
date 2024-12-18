@@ -81,17 +81,17 @@ final class ViewNamespace
             new ModelNameResolver(new ObjectClassReader()) :
             $modelNameProvider;
 
-        $templateProvider = $modules->getModelTemplateResolver();
-        $templateProvider = null === $templateProvider ?
+        $modelTemplateResolver = $modules->getModelTemplateResolver();
+        $modelTemplateResolver = null === $modelTemplateResolver ?
             new FileModelTemplateResolver(
                 $namespace,
                 $config->getTemplatesRootPath(),
                 $config->getTemplateFileExtension(),
-                $config->isFileBasedTemplate(),
+                $config->fileBasedTemplates(),
                 $modelNamespaceProvider,
                 $modelNameProvider
             ) :
-            $templateProvider;
+            $modelTemplateResolver;
 
         $propertyValueProvider = $modules->getPropertyValueProvider();
         $propertyValueProvider = null === $propertyValueProvider ?
@@ -112,13 +112,25 @@ final class ViewNamespace
 
         // Without null check - templateRenderer is a mandatory module.
         $templateRenderer = $modules->getTemplateRenderer();
-        $templateRenderer = new TemplateRendererWithModelsRender($templateRenderer, $modelRendererWithNamespace);
+        $templateRendererWithModelsRender = new TemplateRendererWithModelsRender(
+            $templateRenderer,
+            $modelRendererWithNamespace
+        );
 
-        //// 2. Real Factory and Renderer creation (used in the Views class):
+        if (true === $config->modelsAsStringsInTemplates()) {
+            $templateRenderer = $templateRendererWithModelsRender;
+        }
+
+        //// 2. Real Factory and Renderer creation (used in the ViewsManager class):
 
         $realModelFactory = $modules->getModelFactory();
         $realModelFactory = null === $realModelFactory ?
-            new ModelFactory($objectReader, $propertyValueProvider) :
+            new ModelFactory(
+                $objectReader,
+                $propertyValueProvider,
+                $modelTemplateResolver,
+                $templateRendererWithModelsRender
+            ) :
             $realModelFactory;
 
         $realModelFactory = new ModelFactoryWithDefaultsManagement(
@@ -133,7 +145,7 @@ final class ViewNamespace
             new ModelRenderer(
                 $templateRenderer,
                 $modelFactoryWithNamespaces,
-                $templateProvider
+                $modelTemplateResolver
             ) :
             $realModelRenderer;
 
@@ -148,7 +160,7 @@ final class ViewNamespace
         $modules->setEventDispatcher($eventDispatcher)
                 ->setObjectReader($objectReader)
                 ->setObjectPropertyWriter($objectPropertyWriter)
-                ->setModelTemplateResolver($templateProvider)
+                ->setModelTemplateResolver($modelTemplateResolver)
                 ->setPropertyValueProvider($propertyValueProvider)
                 ->setModelFactory($realModelFactory)
                 ->setModelRenderer($realModelRenderer)

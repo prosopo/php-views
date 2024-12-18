@@ -8,11 +8,15 @@ use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelWithDefaultsInterface;
 use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
+use Prosopo\Views\Interfaces\Template\ModelTemplateResolverInterface;
+use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 
 abstract class BaseTemplateModel implements TemplateModelInterface, TemplateModelWithDefaultsInterface
 {
     private ObjectReaderInterface $objectReader;
     private PropertyValueProviderInterface $propertyValueProviderForDefaults;
+    private ModelTemplateResolverInterface $modelTemplateResolver;
+    private TemplateRendererInterface $templateRenderer;
 
     /**
      * The constructor is marked as final to prevent accidental argument overrides.
@@ -37,10 +41,14 @@ abstract class BaseTemplateModel implements TemplateModelInterface, TemplateMode
      */
     final public function __construct(
         ObjectReaderInterface $objectPropertyReader,
-        PropertyValueProviderInterface $propertyValueProviderForDefaults
+        PropertyValueProviderInterface $propertyValueProviderForDefaults,
+        ModelTemplateResolverInterface $modelTemplateResolver,
+        TemplateRendererInterface $templateRenderer
     ) {
         $this->objectReader = $objectPropertyReader;
         $this->propertyValueProviderForDefaults = $propertyValueProviderForDefaults;
+        $this->modelTemplateResolver = $modelTemplateResolver;
+        $this->templateRenderer = $templateRenderer;
 
         $this->setCustomDefaults();
     }
@@ -57,5 +65,13 @@ abstract class BaseTemplateModel implements TemplateModelInterface, TemplateMode
 
     protected function setCustomDefaults(): void
     {
+    }
+
+    public function __toString()
+    {
+        $template = $this->modelTemplateResolver->resolveModelTemplate($this);
+        $arguments = $this->getTemplateArguments();
+
+        return $this->templateRenderer->renderTemplate($template, $arguments);
     }
 }

@@ -32,7 +32,7 @@ class BladeTemplateRendererTest extends TestCase
     {
         // given
         $bladeRendererConfig = new ViewTemplateRendererConfig();
-        $bladeRendererConfig->setIsFileBasedTemplate(false);
+        $bladeRendererConfig->setFileBasedTemplates(false);
         $bladeRenderer = new ViewTemplateRenderer($bladeRendererConfig);
 
         // when
@@ -48,7 +48,7 @@ class BladeTemplateRendererTest extends TestCase
     {
         // given
         $bladeRendererConfig = new ViewTemplateRendererConfig();
-        $bladeRendererConfig->setIsFileBasedTemplate(false);
+        $bladeRendererConfig->setFileBasedTemplates(false);
         $receivedEventDetails = null;
         $bladeRendererConfig->setTemplateErrorHandler(function (array $eventDetails) use (&$receivedEventDetails) {
             $receivedEventDetails = $eventDetails;
@@ -73,7 +73,7 @@ class BladeTemplateRendererTest extends TestCase
     {
         // given
         $bladeRendererConfig = new ViewTemplateRendererConfig();
-        $bladeRendererConfig->setIsFileBasedTemplate(false);
+        $bladeRendererConfig->setFileBasedTemplates(false);
         $receivedEventDetails = null;
         $bladeRendererConfig->setTemplateErrorHandler(function (array $eventDetails) use (&$receivedEventDetails) {
             $receivedEventDetails = $eventDetails;
