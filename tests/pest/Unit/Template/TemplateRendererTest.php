@@ -59,34 +59,6 @@ class TemplateRendererTest extends TestCase
         Mockery::close();
     }
 
-    public function testRenderTemplatePrintsWhenDoPrintIsTrue(): void
-    {
-        // given
-        $templateExecutor = Mockery::mock(CodeRunnerInterface::class);
-        $renderer = new TemplateRenderer($templateExecutor);
-
-        // when
-        $result = fn() => $renderer->renderTemplate('<h1>{{ $title }}</h1>', ['title' => 'Welcome'], true);
-
-        // then
-        $templateExecutor->shouldReceive('runCode')
-            ->once()
-            ->with('<h1>{{ $title }}</h1>', ['title' => 'Welcome'])
-            ->andReturnUsing(function () {
-                echo '<h1>Welcome</h1>';
-            });
-
-        ob_start();
-        $rendered = $result();
-        $output = ob_get_clean();
-
-        $this->assertSame('<h1>Welcome</h1>', $rendered);
-        $this->assertSame('<h1>Welcome</h1>', $output);
-
-        // apply
-        Mockery::close();
-    }
-
     public function testRenderTemplateHandlesEmptyTemplate(): void
     {
         // given

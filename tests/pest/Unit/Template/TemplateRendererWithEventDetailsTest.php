@@ -29,7 +29,7 @@ class TemplateRendererWithEventDetailsTest extends TestCase
 
         $templateRendererMock->shouldReceive('renderTemplate')
             ->once()
-            ->with('<div>{{ $var }}</div>', ['var' => 'Test Content'], false)
+            ->with('<div>{{ $var }}</div>', ['var' => 'Test Content'])
             ->andReturn('<div>Test Content</div>');
 
         $eventDispatcherMock->shouldReceive('unregisterEventDetails')
@@ -37,40 +37,6 @@ class TemplateRendererWithEventDetailsTest extends TestCase
             ->with('render_event', ['template' => '<div>{{ $var }}</div>']);
 
         $this->assertSame('<div>Test Content</div>', $result());
-
-        // apply
-        Mockery::close();
-    }
-
-    public function testRenderTemplatePassesDoPrintFlag(): void
-    {
-        // given
-        $templateRendererMock = Mockery::mock(TemplateRendererInterface::class);
-        $eventDispatcherMock = Mockery::mock(EventDispatcherInterface::class);
-        $renderer = new TemplateRendererWithEventDetails($templateRendererMock, $eventDispatcherMock, 'render_event');
-
-        // when
-        $result = fn() => $renderer->renderTemplate(
-            '<p>{{ $message }}</p>',
-            ['message' => 'Hello, World!'],
-            true
-        );
-
-        // then
-        $eventDispatcherMock->shouldReceive('registerEventDetails')
-            ->once()
-            ->with('render_event', ['template' => '<p>{{ $message }}</p>']);
-
-        $templateRendererMock->shouldReceive('renderTemplate')
-            ->once()
-            ->with('<p>{{ $message }}</p>', ['message' => 'Hello, World!'], true)
-            ->andReturn('<p>Hello, World!</p>');
-
-        $eventDispatcherMock->shouldReceive('unregisterEventDetails')
-            ->once()
-            ->with('render_event', ['template' => '<p>{{ $message }}</p>']);
-
-        $this->assertSame('<p>Hello, World!</p>', $result());
 
         // apply
         Mockery::close();
@@ -93,7 +59,7 @@ class TemplateRendererWithEventDetailsTest extends TestCase
 
         $templateRendererMock->shouldReceive('renderTemplate')
             ->once()
-            ->with('', [], false)
+            ->with('', [])
             ->andReturn('');
 
         $eventDispatcherMock->shouldReceive('unregisterEventDetails')

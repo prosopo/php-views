@@ -8,7 +8,6 @@ use Mockery;
 use PHPUnit\Framework\TestCase;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
-use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use Prosopo\Views\Interfaces\Template\ModelTemplateResolverInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\PrivateClasses\Model\ModelRenderer;
@@ -43,7 +42,7 @@ class ModelRendererTest extends TestCase
 
         $templateRendererMock->shouldReceive('renderTemplate')
             ->once()
-            ->with('<div>{{ $key }}</div>', ['key' => 'value'], false)
+            ->with('<div>{{ $key }}</div>', ['key' => 'value'])
             ->andReturn('<div>value</div>');
 
         // then
@@ -86,7 +85,7 @@ class ModelRendererTest extends TestCase
 
         $templateRendererMock->shouldReceive('renderTemplate')
             ->once()
-            ->with('<div>{{ $key }}</div>', ['key' => 'value'], false)
+            ->with('<div>{{ $key }}</div>', ['key' => 'value'])
             ->andReturn('<div>value</div>');
 
         $this->assertSame('<div>value</div>', $result());
@@ -131,47 +130,10 @@ class ModelRendererTest extends TestCase
 
         $templateRendererMock->shouldReceive('renderTemplate')
             ->once()
-            ->with('<div>{{ $key }}</div>', ['key' => 'modified_value'], false)
+            ->with('<div>{{ $key }}</div>', ['key' => 'modified_value'])
             ->andReturn('<div>modified_value</div>');
 
         $this->assertSame('<div>modified_value</div>', $result());
-
-        // apply
-        Mockery::close();
-    }
-
-    public function testRenderModelPrintsOutput(): void
-    {
-        // given
-        $templateRendererMock = Mockery::mock(TemplateRendererInterface::class);
-        $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
-        $templateProviderMock = Mockery::mock(ModelTemplateResolverInterface::class);
-        $modelMock = Mockery::mock(TemplateModelInterface::class);
-        $renderer = new ModelRenderer(
-            $templateRendererMock,
-            $modelFactoryMock,
-            $templateProviderMock
-        );
-
-        // when
-        $renderModel = fn()=>$renderer->renderModel($modelMock, null, true);
-
-        // then
-        $modelMock->shouldReceive('getTemplateArguments')
-            ->once()
-            ->andReturn(['key' => 'value']);
-
-        $templateProviderMock->shouldReceive('resolveModelTemplate')
-            ->once()
-            ->with($modelMock)
-            ->andReturn('<div>{{ $key }}</div>');
-
-        $templateRendererMock->shouldReceive('renderTemplate')
-            ->once()
-            ->with('<div>{{ $key }}</div>', ['key' => 'value'], true)
-            ->andReturn('<div>value</div>');
-
-        $this->assertSame('<div>value</div>', $renderModel());
 
         // apply
         Mockery::close();

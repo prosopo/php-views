@@ -235,8 +235,8 @@ class ViewsManagerTest extends TestCase
 
         // then
         $this->assertSame('', $rendered);
-        $this->assertSame(['viewClass','template','arguments','code','error',], array_keys($receivedEventDetails));
-        $this->assertSame($modelClass, $receivedEventDetails['viewClass']);
+        $this->assertSame(['modelClass','template','arguments','code','error',], array_keys($receivedEventDetails));
+        $this->assertSame($modelClass, $receivedEventDetails['modelClass']);
         $this->assertSame(vfsStream::url('templates/first-model.blade.php'), $receivedEventDetails['template']);
         $this->assertSame('some data', $receivedEventDetails['arguments']['message']);
         $this->assertSame('<?php if( $message ): ?>wrong template', $receivedEventDetails['code']);

@@ -33,8 +33,7 @@ class TemplateRendererWithCustomEscapeTest extends TestCase
                 Mockery::on(function ($variables) {
                     return is_callable($variables['escape'])
                         && call_user_func($variables['escape'], 'test') === 'TEST';
-                }),
-                false
+                })
             )
             ->andReturn('<div>TEST</div>');
 
@@ -68,8 +67,7 @@ class TemplateRendererWithCustomEscapeTest extends TestCase
                 Mockery::on(function ($variables) {
                     return is_callable($variables['escape'])
                         && call_user_func($variables['escape'], '<script>alert("test")</script>') === '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;';
-                }),
-                false
+                })
             )
             ->andReturn('<div>&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;</div>');
 
@@ -101,8 +99,7 @@ class TemplateRendererWithCustomEscapeTest extends TestCase
                     return isset($mergedVariables['escape']) &&
                         is_callable($mergedVariables['escape']) &&
                         $mergedVariables['escape']('hello') === 'hello';
-                }),
-                false
+                })
             )
             ->andReturn('<div>hello</div>');
 
