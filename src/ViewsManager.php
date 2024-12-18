@@ -23,17 +23,17 @@ use Prosopo\Views\View\ViewNamespaceModules;
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties and introduce new public ones.
  */
-final class Views implements ViewNamespaceManagerInterface, ModelFactoryInterface, ModelRendererInterface
+final class ViewsManager implements ViewNamespaceManagerInterface, ModelFactoryInterface, ModelRendererInterface
 {
     private string $namespaceNotFoundErrorMessage;
     private string $wrongModelErrorMessage;
     private ModelNamespaceResolverInterface $modelNamespaceProvider;
     private ViewNamespaceModulesContainerInterface $namespaceModulesContainer;
 
-    public function __construct(?ViewsConfig $config = null)
+    public function __construct(?ViewsManagerConfig $config = null)
     {
         $config = null === $config ?
-            new ViewsConfig() :
+            new ViewsManagerConfig() :
             $config;
 
         $modelNamespaceProvider = $config->getModelNamespaceProvider();

@@ -11,7 +11,7 @@ use Prosopo\Views\Interfaces\View\ViewNamespaceModulesContainerInterface;
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties and introduce new public ones.
  */
-final class ViewsConfig
+final class ViewsManagerConfig
 {
     private string $namespaceNotFoundErrorMessage;
     private string $wrongModelErrorMessage;

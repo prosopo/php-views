@@ -9,13 +9,13 @@ use ParseError;
 use PHPUnit\Framework\TestCase;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
-use Prosopo\Views\TemplateModel;
+use Prosopo\Views\BaseTemplateModel;
 use Prosopo\Views\View\ViewNamespaceConfig;
 use Prosopo\Views\View\ViewTemplateRenderer;
 use Prosopo\Views\View\ViewTemplateRendererConfig;
-use Prosopo\Views\Views;
+use Prosopo\Views\ViewsManager;
 
-class ViewsTest extends TestCase
+class ViewsManagerTest extends TestCase
 {
     //// renderModel
 
@@ -40,7 +40,7 @@ class ViewsTest extends TestCase
             ],
             false
         );
-        $views = new Views();
+        $views = new ViewsManager();
 
         // when
         $views->registerNamespace($modelNamespace, $namespaceConfig);
@@ -80,7 +80,7 @@ class ViewsTest extends TestCase
             false,
             ['data',]
         );
-        $views = new Views();
+        $views = new ViewsManager();
 
         // when
         $views->registerNamespace($modelNamespace, $namespaceConfig);
@@ -100,7 +100,7 @@ class ViewsTest extends TestCase
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('templates'))
             ->setTemplateFileExtension('.blade.php');
-        $views = new Views();
+        $views = new ViewsManager();
 
         $modelNamespace = $this->defineRealModelClass(
             __METHOD__,
@@ -134,7 +134,7 @@ class ViewsTest extends TestCase
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('templates'))
             ->setTemplateFileExtension('.blade.php');
-        $views = new Views();
+        $views = new ViewsManager();
 
         $modelNamespace = $this->defineRealModelClass(
             __METHOD__,
@@ -184,7 +184,7 @@ class ViewsTest extends TestCase
             ],
             false
         );
-        $views = new Views();
+        $views = new ViewsManager();
 
         // when
         $views->registerNamespace($modelNamespace, $namespaceConfig);
@@ -211,7 +211,7 @@ class ViewsTest extends TestCase
         $namespaceConfig
             ->getModules()
             ->setEventDispatcher($bladeRenderer->getModules()->getEventDispatcher());
-        $views = new Views();
+        $views = new ViewsManager();
 
         $modelNamespace = $this->defineRealModelClass(
             __METHOD__,
@@ -258,7 +258,7 @@ class ViewsTest extends TestCase
         $namespaceConfig
             ->getModules()
             ->setEventDispatcher($bladeRenderer->getModules()->getEventDispatcher());
-        $views = new Views();
+        $views = new ViewsManager();
 
         $modelNamespace = $this->defineRealModelClass(
             __METHOD__,
@@ -311,7 +311,7 @@ class ViewsTest extends TestCase
             false
         );
         $namespace = str_replace('\inner', '', $innerModelNamespace);
-        $views = new Views();
+        $views = new ViewsManager();
 
         // when
         $views->registerNamespace($namespace, $namespaceConfig);
@@ -363,7 +363,7 @@ class ViewsTest extends TestCase
             ],
             true
         );
-        $views = new Views();
+        $views = new ViewsManager();
 
         // when
         $views->registerNamespace($firstNamespace, $firstNamespaceConfig);
@@ -406,7 +406,7 @@ class ViewsTest extends TestCase
             ],
             false
         );
-        $views = new Views();
+        $views = new ViewsManager();
 
         // when
         $views->registerNamespace($modelNamespace, $namespaceConfig);
@@ -436,7 +436,7 @@ class ViewsTest extends TestCase
         $viewTemplateRendererConfig->getModules()
             ->setTemplateCompiler($compilerStub);
         $viewTemplateRenderer = new ViewTemplateRenderer($viewTemplateRendererConfig);
-        $views = new Views();
+        $views = new ViewsManager();
         $viewNamespaceConfig = new ViewNamespaceConfig($viewTemplateRenderer);
         $modelNamespace = $this->defineRealModelClass(
             __METHOD__,
@@ -496,7 +496,7 @@ class ViewsTest extends TestCase
             ],
             false
         );
-        $views = new Views();
+        $views = new ViewsManager();
 
         // when
         $views->registerNamespace($firstNamespace, $firstNamespaceConfig);
@@ -518,7 +518,7 @@ class ViewsTest extends TestCase
         // given
         $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
-        $views = new Views();
+        $views = new ViewsManager();
 
         $modelNamespace = $this->defineRealModelClass(
             __METHOD__,
@@ -542,7 +542,7 @@ class ViewsTest extends TestCase
         // given
         $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
-        $views = new Views();
+        $views = new ViewsManager();
 
         $modelNamespace = $this->defineRealModelClass(
             __METHOD__,
@@ -572,7 +572,7 @@ class ViewsTest extends TestCase
         // given
         $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
-        $views = new Views();
+        $views = new ViewsManager();
 
         $modelNamespace = $this->defineRealModelClass(
             __METHOD__,
@@ -602,7 +602,7 @@ class ViewsTest extends TestCase
         // given
         $bladeRenderer = new ViewTemplateRenderer();
         $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
-        $views = new Views();
+        $views = new ViewsManager();
 
         $modelNamespace = $this->defineRealModelClass(
             __METHOD__,
@@ -645,7 +645,7 @@ class ViewsTest extends TestCase
             [],
             true
         );
-        $views = new Views();
+        $views = new ViewsManager();
 
         // when
         $views->registerNamespace($firstNamespace, $firstNamespaceConfig);
@@ -676,7 +676,7 @@ class ViewsTest extends TestCase
         $namespace = '_views_test_' . strtolower($methodName);
         $classContent = $this->getClassProperties($properties);
         $extends = true === $extendsClass ?
-            'extends \\' . TemplateModel::class :
+            'extends \\' . BaseTemplateModel::class :
             'implements \\' . TemplateModelInterface::class;
 
         if (false === $extendsClass) {

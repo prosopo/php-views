@@ -9,7 +9,7 @@ use Prosopo\Views\Interfaces\Model\TemplateModelWithDefaultsInterface;
 use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
 
-abstract class TemplateModel implements TemplateModelInterface, TemplateModelWithDefaultsInterface
+abstract class BaseTemplateModel implements TemplateModelInterface, TemplateModelWithDefaultsInterface
 {
     private ObjectReaderInterface $objectReader;
     private PropertyValueProviderInterface $propertyValueProviderForDefaults;
@@ -50,7 +50,7 @@ abstract class TemplateModel implements TemplateModelInterface, TemplateModelWit
         return $this->objectReader->extractObjectVariables($this);
     }
 
-    public function getDefaultsProvider(): PropertyValueProviderInterface
+    public function getDefaultPropertyValueProvider(): PropertyValueProviderInterface
     {
         return $this->propertyValueProviderForDefaults;
     }

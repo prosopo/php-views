@@ -26,7 +26,7 @@ You're free to use the package in your own way:
 ## Table of Contents
 
 - [1. Model-driven approach](#1-model-driven-approach)
-- [2. Views](#2-views)
+- [2. Views Manager](#2-views-manager)
 - [3. View Renderer](#3-view-renderer)
 - [4. Benchmark](#4-benchmark)
 - [5. Contribution](#4-contribution)
@@ -43,10 +43,10 @@ Model class:
 ```php
 namespace MyPackage\Views;
 
+use Prosopo\Views\BaseTemplateModel;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
-use Prosopo\Views\TemplateModel;
 
-class EmployeeTemplateModel extends TemplateModel
+class EmployeeTemplateModel extends BaseTemplateModel
 {
     public int $salary;
     public int $bonus;
@@ -87,7 +87,7 @@ from which {{ $salary }} is a salary, and {{ $bonus }} is a bonus.
    maintain
    flexibility and avoid specifying the exact component.
 
-The `TemplateModel` class implements the `TemplateModelInterface`. During rendering, any inner objects that also
+The `BaseTemplateModel` class implements the `TemplateModelInterface`. During rendering, any inner objects that also
 implement
 `TemplateModelInterface` will be automatically rendered and passed into the template as strings.
 
@@ -100,15 +100,16 @@ set custom default values, consider using one of the following approaches:
 ```php
 namespace MyPackage\Views;
 
-use Prosopo\Views\TemplateModel;
+use Prosopo\Views\BaseTemplateModel;
 
-class EmployeeTemplateModel extends TemplateModel
+class EmployeeTemplateModel extends BaseTemplateModel
 {
     // approach for plain field types.
     public int $varWithCustomDefaultValue = 'custom default value';
     public Company $company;
 
-    protected function setCustomDefaults(){
+    protected function setCustomDefaults(): void
+    {
         // approach for object field types.
         $this->company = new Company();
     }
@@ -131,19 +132,21 @@ namespace MyPackage\Views;
 
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 
-class AnyClass implements TemplateModelInterface {  
-     public function getTemplateArguments(): array {
+class AnyClass implements TemplateModelInterface
+{
+    public function getTemplateArguments(): array
+    {
         // you can fill out arguments from any source or define manually.
         return [
-           'name' => 'value',
+            'name' => 'value',
         ];
-     }
+    }
 }
 ```
 
-## 2. Views
+## 2. Views Manager
 
-The `Views` class provides the `registerNamespace`, `createModel` and `renderModel` methods. It acts as a
+The `ViewsManager` class provides the `registerNamespace`, `createModel` and `renderModel` methods. It acts as a
 namespace manager and brings together different namespace configurations.
 
 Each `ViewNamespace` has its own independent setup and set of modules. E.g. among these modules is the
@@ -155,7 +158,7 @@ corresponding templates.
 ```php
 use Prosopo\Views\View\ViewNamespaceConfig;
 use Prosopo\Views\View\ViewTemplateRenderer;
-use Prosopo\Views\Views;
+use Prosopo\Views\ViewsManager;
 
 // 1. Make the Template Renderer.
 // (By default it uses the built-in Blade, but you can connect any)
@@ -179,11 +182,11 @@ $namespaceConfig->getModules()
 
 // 3. Make the Views instance:
 
-$views = new Views();
+$viewsManager = new ViewsManager();
 
 // 4. Add the root namespace of your Template Models
 
-$views->registerNamespace('MyPackage\Views', $namespaceConfig);
+$viewsManager->registerNamespace('MyPackage\Views', $namespaceConfig);
 
 // Tip: you can have multiple namespaces, and mix their Models.
 ```
@@ -194,7 +197,7 @@ You can create, set values, and render a Model in a single step using the callba
 as shown below:
 
 ```php
-echo $views->renderModel(
+echo $viewsManager->renderModel(
     EmployeeModel::class,
     function (EmployeeModel $employee) use ($salary, $bonus) {
         $employee->salary = $salary;
@@ -210,7 +213,7 @@ This approach enables a functional programming style when working with Models.
 When you need split creation, use the factory to create the model, and then render later when you need it.
 
 ```php
-$employee = $views->createModel(EmployeeModel::class);
+$employee = $viewsManager->createModel(EmployeeModel::class);
 
 // ...
 
@@ -225,15 +228,13 @@ echo $views->renderModel($employee);
 // to customize the Model properties before rendering. 
 ```
 
-Advice: The `Views` class implements three interfaces: `ViewNamespaceManagerInterface` (for `registerNamespace`),
-`ModelFactoryInterface` (for
-`createModel`), and `ModelRendererInterface` (for `renderModel`).
+Advice: The `ViewsManager` class implements three interfaces: `ViewNamespaceManagerInterface` (for `registerNamespace`),
+`ModelFactoryInterface` (for `createModel`), and `ModelRendererInterface` (for `renderModel`).
 
-When passing the `Views` instance to your methods, use
-one of these interfaces as the argument type instead of the `Views` class itself.
+When passing the `ViewsManager` instance to your methods, use one of these interfaces as the argument type instead of
+the `ViewsManager` class itself.
 
-This approach ensures that only the specific actions
-you expect are accessible, promoting cleaner and more maintainable code.
+This approach ensures that only the specific actions you expect are accessible, promoting cleaner and more maintainable code.
 
 ### 2.4) Automated templates matching
 
@@ -261,7 +262,8 @@ names.
 
 ### 2.5) Custom modules
 
-By default, the `registerNamespace` class creates module instances for the namespace using classes from the current package.
+By default, the `registerNamespace` class creates module instances for the namespace using classes from the current
+package.
 
 If you need to override the default module behavior, you can define a custom implementation in the
 configuration and the package will use the specified implementation.
@@ -275,7 +277,7 @@ configuration and the package will use the specified implementation.
 
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\View\ViewNamespaceConfig;
-use Prosopo\Views\Views;
+use Prosopo\Views\ViewsManager;
 
 class TwigDecorator implements TemplateRendererInterface
 {
@@ -286,9 +288,9 @@ class TwigDecorator implements TemplateRendererInterface
         // todo init Twig or another engine.
     }
 
-    public function renderTemplate(string $template, array $variables, bool $doPrint = false): string
+    public function renderTemplate(string $template, array $variables = []): string
     {
-        return $this->twig->render($template, $variables, $doPrint);
+        return $this->twig->render($template, $variables);
     }
 }
 
@@ -302,11 +304,11 @@ $namespaceConfig = (new ViewNamespaceConfig($twigDecorator))
 
 // 3. Make the Views:
 
-$views = new Views();
+$viewsManager = new ViewsManager();
 
 // 4. Add the namespace (you can have multiple namespaces)
 
-$views->registerNamespace('MyPackage\Views', $namespaceConfig);
+$viewsManager->registerNamespace('MyPackage\Views', $namespaceConfig);
 ```
 
 You can override any namespace module in the following way:
@@ -322,7 +324,7 @@ $namespaceConfig->getModules()
 
 ### 2.6) Namespace mixing
 
-> Fun Fact: The `Views` class not only supporting multiple namespaces, but also enabling you to use Models from one
+> Fun Fact: The `ViewsManager` class not only supporting multiple namespaces, but also enabling you to use Models from one
 > namespace within another, preserving their individual setup.
 
 Example of multi-namespace usage:
@@ -414,8 +416,7 @@ echo $viewTemplateRenderer->renderTemplate('@if($var)The variable is set.@endif'
 ### 3.3) Available View Renderer settings
 
 The `ViewTemplateRenderer` supports a variety of settings that let you customize features such as
-escaping,
-error handling, and more:
+escaping, error handling, and more:
 
 ```php
 use Prosopo\Views\View\ViewTemplateRenderer;
@@ -471,7 +472,7 @@ use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
 use Prosopo\Views\View\ViewNamespaceConfig;
 use Prosopo\Views\View\ViewTemplateRenderer;
 use Prosopo\Views\View\ViewTemplateRendererConfig;
-use Prosopo\Views\Views;
+use Prosopo\Views\ViewsManager;
 
 class CompilerStubForPlainPhpSupport implements TemplateCompilerInterface
 {
@@ -489,7 +490,7 @@ $viewTemplateRendererConfig->getModules()
 
 $viewTemplateRenderer = new ViewTemplateRenderer($viewTemplateRendererConfig);
 
-$views = new Views();
+$views = new ViewsManager();
 
 $viewNamespaceConfig = new ViewNamespaceConfig($viewTemplateRenderer);
 $viewNamespaceConfig

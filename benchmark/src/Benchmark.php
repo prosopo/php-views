@@ -8,7 +8,7 @@ use Exception;
 use Jenssegers\Blade\Blade;
 use Prosopo\Views\View\ViewNamespaceConfig;
 use Prosopo\Views\View\ViewTemplateRenderer;
-use Prosopo\Views\Views;
+use Prosopo\Views\ViewsManager;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
@@ -170,7 +170,7 @@ class Benchmark
         mkdir($phpViewsWithModelsDir);
 
         $phpViewsRenderer = new ViewTemplateRenderer();
-        $phpViews = new Views();
+        $phpViews = new ViewsManager();
 
         $namespaceConfig = new ViewNamespaceConfig($phpViewsRenderer);
         $namespaceConfig->setTemplateFileExtension('.blade.php');

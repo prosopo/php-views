@@ -6,7 +6,7 @@ namespace Prosopo\Views\PrivateClasses\Object;
 
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
-use Prosopo\Views\TemplateModel;
+use Prosopo\Views\BaseTemplateModel;
 use ReflectionProperty;
 
 /**
@@ -52,14 +52,14 @@ final class PropertyValueProviderForModels implements PropertyValueProviderInter
     }
 
     /**
-     * @param class-string<TemplateModel>|string $propertyType
+     * @param class-string<BaseTemplateModel>|string $propertyType
      *
-     * @return class-string<TemplateModel>|null
+     * @return class-string<BaseTemplateModel>|null
      */
     protected function getModelClassStringForInheritors(string $propertyType)
     {
         return true === class_exists($propertyType) &&
-        true === is_a($propertyType, TemplateModel::class, true) ?
+        true === is_a($propertyType, BaseTemplateModel::class, true) ?
             $propertyType :
             null;
     }

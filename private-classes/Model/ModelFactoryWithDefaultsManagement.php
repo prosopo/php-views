@@ -42,7 +42,7 @@ final class ModelFactoryWithDefaultsManagement implements ModelFactoryInterface
 
     protected function setDefaultValuesRecursively(TemplateModelWithDefaultsInterface $modelWithDefaults): void
     {
-        $defaultsPropertyValueProvider = $modelWithDefaults->getDefaultsProvider();
+        $defaultsPropertyValueProvider = $modelWithDefaults->getDefaultPropertyValueProvider();
 
         $this->objectPropertyWriter->assignPropertyValues($modelWithDefaults, $defaultsPropertyValueProvider);
 

@@ -40,7 +40,7 @@ class ModelFactoryWithDefaultsManagementTest extends TestCase
             ->andReturn($modelWithDefaultsMock);
 
         $modelWithDefaultsMock
-            ->shouldReceive('getDefaultsProvider')
+            ->shouldReceive('getDefaultPropertyValueProvider')
             ->once()
             ->andReturn($propertyValueProviderMock);
 
@@ -113,7 +113,7 @@ class ModelFactoryWithDefaultsManagementTest extends TestCase
             ->andReturn($mainModelMock);
 
         $mainModelMock
-            ->shouldReceive('getDefaultsProvider')
+            ->shouldReceive('getDefaultPropertyValueProvider')
             ->once()
             ->andReturn($propertyValueProviderMock);
 
@@ -127,7 +127,7 @@ class ModelFactoryWithDefaultsManagementTest extends TestCase
             ->with($mainModelMock, $propertyValueProviderMock);
 
         $innerModelMock1
-            ->shouldReceive('getDefaultsProvider')
+            ->shouldReceive('getDefaultPropertyValueProvider')
             ->once()
             ->andReturn($propertyValueProviderMock);
 
@@ -141,7 +141,7 @@ class ModelFactoryWithDefaultsManagementTest extends TestCase
             ->with($innerModelMock1, $propertyValueProviderMock);
 
         $innerModelMock2
-            ->shouldReceive('getDefaultsProvider')
+            ->shouldReceive('getDefaultPropertyValueProvider')
             ->once()
             ->andReturn($propertyValueProviderMock);
 
@@ -185,7 +185,7 @@ class ModelFactoryWithDefaultsManagementTest extends TestCase
             ->andReturn($mainModelMock);
 
         $mainModelMock
-            ->shouldReceive('getDefaultsProvider')
+            ->shouldReceive('getDefaultPropertyValueProvider')
             ->once()
             ->andReturn($propertyValueProviderMock);
 
