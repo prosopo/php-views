@@ -110,7 +110,12 @@ echo statements, which supports HTML output. For instance:
 If you prefer, you can configure the `ViewsManager` to pass models as strings instead of objects. Refer to the `
 ViewsManager` section for details.
 
-### 2.2) Custom property defaults
+### 2.2) Model naming note
+
+To clarify: `this package does not require` the `Model suffix` in the names of model classes. In this document, we
+use the Model suffix for class names purely for demonstration purposes.
+
+### 2.3) Custom property defaults
 
 Note: In the `TemplateModel` class, in order to satisfy the Model factory, the constructor is marked as final. If you
 need to
@@ -141,7 +146,7 @@ class EmployeeTemplateModel extends BaseTemplateModel
 > automatically resolved
 > while object creation by your application's DI system.
 
-### 2.3) Custom Model implementation (advanced usage)
+### 2.4) Custom Model implementation (advanced usage)
 
 The only requirement for a Model is to implement the `TemplateModelInterface`. This means you can transform any class
 into a Model without needing to extend a specific base class, or even define public properties:
@@ -362,12 +367,18 @@ one namespace within another, preserving their individual setup.
 
 Example of multi-namespace usage:
 
-Suppose you have a namespace for Twig templates, including a `Button` model and a `button.twig` template:
+Suppose you have registered a namespace for Twig templates:
+
+```php
+$viewsManager->registerNamespace('App\Twig',$configForTwigNamespace);
+```
+
+This namespace includes a `Button` model and a `button.twig` template:
 
 Button's model:
 
 ```php
-namespace TwigTemplates;
+namespace App\Twig;
 
 use Prosopo\Views\BaseTemplateModel;
 
@@ -383,12 +394,18 @@ Button's template:
 <button>{{ label|trim }}</button>
 ```
 
-Additionally, you have a namespace for Blade templates, with a `Popup` model:
+Additionally, you registered a namespace for Blade templates:
+
+```php
+$viewsManager->registerNamespace('App\Blade',$configForBladeNamespace);
+```
+
+with a `Popup` model:
 
 Popup's model:
 
 ```php
-namespace BladeTemplates;
+namespace App\Blade;
 
 use Prosopo\Views\BaseTemplateModel;
 
@@ -396,22 +413,23 @@ class PopupModel extends BaseTemplateModel {
 }
 ```
 
-Now is the cool part: you can safely use `ButtonModel` from the other namespace as a property of the `PopupModel` class:
+Now is the cool part: you can safely use the `App\Twig\ButtonModel` class as a property of the
+`App\Blade\PopupModel` class, so it looks like this:
 
 Popup's model:
 
 ```php
-namespace BladeTemplates;
+namespace App\Blade;
 
 use Prosopo\Views\BaseTemplateModel;
-use TwigTemplates\ButtonModel;
+use App\Twig\ButtonModel;
 
 class PopupModel extends BaseTemplateModel {
  public ButtonModel $buttonModel;
 }
 ```
 
-Popup's template:
+Now you can use the `buttonModel` in the popup's template:
 
 ```html
 
@@ -423,17 +441,20 @@ Popup's template:
 
 When you call `ViewsManager->makeModel()` for the `PopupModel` class:
 
-1. The `PopupModel` instance will be created using the `ModelFactory` configured for the `BladeTemplates` namespace.
-2. During automated property initialization, an instance of `ButtonModel` will be created using the `ModelFactory`
-   configured for the `TwigTemplates` namespace.
+1. The `App\Blade\PopupModel` instance will be created using the `ModelFactory` from the `App\Blade` namespace.
+2. During automated property initialization, an instance of `App\Twig\ButtonModel` will be created using the
+   `ModelFactory`
+   from for the `App\Twig` namespace.
 
 This design allows you to seamlessly reuse models across different namespaces while respecting the specific
 configuration of each namespace.
 
-Namespace resolution also occurs when you call `ViewsManager->renderModel()`. For example:
+Namespace resolution also occurs when you call `ViewsManager->renderModel()`. In this example:
 
-* `ButtonModel` will be rendered using the `ViewTemplateRenderer` configured for Twig.
-* `PopupModel` will be rendered using the `ViewTemplateRenderer` configured for Blade.
+* `App\Twig\ButtonModel` will be rendered using the `ViewTemplateRenderer` from the `App\Twig` namespace, which is
+  configured for Twig.
+* `App\Blade\PopupModel` will be rendered using the `ViewTemplateRenderer` from the `App\Blade` namespace, which is
+  configured for Blade.
 
 ## 4. View Renderer
 
