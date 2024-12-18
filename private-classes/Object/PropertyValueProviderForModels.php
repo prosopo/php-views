@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\Object;
 
-use Prosopo\Views\BaseTemplateModel;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
+use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
 use ReflectionProperty;
 
@@ -34,7 +34,7 @@ final class PropertyValueProviderForModels implements PropertyValueProviderInter
 
         $type = $this->getPropertyType($property);
 
-        return null !== $this->getModelClassStringForInheritors($type);
+        return null !== $this->getValidModelClass($type);
     }
 
     public function getPropertyValue(ReflectionProperty $property)
@@ -44,7 +44,7 @@ final class PropertyValueProviderForModels implements PropertyValueProviderInter
         }
 
         $type = $this->getPropertyType($property);
-        $modelClassString = $this->getModelClassStringForInheritors($type);
+        $modelClassString = $this->getValidModelClass($type);
 
         return null !== $modelClassString ?
              $this->modelFactory->createModel($modelClassString) :
@@ -52,14 +52,14 @@ final class PropertyValueProviderForModels implements PropertyValueProviderInter
     }
 
     /**
-     * @param class-string<BaseTemplateModel>|string $propertyType
+     * @param class-string<TemplateModelInterface>|string $propertyType
      *
-     * @return class-string<BaseTemplateModel>|null
+     * @return class-string<TemplateModelInterface>|null
      */
-    protected function getModelClassStringForInheritors(string $propertyType)
+    protected function getValidModelClass(string $propertyType)
     {
         return true === class_exists($propertyType) &&
-        true === is_a($propertyType, BaseTemplateModel::class, true) ?
+        true === is_a($propertyType, TemplateModelInterface::class, true) ?
             $propertyType :
             null;
     }

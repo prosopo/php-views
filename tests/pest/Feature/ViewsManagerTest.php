@@ -8,6 +8,7 @@ use org\bovigo\vfs\vfsStream;
 use ParseError;
 use PHPUnit\Framework\TestCase;
 use Prosopo\Views\BaseTemplateModel;
+use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
 use Prosopo\Views\View\ViewNamespaceConfig;
@@ -563,21 +564,87 @@ class ViewsManagerTest extends TestCase
         $this->assertSame('Hey inner!', $views->renderModel($topModel));
     }
 
-    public function testRenderPassesInnerModelsFromDifferentNamespaces(): void
+    public function testRenderSupportsInnerModelsFromDifferentNamespaces(): void
     {
         // given
         vfsStream::setup('top', null, [
             'folder1' => ['top-model.blade.php' => 'Hey {!! $inner !!}'],
-            'folder2' => [ 'inner-model.blade.php' => 'inner!'],
+            'folder2' => [ 'inner-model.php' => '<?php echo "inner!";'],
         ]);
+
+        $bladeRenderer = new ViewTemplateRenderer();
+        $firstNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
+            ->setTemplatesRootPath(vfsStream::url('top/folder1'))
+            ->setTemplateFileExtension('.blade.php');
+
+        $phpRenderer = new ViewTemplateRenderer();
+        $phpRenderer->getModules()->setTemplateCompiler(new class implements TemplateCompilerInterface{
+            public function compileTemplate(string $template): string
+            {
+                return $template;
+            }
+        });
+        $secondNamespaceConfig = (new ViewNamespaceConfig($phpRenderer))
+            ->setTemplatesRootPath(vfsStream::url('top/folder2'))
+            ->setTemplateFileExtension('.php');
+
+        $secondNamespace = $this->defineRealModelClass(
+            __METHOD__ . '__second',
+            'InnerModel',
+            [],
+            true
+        );
+        $firstNamespace = $this->defineRealModelClass(
+            __METHOD__,
+            'TopModel',
+            [
+                [
+                    'name' => 'inner',
+                    'visibility' => 'public',
+                ]
+            ],
+            false
+        );
+        $viewsManager = new ViewsManager();
+
+        // when
+        $viewsManager->registerNamespace($firstNamespace, $firstNamespaceConfig);
+        $viewsManager->registerNamespace($secondNamespace, $secondNamespaceConfig);
+
+        $innerModelClass = $secondNamespace . '\\InnerModel';
+        $topModelClass = $firstNamespace . '\\TopModel';
+        $topModel = new $topModelClass();
+        $topModel->inner = $viewsManager->createModel($innerModelClass);
+
+        // then
+        $this->assertSame('Hey inner!', $viewsManager->renderModel($topModel));
+    }
+
+    public function testRenderSupportsInnerModelsFromDifferentNamespacesWhenAsStringFlagIsSet(): void
+    {
+        // given
+        vfsStream::setup('top', null, [
+            'folder1' => ['top-model.blade.php' => 'Hey {!! $inner !!}'],
+            'folder2' => [ 'inner-model.php' => '<?php echo "inner!";'],
+        ]);
+
         $bladeRenderer = new ViewTemplateRenderer();
         $firstNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
             ->setTemplatesRootPath(vfsStream::url('top/folder1'))
             ->setTemplateFileExtension('.blade.php')
             ->setModelsAsStringsInTemplates(true);
-        $secondNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
+
+        $phpRenderer = new ViewTemplateRenderer();
+        $phpRenderer->getModules()->setTemplateCompiler(new class implements TemplateCompilerInterface{
+            public function compileTemplate(string $template): string
+            {
+                return $template;
+            }
+        });
+        $secondNamespaceConfig = (new ViewNamespaceConfig($phpRenderer))
             ->setTemplatesRootPath(vfsStream::url('top/folder2'))
-            ->setTemplateFileExtension('.blade.php');
+            ->setTemplateFileExtension('.php');
+
         $secondNamespace = $this->defineRealModelClass(
             __METHOD__ . '__second',
             'InnerModel',
@@ -730,19 +797,54 @@ class ViewsManagerTest extends TestCase
     {
         // given
         $bladeRenderer = new ViewTemplateRenderer();
+
         $firstNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
+        $firstNamespaceConfig->getModules()->setModelFactory(new class implements ModelFactoryInterface{
+            public function createModel(string $modelClass): object
+            {
+                $model = new $modelClass();
+
+                $model->name = 'The first';
+
+                return $model;
+            }
+        });
+
         $secondNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
+        $secondNamespaceConfig->getModules()->setModelFactory(new class implements ModelFactoryInterface{
+            public function createModel(string $modelClass): object
+            {
+                $model = new $modelClass();
+
+                $model->message = 'The second';
+
+                return $model;
+            }
+        });
+
         $firstNamespace = $this->defineRealModelClass(
             __METHOD__,
             'FirstModel',
-            [],
+            [
+                [
+                    'name' => 'name',
+                    'type' => 'string',
+                    'visibility' => 'public',
+                ]
+            ],
             false
         );
         $secondNamespace = $this->defineRealModelClass(
             __METHOD__ . '__second',
             'SecondModel',
-            [],
-            true
+            [
+                [
+                    'name' => 'message',
+                    'type' => 'string',
+                    'visibility' => 'public',
+                ]
+            ],
+            false
         );
         $views = new ViewsManager();
 
@@ -754,32 +856,92 @@ class ViewsManagerTest extends TestCase
         $secondModelClass = $secondNamespace . '\\SecondModel';
 
         // then
-        $this->assertSame($firstModelClass, get_class($views->createModel($firstModelClass)));
-        $this->assertSame($secondModelClass, get_class($views->createModel($secondModelClass)));
+        $this->assertSame('The first', $views->createModel($firstModelClass)->name);
+        $this->assertSame('The second', $views->createModel($secondModelClass)->message);
+    }
+
+    public function testMakeModelWithDefaultsSupportsDifferentNamespaces(): void
+    {
+        // given
+        $bladeRenderer = new ViewTemplateRenderer();
+
+        $firstNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
+        $firstNamespaceConfig
+            ->getModules()
+            ->setModelFactory(new class implements ModelFactoryInterface{
+                public function createModel(string $modelClass): object
+                {
+                    $model = new $modelClass();
+
+                    $model->name = 'The first';
+
+                    return $model;
+                }
+            });
+
+        $secondNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
+
+        $firstNamespace = $this->defineRealModelClass(
+            __METHOD__,
+            'FirstModel',
+            [
+                [
+                    'name' => 'name',
+                    'type' => 'string',
+                    'visibility' => 'public',
+                ]
+            ],
+            false,
+        );
+        $firstModelClass = $firstNamespace . '\\FirstModel';
+
+        $secondNamespace = $this->defineRealModelClass(
+            __METHOD__ . '__second',
+            'SecondModel',
+            [
+                [
+                    'name' => 'firstModel',
+                    'type' => '\\' . $firstModelClass,
+                    'visibility' => 'public',
+                ]
+            ],
+            true
+        );
+
+        $views = new ViewsManager();
+
+        // when
+        $views->registerNamespace($firstNamespace, $firstNamespaceConfig);
+        $views->registerNamespace($secondNamespace, $secondNamespaceConfig);
+
+        $secondModelClass = $secondNamespace . '\\SecondModel';
+
+        // then
+        $this->assertSame('The first', $views->createModel($secondModelClass)->firstModel->name);
     }
 
     /**
      * @param array<int,array{visibility:string,name:string, type?:string, defaultValue?:mixed}> $properties
-     * @param string[] $tempatePropertiesNamesToIgnore
+     * @param string[] $templatePropertiesNamesToIgnore
      */
     protected function defineRealModelClass(
         string $method,
         string $className,
         array $properties,
-        bool $extendsClass,
-        array $tempatePropertiesNamesToIgnore = []
+        bool $extendsBaseModelInsteadImplements,
+        array $templatePropertiesNamesToIgnore = []
     ): string {
         $methodName = explode('::', $method);
         $methodName = $methodName[count($methodName) - 1];
 
         $namespace = '_views_test_' . strtolower($methodName);
         $classContent = $this->getClassProperties($properties);
-        $extends = true === $extendsClass ?
+        $extends = true === $extendsBaseModelInsteadImplements ?
             'extends \\' . BaseTemplateModel::class :
             'implements \\' . TemplateModelInterface::class;
 
-        if (false === $extendsClass) {
-            $classContent .= $this->makeTemplateArgumentsMethod($properties, $tempatePropertiesNamesToIgnore);
+        if (false === $extendsBaseModelInsteadImplements) {
+            $classContent .= $this->makeTemplateArgumentsMethod($properties, $templatePropertiesNamesToIgnore);
         }
 
         $code = sprintf('namespace %s; class %s %s { %s }', $namespace, $className, $extends, $classContent);
