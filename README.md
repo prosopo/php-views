@@ -25,14 +25,23 @@ You're free to use the package in your own way:
 
 ## Table of Contents
 
-- [1. Model-driven approach](#1-model-driven-approach)
-- [2. Views Manager](#2-views-manager)
-- [3. View Renderer](#3-view-renderer)
-- [4. Benchmark](#4-benchmark)
-- [5. Contribution](#4-contribution)
-- [6. Credits](#5-credits)
+- [1. Installation](#1-installation)
+- [2. Model-driven approach](#2-model-driven-approach)
+- [3. Views Manager](#3-views-manager)
+- [4. View Renderer](#4-view-renderer)
+- [5. Benchmark](#5-benchmark)
+- [6. Contribution](#6-contribution)
+- [7. Credits](#7-credits)
 
-## 1. Model-driven approach
+## 1. Installation
+
+`composer require prosopo/views`
+
+Don't forget to include the composer autoloader in your app:
+
+`require __DIR__ . '/vendor/autoload.php';`
+
+## 2. Model-driven approach
 
 Similar to many frameworks, such as Laravel, this package embraces a model-driven approach to templates. Each template
 is paired with its own Model, where the Model's public properties and methods act as arguments available within the
@@ -78,7 +87,7 @@ Est. taxes: {{ $innerModel->taxes($salary) }}
 {!! $company !!}
 ```
 
-### 1.2) Benefits of the model-driven approach
+### 2.1) Benefits of the model-driven approach
 
 1. Typed variables: Eliminate the hassle of type matching and renaming associated with array-driven variables.
 2. Reduced Routine: During object creation, public fields of the model without default values are automatically
@@ -101,7 +110,7 @@ echo statements, which supports HTML output. For instance:
 If you prefer, you can configure the `ViewsManager` to pass models as strings instead of objects. Refer to the `
 ViewsManager` section for details.
 
-### 1.3) Custom property defaults
+### 2.2) Custom property defaults
 
 Note: In the `TemplateModel` class, in order to satisfy the Model factory, the constructor is marked as final. If you
 need to
@@ -132,7 +141,7 @@ class EmployeeTemplateModel extends BaseTemplateModel
 > automatically resolved
 > while object creation by your application's DI system.
 
-### 1.4) Custom Model implementation (advanced usage)
+### 2.3) Custom Model implementation (advanced usage)
 
 The only requirement for a Model is to implement the `TemplateModelInterface`. This means you can transform any class
 into a Model without needing to extend a specific base class, or even define public properties:
@@ -165,7 +174,7 @@ $namespaceConfig->setModelsAsStringsInTemplates(true);
 When this option is enabled, the renderer will automatically convert objects implementing `TemplateModelInterface` into
 strings before passing them to the template.
 
-## 2. Views Manager
+## 3. Views Manager
 
 The `ViewsManager` class provides the `registerNamespace`, `createModel` and `renderModel` methods. It acts as a
 namespace manager and brings together different namespace configurations.
@@ -174,7 +183,7 @@ Each `ViewNamespace` has its own independent setup and set of modules. E.g. amon
 `ModelTemplateProvider`, which automates the process of linking models to their
 corresponding templates.
 
-### 2.1) Setup
+### 3.1) Setup
 
 ```php
 use Prosopo\Views\View\ViewNamespaceConfig;
@@ -214,7 +223,7 @@ $viewsManager->registerNamespace('MyPackage\Views', $namespaceConfig);
 // Tip: you can have multiple namespaces, and mix their Models.
 ```
 
-### 2.2) Single-step Model creation and rendering
+### 3.2) Single-step Model creation and rendering
 
 You can create, set values, and render a Model in a single step using the callback argument of the `renderView` method,
 as shown below:
@@ -231,7 +240,7 @@ echo $viewsManager->renderModel(
 
 This approach enables a functional programming style when working with Models.
 
-### 2.3) Multi-step creation and rendering
+### 3.3) Multi-step creation and rendering
 
 When you need split creation, use the factory to create the model, and then render later when you need it.
 
@@ -260,7 +269,7 @@ the `ViewsManager` class itself.
 This approach ensures that only the specific actions you expect are accessible, promoting cleaner and more maintainable
 code.
 
-### 2.4) Automated templates matching
+### 3.4) Automated templates matching
 
 The built-in `ModelTemplateResolver` automatically matches templates based on the Model names and their relative
 namespaces. This automates the process of associating templates with their corresponding Models.
@@ -284,7 +293,7 @@ names.
 > implement your own logic. In case the reason is the name-specific only, consider overriding the `ModelNameResolver`
 > module instead.
 
-### 2.5) Custom modules
+### 3.5) Custom modules
 
 By default, the `registerNamespace` class creates module instances for the namespace using classes from the current
 package.
@@ -346,7 +355,7 @@ $namespaceConfig->getModules()
 > Note: The package includes only the Blade implementation. If you wish to use a different template engine,
 > like Twig, you need to install its Composer package and create a facade object, as demonstrated above.
 
-### 2.6) Namespace mixing
+### 3.6) Namespace mixing
 
 > Fun Fact: The `ViewsManager` class not only supporting multiple namespaces, but also enabling you to use Models from
 > one
@@ -361,13 +370,13 @@ Additionally, you have a namespace for Twig templates, with a `Popup` model and 
 Here’s the cool part: you can safely use `Button` as a property of the `Popup` model. The package will first render the
 `Button` using Twig, converting it to a string, and then pass it seamlessly into the Blade template of the `Popup`.
 
-## 3. View Renderer
+## 4. View Renderer
 
 `ViewTemplateRenderer` is the class responsible for rendering templates in this package. By default, it integrates the
 Blade compiler, but it is fully customizable. You can replace the Blade compiler with your own implementation or use a
 simple stub to enable support for plain PHP template files.
 
-### 3.1) Built-in Blade integration
+### 4.1) Built-in Blade integration
 
 [Blade](https://laravel.com/docs/11.x/blade) is an elegant and powerful template engine originally designed
 for [Laravel](https://laravel.com/).
@@ -404,7 +413,7 @@ However, we chose not to adopt this approach for several reasons:
 
 Thanks to great Blade's conceptual design, our compiler implementation required fewer than 200 lines of code.
 
-### 3.2) View Renderer setup
+### 4.2) View Renderer setup
 
 ```php
 use Prosopo\Views\View\ViewTemplateRenderer;
@@ -438,7 +447,7 @@ echo $viewTemplateRenderer->renderTemplate('@if($var)The variable is set.@endif'
 > means that even if you can't or don't want to use the model-driven approach, you can still utilize it as an
 > independent Blade compiler.
 
-### 3.3) Available View Renderer settings
+### 4.3) Available View Renderer settings
 
 The `ViewTemplateRenderer` supports a variety of settings that let you customize features such as
 escaping, error handling, and more:
@@ -480,7 +489,7 @@ $viewRendererConfig = (new ViewTemplateRendererConfig())
 $viewTemplateRenderer = new ViewTemplateRenderer($viewRendererConfig);
 ```
 
-### 3.4) Custom View Renderer modules
+### 4.4) Custom View Renderer modules
 
 By default, the `ViewTemplateRenderer` creates module instances using classes from the current package, including the
 Blade compiler.
@@ -528,7 +537,7 @@ $views->registerNamespace('MyApp\Models', $viewNamespaceConfig);
 Now this namespace is configured to deal with plain PHP template files, while having all the package features, including
 model-driven approach and template error handling.
 
-## 4. Benchmark
+## 5. Benchmark
 
 We conducted a [PHP performance benchmark](https://github.com/prosopo/php-views/blob/main/benchmark/src/Benchmark.php)
 to compare this package with the Laravel's Blade (mocked using [jenssegers/blade](https://github.com/jenssegers/blade))
@@ -557,13 +566,13 @@ repository, you can easily run it locally to verify the results.
 We encourage you to enhance the benchmark further - feel free to make it more advanced and submit a pull request. We're
 happy to review and accept contributions! 🚀
 
-## 5. Contribution
+## 6. Contribution
 
 We would be excited if you decide to contribute! Please read
 the [for-devs.md](https://github.com/prosopo/php-views/blob/main/for-devs.md) file for project guidelines and
 agreements.
 
-## 6. Credits
+## 7. Credits
 
 This package was created by [Maxim Akimov](https://github.com/light-source/) during the development of
 the [WordPress integration for Prosopo Procaptcha](https://wordpress.org/plugins/prosopo-procaptcha/).
