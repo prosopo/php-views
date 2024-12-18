@@ -9,7 +9,6 @@ use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\PrivateClasses\Object\{ObjectClassReader,
     PropertyValueProviderForModels,
     ObjectReader,
-    ObjectReaderWithRendering,
     ObjectPropertyWriter,
     PropertyValueProvider,
     PropertyValueProviderByTypes,

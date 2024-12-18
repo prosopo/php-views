@@ -77,7 +77,7 @@ Model template (Blade is used in this example):
 <p>
 Your month income is {{ $total() }}, 
 from which {{ $salary }} is a salary, and {{ $bonus }} is a bonus.
-Est. taxes: {{ $innerModel->taxes($salary) }}
+Est. taxes: {{ $company->calcTaxes($salary) }}
 </p>
 
 {!! $innerModel !!}
@@ -105,7 +105,7 @@ example:
 The `BaseTemplateModel` class overrides the `__toString()` method, allowing inner models to be rendered as strings using
 echo statements, which supports HTML output. For instance:
 
-`{!! $innerModel !!}`
+`{!! $innerModel !!}` will render the model and print the result.
 
 If you prefer, you can configure the `ViewsManager` to pass models as strings instead of objects. Refer to the `
 ViewsManager` section for details.
@@ -357,18 +357,83 @@ $namespaceConfig->getModules()
 
 ### 3.6) Namespace mixing
 
-> Fun Fact: The `ViewsManager` class not only supporting multiple namespaces, but also enabling you to use Models from
-> one
-> namespace within another, preserving their individual setup.
+The `ViewsManager` class not only supporting multiple namespaces, but also enabling you to use Models from
+one namespace within another, preserving their individual setup.
 
 Example of multi-namespace usage:
 
-Suppose you have a namespace for Blade templates, including a `Button` model and a `button.blade.php` template.
+Suppose you have a namespace for Twig templates, including a `Button` model and a `button.twig` template:
 
-Additionally, you have a namespace for Twig templates, with a `Popup` model and a `popup.twig` template.
+Button's model:
 
-Here’s the cool part: you can safely use `Button` as a property of the `Popup` model. The package will first render the
-`Button` using Twig, converting it to a string, and then pass it seamlessly into the Blade template of the `Popup`.
+```php
+namespace TwigTemplates;
+
+use Prosopo\Views\BaseTemplateModel;
+
+class ButtonModel extends BaseTemplateModel {
+ public string $label;
+}
+```
+
+Button's template:
+
+```html
+
+<button>{{ label|trim }}</button>
+```
+
+Additionally, you have a namespace for Blade templates, with a `Popup` model:
+
+Popup's model:
+
+```php
+namespace BladeTemplates;
+
+use Prosopo\Views\BaseTemplateModel;
+
+class PopupModel extends BaseTemplateModel {
+}
+```
+
+Now is the cool part: you can safely use `ButtonModel` from the other namespace as a property of the `PopupModel` class:
+
+Popup's model:
+
+```php
+namespace BladeTemplates;
+
+use Prosopo\Views\BaseTemplateModel;
+use TwigTemplates\ButtonModel;
+
+class PopupModel extends BaseTemplateModel {
+ public ButtonModel $buttonModel;
+}
+```
+
+Popup's template:
+
+```html
+
+<div>
+    I'm a popup!
+    To close, click here - {!! $buttonModel !!}
+</div>
+```
+
+When you call `ViewsManager->makeModel()` for the `PopupModel` class:
+
+1. The `PopupModel` instance will be created using the `ModelFactory` configured for the `BladeTemplates` namespace.
+2. During automated property initialization, an instance of `ButtonModel` will be created using the `ModelFactory`
+   configured for the `TwigTemplates` namespace.
+
+This design allows you to seamlessly reuse models across different namespaces while respecting the specific
+configuration of each namespace.
+
+Namespace resolution also occurs when you call `ViewsManager->renderModel()`. For example:
+
+* `ButtonModel` will be rendered using the `ViewTemplateRenderer` configured for Twig.
+* `PopupModel` will be rendered using the `ViewTemplateRenderer` configured for Blade.
 
 ## 4. View Renderer
 
