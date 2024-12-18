@@ -178,7 +178,7 @@ class Benchmark
 
         $namespace = '_php_views_with_models';
 
-        $phpViews->addNamespace($namespace, $namespaceConfig);
+        $phpViews->registerNamespace($namespace, $namespaceConfig);
 
         $phpViewsWithModelFiles = $this->writeUniqueTemplates(
             $phpViewsWithModelsDir,

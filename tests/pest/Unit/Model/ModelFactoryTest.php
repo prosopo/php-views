@@ -40,7 +40,7 @@ class ModelFactoryTest extends TestCase
         };
 
         // when
-        $result = $factory->makeModel(get_class($modelClass));
+        $result = $factory->createModel(get_class($modelClass));
 
         // then
         $this->assertInstanceOf(get_class($modelClass), $result);
@@ -59,7 +59,7 @@ class ModelFactoryTest extends TestCase
         $factory = new ModelFactory($objectReaderMock, $propertyValueProviderMock);
 
         // when
-        $makeModel = fn() => $factory->makeModel('NonExistentClass');
+        $makeModel = fn() => $factory->createModel('NonExistentClass');
 
         // when & then
         $this->expectException(Error::class);
@@ -82,7 +82,7 @@ class ModelFactoryTest extends TestCase
         };
 
         // when
-        $makeModel = fn() => $factory->makeModel(get_class($invalidModelClass));
+        $makeModel = fn() => $factory->createModel(get_class($invalidModelClass));
 
         // then
         $this->expectException(Error::class);

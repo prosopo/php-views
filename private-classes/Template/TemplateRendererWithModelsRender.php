@@ -24,11 +24,11 @@ final class TemplateRendererWithModelsRender implements TemplateRendererInterfac
         $this->modelRenderer = $modelRenderer;
     }
 
-    public function renderTemplate(string $template, array $variables = [], bool $doPrint = false): string
+    public function renderTemplate(string $template, array $variables = []): string
     {
         $variables = $this->renderModels($variables);
 
-        return $this->templateRenderer->renderTemplate($template, $variables, $doPrint);
+        return $this->templateRenderer->renderTemplate($template, $variables);
     }
 
     /**

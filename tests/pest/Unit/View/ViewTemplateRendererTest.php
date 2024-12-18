@@ -6,7 +6,7 @@ namespace Tests\Unit\View;
 
 use Mockery;
 use PHPUnit\Framework\TestCase;
-use Prosopo\Views\Interfaces\CodeExecutorInterface;
+use Prosopo\Views\Interfaces\CodeRunnerInterface;
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
@@ -85,12 +85,12 @@ class ViewTemplateRendererTest extends TestCase
                 $modules->setEventDispatcher($module);
             },
             function (ViewTemplateRendererModules $modules) {
-                $modules->getEventDispatcher()->attachEventDetails('test', []);
+                $modules->getEventDispatcher()->registerEventDetails('test', []);
             }
         );
 
         // then
-        $module->shouldReceive('attachEventDetails')
+        $module->shouldReceive('registerEventDetails')
             ->once();
 
         // apply
@@ -127,7 +127,7 @@ class ViewTemplateRendererTest extends TestCase
     public function testUsesGivenCodeExecutor(): void
     {
         // given
-        $module = Mockery::mock(CodeExecutorInterface::class);
+        $module = Mockery::mock(CodeRunnerInterface::class);
 
         // when
         $test = fn()=>$this->testUsesGivenModule(
@@ -135,12 +135,12 @@ class ViewTemplateRendererTest extends TestCase
                 $modules->setCodeExecutor($module);
             },
             function (ViewTemplateRendererModules $modules) {
-                $modules->getCodeExecutor()->executeCode('test');
+                $modules->getCodeExecutor()->runCode('test');
             }
         );
 
         // then
-        $module->shouldReceive('executeCode')
+        $module->shouldReceive('runCode')
             ->once();
 
         // apply

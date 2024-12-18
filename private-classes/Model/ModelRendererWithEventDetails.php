@@ -28,21 +28,21 @@ final class ModelRendererWithEventDetails implements ModelRendererInterface
         $this->eventName = $eventName;
     }
 
-    public function renderModel($modelOrClass, Closure $setupCallback = null, bool $doPrint = false): string
+    public function renderModel($modelOrClass, Closure $setupModelCallback = null): string
     {
-        $viewClass = true === is_string($modelOrClass) ?
+        $modelClass = true === is_string($modelOrClass) ?
             $modelOrClass :
             get_class($modelOrClass);
 
         $eventDetails = [
-            'viewClass' => $viewClass,
+            'modelClass' => $modelClass,
         ];
 
-        $this->eventDispatcher->attachEventDetails($this->eventName, $eventDetails);
+        $this->eventDispatcher->registerEventDetails($this->eventName, $eventDetails);
 
-        $response = $this->viewRenderer->renderModel($modelOrClass, $setupCallback, $doPrint);
+        $response = $this->viewRenderer->renderModel($modelOrClass, $setupModelCallback);
 
-        $this->eventDispatcher->detachEventDetails($this->eventName, $eventDetails);
+        $this->eventDispatcher->unregisterEventDetails($this->eventName, $eventDetails);
 
         return $response;
     }

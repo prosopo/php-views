@@ -25,7 +25,7 @@ final class ModelFactory implements ModelFactoryInterface
         $this->propertyValueProvider = $propertyValueProvider;
     }
 
-    public function makeModel(string $modelClass)
+    public function createModel(string $modelClass)
     {
         return new $modelClass($this->objectReader, $this->propertyValueProvider);
     }

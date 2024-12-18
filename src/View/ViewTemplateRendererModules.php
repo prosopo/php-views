@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\View;
 
-use Prosopo\Views\Interfaces\CodeExecutorInterface;
+use Prosopo\Views\Interfaces\CodeRunnerInterface;
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
@@ -20,7 +20,7 @@ final class ViewTemplateRendererModules
     private ?TemplateRendererInterface $templateRenderer;
     private ?EventDispatcherInterface $eventDispatcher;
     private ?TemplateCompilerInterface $templateCompiler;
-    private ?CodeExecutorInterface $phpCodeExecutor;
+    private ?CodeRunnerInterface $phpCodeExecutor;
 
     public function __construct()
     {
@@ -47,7 +47,7 @@ final class ViewTemplateRendererModules
         return $this->templateCompiler;
     }
 
-    public function getCodeExecutor(): ?CodeExecutorInterface
+    public function getCodeExecutor(): ?CodeRunnerInterface
     {
         return $this->phpCodeExecutor;
     }
@@ -75,7 +75,7 @@ final class ViewTemplateRendererModules
         return $this;
     }
 
-    public function setCodeExecutor(?CodeExecutorInterface $codeExecutor): self
+    public function setCodeExecutor(?CodeRunnerInterface $codeExecutor): self
     {
         $this->phpCodeExecutor = $codeExecutor;
 

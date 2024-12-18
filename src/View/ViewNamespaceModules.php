@@ -6,13 +6,13 @@ namespace Prosopo\Views\View;
 
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
-use Prosopo\Views\Interfaces\Model\ModelNameProviderInterface;
-use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
+use Prosopo\Views\Interfaces\Model\ModelNameResolverInterface;
+use Prosopo\Views\Interfaces\Model\ModelNamespaceResolverInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Object\ObjectPropertyWriterInterface;
 use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
-use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
+use Prosopo\Views\Interfaces\Template\ModelTemplateResolverInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 
 /**
@@ -28,27 +28,27 @@ final class ViewNamespaceModules
     //// Custom modules: define them only when you need to override the default behavior:
 
     private ?ModelFactoryInterface $modelFactory;
-    private ?ModelTemplateProviderInterface $modelTemplateProvider;
+    private ?ModelTemplateResolverInterface $modelTemplateResolver;
     private ?ObjectReaderInterface $objectReader;
     private ?ObjectPropertyWriterInterface $objectPropertyWriter;
     private ?PropertyValueProviderInterface $propertyValueProvider;
     private ?ModelRendererInterface $modelRenderer;
     private ?EventDispatcherInterface $eventDispatcher;
-    private ?ModelNameProviderInterface $modelNameProvider;
-    private ?ModelNamespaceProviderInterface $modelNamespaceProvider;
+    private ?ModelNameResolverInterface $modelNameResolver;
+    private ?ModelNamespaceResolverInterface $modelNamespaceResolver;
 
     public function __construct(TemplateRendererInterface $templateRenderer)
     {
         $this->templateRenderer = $templateRenderer;
         $this->modelFactory = null;
-        $this->modelTemplateProvider = null;
+        $this->modelTemplateResolver = null;
         $this->objectReader = null;
         $this->objectPropertyWriter = null;
         $this->propertyValueProvider = null;
         $this->modelRenderer = null;
         $this->eventDispatcher = null;
-        $this->modelNameProvider = null;
-        $this->modelNamespaceProvider = null;
+        $this->modelNameResolver = null;
+        $this->modelNamespaceResolver = null;
     }
 
     //// Getters.
@@ -63,9 +63,9 @@ final class ViewNamespaceModules
         return $this->modelFactory;
     }
 
-    public function getModelTemplateProvider(): ?ModelTemplateProviderInterface
+    public function getModelTemplateResolver(): ?ModelTemplateResolverInterface
     {
-        return $this->modelTemplateProvider;
+        return $this->modelTemplateResolver;
     }
 
     public function getObjectReader(): ?ObjectReaderInterface
@@ -93,14 +93,14 @@ final class ViewNamespaceModules
         return $this->eventDispatcher;
     }
 
-    public function getModelNameProvider(): ?ModelNameProviderInterface
+    public function getModelNameResolver(): ?ModelNameResolverInterface
     {
-        return $this->modelNameProvider;
+        return $this->modelNameResolver;
     }
 
-    public function getModelNamespaceProvider(): ?ModelNamespaceProviderInterface
+    public function getModelNamespaceResolver(): ?ModelNamespaceResolverInterface
     {
-        return $this->modelNamespaceProvider;
+        return $this->modelNamespaceResolver;
     }
 
     //// Setters.
@@ -119,9 +119,9 @@ final class ViewNamespaceModules
         return $this;
     }
 
-    public function setModelTemplateProvider(?ModelTemplateProviderInterface $modelTemplateProvider): self
+    public function setModelTemplateResolver(?ModelTemplateResolverInterface $modelTemplateResolver): self
     {
-        $this->modelTemplateProvider = $modelTemplateProvider;
+        $this->modelTemplateResolver = $modelTemplateResolver;
 
         return $this;
     }
@@ -161,16 +161,16 @@ final class ViewNamespaceModules
         return $this;
     }
 
-    public function setModelNameProvider(?ModelNameProviderInterface $modelNameProvider): self
+    public function setModelNameResolver(?ModelNameResolverInterface $modelNameResolver): self
     {
-        $this->modelNameProvider = $modelNameProvider;
+        $this->modelNameResolver = $modelNameResolver;
 
         return $this;
     }
 
-    public function setModelNamespaceProvider(?ModelNamespaceProviderInterface $modelNamespaceProvider): self
+    public function setModelNamespaceResolver(?ModelNamespaceResolverInterface $modelNamespaceResolver): self
     {
-        $this->modelNamespaceProvider = $modelNamespaceProvider;
+        $this->modelNamespaceResolver = $modelNamespaceResolver;
 
         return $this;
     }

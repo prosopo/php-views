@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\PrivateClasses\CodeExecutor;
+namespace Prosopo\Views\PrivateClasses\CodeRunner;
 
 use ErrorException;
-use Prosopo\Views\Interfaces\CodeExecutorInterface;
+use Prosopo\Views\Interfaces\CodeRunnerInterface;
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
 use Throwable;
 
@@ -13,23 +13,23 @@ use Throwable;
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
  * We reserve the right to change its name and implementation.
  */
-final class CodeExecutorWithErrorHandler implements CodeExecutorInterface
+final class CodeRunnerWithErrorHandler implements CodeRunnerInterface
 {
-    private CodeExecutorInterface $codeExecutor;
+    private CodeRunnerInterface $codeExecutor;
     private EventDispatcherInterface $eventDispatcher;
     private string $errorEventName;
 
     public function __construct(
-        CodeExecutorInterface $codeExecutor,
+        CodeRunnerInterface      $codeExecutor,
         EventDispatcherInterface $eventDispatcher,
-        string $errorEventName
+        string                   $errorEventName
     ) {
         $this->codeExecutor = $codeExecutor;
         $this->eventDispatcher = $eventDispatcher;
         $this->errorEventName = $errorEventName;
     }
 
-    public function executeCode(string $code, array $arguments = []): void
+    public function runCode(string $code, array $arguments = []): void
     {
         $errorDetails = [
             'arguments' => $arguments,
@@ -43,7 +43,7 @@ final class CodeExecutorWithErrorHandler implements CodeExecutorInterface
                 throw new ErrorException($message, 0, $severity, $file, $line);
             });
 
-            $this->codeExecutor->executeCode($code, $arguments);
+            $this->codeExecutor->runCode($code, $arguments);
         } catch (Throwable $error) {
             $errorDetails['error'] = $error;
 

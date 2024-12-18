@@ -16,7 +16,7 @@ class ViewsTest extends TestCase
         $views = new Views();
 
         // when
-        $makeModel = fn()=> $views->makeModel('MissingClass');
+        $makeModel = fn()=> $views->createModel('MissingClass');
 
         // then
         $this->expectException(Exception::class);
@@ -31,7 +31,7 @@ class ViewsTest extends TestCase
         $views = new Views();
 
         // when
-        $makeModel = fn()=> $views->makeModel(get_class($this));
+        $makeModel = fn()=> $views->createModel(get_class($this));
 
         // then
         $this->expectException(Exception::class);

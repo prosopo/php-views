@@ -7,7 +7,7 @@ namespace Tests\Unit\Model;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
-use Prosopo\Views\PrivateClasses\Model\ModelNamespaceProvider;
+use Prosopo\Views\PrivateClasses\Model\ModelNamespaceResolver;
 use Prosopo\Views\PrivateClasses\Object\ObjectClassReader;
 
 class ModelNamespaceProviderTest extends TestCase
@@ -16,11 +16,11 @@ class ModelNamespaceProviderTest extends TestCase
     {
         // given
         $objectClassReaderMock = Mockery::mock(ObjectClassReader::class);
-        $provider = new ModelNamespaceProvider($objectClassReaderMock);
+        $provider = new ModelNamespaceResolver($objectClassReaderMock);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
 
         // when
-        $getModelNamespace = fn()=> $provider->getModelNamespace($modelMock);
+        $getModelNamespace = fn()=> $provider->resolveModelNamespace($modelMock);
 
         // then
         $objectClassReaderMock
@@ -37,11 +37,11 @@ class ModelNamespaceProviderTest extends TestCase
     {
         // given
         $objectClassReaderMock = Mockery::mock(ObjectClassReader::class);
-        $provider = new ModelNamespaceProvider($objectClassReaderMock);
+        $provider = new ModelNamespaceResolver($objectClassReaderMock);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
 
         // when
-        $getModelNamespace = fn()=> $provider->getModelNamespace($modelMock);
+        $getModelNamespace = fn()=> $provider->resolveModelNamespace($modelMock);
 
         // then
         $objectClassReaderMock
@@ -58,11 +58,11 @@ class ModelNamespaceProviderTest extends TestCase
     {
         // given
         $objectClassReaderMock = Mockery::mock(ObjectClassReader::class);
-        $provider = new ModelNamespaceProvider($objectClassReaderMock);
+        $provider = new ModelNamespaceResolver($objectClassReaderMock);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
 
         // when
-        $getModelNamespace = fn()=> $provider->getModelNamespace($modelMock);
+        $getModelNamespace = fn()=> $provider->resolveModelNamespace($modelMock);
 
         // then
         $objectClassReaderMock

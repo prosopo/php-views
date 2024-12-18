@@ -141,7 +141,7 @@ class PropertyValueProviderForModelsTest extends TestCase
             ->with($propertyMock)
             ->andReturn(false);
 
-        $modelFactoryMock->shouldReceive('makeModel')
+        $modelFactoryMock->shouldReceive('createModel')
             ->once()
             ->with(TemplateModel::class)
             ->andReturn($model);

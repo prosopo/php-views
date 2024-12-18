@@ -92,7 +92,7 @@ class EventDispatcherTest extends TestCase
         };
 
         // when
-        $dispatcher->attachEventDetails('testEvent', ['attachedKey' => 'attachedValue']);
+        $dispatcher->registerEventDetails('testEvent', ['attachedKey' => 'attachedValue']);
         $dispatcher->addEventListener('testEvent', $listener);
         $dispatcher->dispatchEvent('testEvent', ['key' => 'value']);
 
@@ -117,8 +117,8 @@ class EventDispatcherTest extends TestCase
         };
 
         // when
-        $dispatcher->attachEventDetails('testEvent', ['key1' => 'value1', 'key2' => 'value2']);
-        $dispatcher->detachEventDetails('testEvent', ['key2' => 'value2']);
+        $dispatcher->registerEventDetails('testEvent', ['key1' => 'value1', 'key2' => 'value2']);
+        $dispatcher->unregisterEventDetails('testEvent', ['key2' => 'value2']);
         $dispatcher->addEventListener('testEvent', $listener);
         $dispatcher->dispatchEvent('testEvent', ['key3' => 'value3']);
 
@@ -174,7 +174,7 @@ class EventDispatcherTest extends TestCase
         };
 
         // when
-        $dispatcher->attachEventDetails('eventA', ['attachedKey' => 'attachedValue']);
+        $dispatcher->registerEventDetails('eventA', ['attachedKey' => 'attachedValue']);
         $dispatcher->addEventListener('eventB', $listener);
         $dispatcher->dispatchEvent('eventB', ['key' => 'value']);
 

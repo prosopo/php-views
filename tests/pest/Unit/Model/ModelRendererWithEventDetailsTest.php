@@ -25,7 +25,7 @@ class ModelRendererWithEventDetailsTest extends TestCase
         $result = fn()=>$renderer->renderModel($modelMock);
 
         // then
-        $eventDispatcherMock->shouldReceive('attachEventDetails')
+        $eventDispatcherMock->shouldReceive('registerEventDetails')
             ->once()
             ->with('render_event', ['viewClass' => get_class($modelMock)]);
 
@@ -34,7 +34,7 @@ class ModelRendererWithEventDetailsTest extends TestCase
             ->with($modelMock, null, false)
             ->andReturn('<div>Rendered View</div>');
 
-        $eventDispatcherMock->shouldReceive('detachEventDetails')
+        $eventDispatcherMock->shouldReceive('unregisterEventDetails')
             ->once()
             ->with('render_event', ['viewClass' => get_class($modelMock)]);
 
@@ -55,7 +55,7 @@ class ModelRendererWithEventDetailsTest extends TestCase
         $result = fn()=> $renderer->renderModel('TestModelClass');
 
         // then
-        $eventDispatcherMock->shouldReceive('attachEventDetails')
+        $eventDispatcherMock->shouldReceive('registerEventDetails')
             ->once()
             ->with('render_event', ['viewClass' => 'TestModelClass']);
 
@@ -64,7 +64,7 @@ class ModelRendererWithEventDetailsTest extends TestCase
             ->with('TestModelClass', null, false)
             ->andReturn('<div>Rendered Model</div>');
 
-        $eventDispatcherMock->shouldReceive('detachEventDetails')
+        $eventDispatcherMock->shouldReceive('unregisterEventDetails')
             ->once()
             ->with('render_event', ['viewClass' => 'TestModelClass']);
 
@@ -92,7 +92,7 @@ class ModelRendererWithEventDetailsTest extends TestCase
         $result = fn()=>$renderer->renderModel($modelMock, $setupCallback);
 
         // then
-        $eventDispatcherMock->shouldReceive('attachEventDetails')
+        $eventDispatcherMock->shouldReceive('registerEventDetails')
             ->once()
             ->with('render_event', ['viewClass' => get_class($modelMock)]);
 
@@ -101,7 +101,7 @@ class ModelRendererWithEventDetailsTest extends TestCase
             ->with($modelMock, $setupCallback, false)
             ->andReturn('<div>Modified View</div>');
 
-        $eventDispatcherMock->shouldReceive('detachEventDetails')
+        $eventDispatcherMock->shouldReceive('unregisterEventDetails')
             ->once()
             ->with('render_event', ['viewClass' => get_class($modelMock)]);
 
@@ -124,7 +124,7 @@ class ModelRendererWithEventDetailsTest extends TestCase
         $renderModel = fn()=>$renderer->renderModel($modelMock, null, true);
 
         // then
-        $eventDispatcherMock->shouldReceive('attachEventDetails')
+        $eventDispatcherMock->shouldReceive('registerEventDetails')
             ->once()
             ->with('render_event', ['viewClass' => get_class($modelMock)]);
 
@@ -133,7 +133,7 @@ class ModelRendererWithEventDetailsTest extends TestCase
             ->with($modelMock, null, true)
             ->andReturn('<div>Printed View</div>');
 
-        $eventDispatcherMock->shouldReceive('detachEventDetails')
+        $eventDispatcherMock->shouldReceive('unregisterEventDetails')
             ->once()
             ->with('render_event', ['viewClass' => get_class($modelMock)]);
 

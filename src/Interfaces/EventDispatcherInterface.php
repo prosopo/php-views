@@ -24,10 +24,10 @@ interface EventDispatcherInterface
     /**
      * @param array<string,mixed> $eventDetails
      */
-    public function attachEventDetails(string $eventName, array $eventDetails): void;
+    public function registerEventDetails(string $eventName, array $eventDetails): void;
 
     /**
      * @param array<string,mixed> $eventDetails
      */
-    public function detachEventDetails(string $eventName, array $eventDetails): void;
+    public function unregisterEventDetails(string $eventName, array $eventDetails): void;
 }

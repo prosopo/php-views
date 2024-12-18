@@ -47,7 +47,7 @@ final class PropertyValueProviderForModels implements PropertyValueProviderInter
         $modelClassString = $this->getModelClassStringForInheritors($type);
 
         return null !== $modelClassString ?
-             $this->modelFactory->makeModel($modelClassString) :
+             $this->modelFactory->createModel($modelClassString) :
             null;
     }
 

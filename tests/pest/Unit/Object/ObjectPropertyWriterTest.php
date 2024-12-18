@@ -21,7 +21,7 @@ class ObjectPropertyWriterTest extends TestCase
         $writer = new ObjectPropertyWriter();
 
         // when
-        $result = fn() => $writer->setObjectPropertyValues($testInstance, $propertyValueProvider);
+        $result = fn() => $writer->assignPropertyValues($testInstance, $propertyValueProvider);
 
         // then
         $propertyValueProvider->shouldReceive('supportsProperty')
@@ -51,7 +51,7 @@ class ObjectPropertyWriterTest extends TestCase
         };
 
         // when
-        $result = fn() => $writer->setObjectPropertyValues($testInstance, $propertyValueProvider);
+        $result = fn() => $writer->assignPropertyValues($testInstance, $propertyValueProvider);
 
         // then
         $result();
@@ -69,7 +69,7 @@ class ObjectPropertyWriterTest extends TestCase
         $writer = new ObjectPropertyWriter();
 
         // when
-        $result = fn() => $writer->setObjectPropertyValues($testInstance, $propertyValueProvider);
+        $result = fn() => $writer->assignPropertyValues($testInstance, $propertyValueProvider);
 
         // then
         $propertyValueProvider->shouldReceive('supportsProperty')

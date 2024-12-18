@@ -23,7 +23,7 @@ class TemplateRendererWithEventDetailsTest extends TestCase
         $result = fn() => $renderer->renderTemplate('<div>{{ $var }}</div>', ['var' => 'Test Content']);
 
         // then
-        $eventDispatcherMock->shouldReceive('attachEventDetails')
+        $eventDispatcherMock->shouldReceive('registerEventDetails')
             ->once()
             ->with('render_event', ['template' => '<div>{{ $var }}</div>',]);
 
@@ -32,7 +32,7 @@ class TemplateRendererWithEventDetailsTest extends TestCase
             ->with('<div>{{ $var }}</div>', ['var' => 'Test Content'], false)
             ->andReturn('<div>Test Content</div>');
 
-        $eventDispatcherMock->shouldReceive('detachEventDetails')
+        $eventDispatcherMock->shouldReceive('unregisterEventDetails')
             ->once()
             ->with('render_event', ['template' => '<div>{{ $var }}</div>']);
 
@@ -57,7 +57,7 @@ class TemplateRendererWithEventDetailsTest extends TestCase
         );
 
         // then
-        $eventDispatcherMock->shouldReceive('attachEventDetails')
+        $eventDispatcherMock->shouldReceive('registerEventDetails')
             ->once()
             ->with('render_event', ['template' => '<p>{{ $message }}</p>']);
 
@@ -66,7 +66,7 @@ class TemplateRendererWithEventDetailsTest extends TestCase
             ->with('<p>{{ $message }}</p>', ['message' => 'Hello, World!'], true)
             ->andReturn('<p>Hello, World!</p>');
 
-        $eventDispatcherMock->shouldReceive('detachEventDetails')
+        $eventDispatcherMock->shouldReceive('unregisterEventDetails')
             ->once()
             ->with('render_event', ['template' => '<p>{{ $message }}</p>']);
 
@@ -87,7 +87,7 @@ class TemplateRendererWithEventDetailsTest extends TestCase
         $result = fn() => $renderer->renderTemplate('', []);
 
         // then
-        $eventDispatcherMock->shouldReceive('attachEventDetails')
+        $eventDispatcherMock->shouldReceive('registerEventDetails')
             ->once()
             ->with('render_event', ['template' => '']);
 
@@ -96,7 +96,7 @@ class TemplateRendererWithEventDetailsTest extends TestCase
             ->with('', [], false)
             ->andReturn('');
 
-        $eventDispatcherMock->shouldReceive('detachEventDetails')
+        $eventDispatcherMock->shouldReceive('unregisterEventDetails')
             ->once()
             ->with('render_event', ['template' => '']);
 

@@ -19,11 +19,11 @@ final class TemplateRendererWithFileTemplate implements TemplateRendererInterfac
         $this->templateRenderer = $templateRenderer;
     }
 
-    public function renderTemplate(string $template, array $variables = [], bool $doPrint = false): string
+    public function renderTemplate(string $template, array $variables = []): string
     {
         $template = $this->getFileContent($template);
 
-        return $this->templateRenderer->renderTemplate($template, $variables, $doPrint);
+        return $this->templateRenderer->renderTemplate($template, $variables);
     }
 
     protected function getFileContent(string $file): string

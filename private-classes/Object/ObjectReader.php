@@ -15,7 +15,7 @@ use ReflectionProperty;
  */
 final class ObjectReader implements ObjectReaderInterface
 {
-    public function getObjectVariables(object $instance): array
+    public function extractObjectVariables(object $instance): array
     {
         $reflectionClass = new ReflectionClass($instance);
 

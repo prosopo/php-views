@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\Template;
 
-use Prosopo\Views\Interfaces\CodeExecutorInterface;
+use Prosopo\Views\Interfaces\CodeRunnerInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 
 /**
@@ -13,26 +13,19 @@ use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
  */
 final class TemplateRenderer implements TemplateRendererInterface
 {
-    private CodeExecutorInterface $codeExecutor;
+    private CodeRunnerInterface $codeExecutor;
 
-    public function __construct(CodeExecutorInterface $codeExecutor)
+    public function __construct(CodeRunnerInterface $codeExecutor)
     {
         $this->codeExecutor = $codeExecutor;
     }
 
-    public function renderTemplate(string $template, array $variables = [], bool $doPrint = false): string
+    public function renderTemplate(string $template, array $variables = []): string
     {
         ob_start();
 
-        $this->codeExecutor->executeCode($template, $variables);
+        $this->codeExecutor->runCode($template, $variables);
 
-        $html = (string)ob_get_clean();
-
-        if (true === $doPrint) {
-            // @phpcs:ignore
-            echo $html;
-        }
-
-        return $html;
+        return (string)ob_get_clean();
     }
 }

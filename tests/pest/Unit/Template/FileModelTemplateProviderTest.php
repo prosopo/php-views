@@ -7,10 +7,10 @@ namespace Tests\Unit\Template;
 use Mockery;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
-use Prosopo\Views\Interfaces\Model\ModelNameProviderInterface;
-use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
+use Prosopo\Views\Interfaces\Model\ModelNameResolverInterface;
+use Prosopo\Views\Interfaces\Model\ModelNamespaceResolverInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
-use Prosopo\Views\PrivateClasses\Template\FileModelTemplateProvider;
+use Prosopo\Views\PrivateClasses\Template\FileModelTemplateResolver;
 
 class FileModelTemplateProviderTest extends TestCase
 {
@@ -19,9 +19,9 @@ class FileModelTemplateProviderTest extends TestCase
         // given
         vfsStream::setup('templates', null, ['sample-view.blade.php' => 'View Content']);
         $templateModel = Mockery::mock(TemplateModelInterface::class);
-        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceProviderInterface::class);
-        $modelNameProviderMock = Mockery::mock(ModelNameProviderInterface::class);
-        $provider = new FileModelTemplateProvider(
+        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceResolverInterface::class);
+        $modelNameProviderMock = Mockery::mock(ModelNameResolverInterface::class);
+        $provider = new FileModelTemplateResolver(
             'App\\Views',
             vfsStream::url('templates'),
             '.blade.php',
@@ -31,14 +31,14 @@ class FileModelTemplateProviderTest extends TestCase
         );
 
         // when
-        $result = fn() => $provider->getModelTemplate($templateModel);
+        $result = fn() => $provider->resolveModelTemplate($templateModel);
 
         // then
-        $modelNamespaceProviderMock->shouldReceive('getModelNamespace')
+        $modelNamespaceProviderMock->shouldReceive('resolveModelNamespace')
             ->once()
             ->with($templateModel)
             ->andReturn('App\\Views');
-        $modelNameProviderMock->shouldReceive('getModelName')
+        $modelNameProviderMock->shouldReceive('resolveModelName')
             ->once()
             ->with($templateModel)
             ->andReturn('SampleView');
@@ -54,9 +54,9 @@ class FileModelTemplateProviderTest extends TestCase
         // given
         vfsStream::setup('templates', null, ['sample-view.blade.php' => 'View Content']);
         $templateModel = Mockery::mock(TemplateModelInterface::class);
-        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceProviderInterface::class);
-        $modelNameProviderMock = Mockery::mock(ModelNameProviderInterface::class);
-        $provider = new FileModelTemplateProvider(
+        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceResolverInterface::class);
+        $modelNameProviderMock = Mockery::mock(ModelNameResolverInterface::class);
+        $provider = new FileModelTemplateResolver(
             'App\\Views',
             vfsStream::url('templates'),
             '.blade.php',
@@ -66,14 +66,14 @@ class FileModelTemplateProviderTest extends TestCase
         );
 
         // when
-        $result = fn() => $provider->getModelTemplate($templateModel);
+        $result = fn() => $provider->resolveModelTemplate($templateModel);
 
         // then
-        $modelNamespaceProviderMock->shouldReceive('getModelNamespace')
+        $modelNamespaceProviderMock->shouldReceive('resolveModelNamespace')
             ->once()
             ->with($templateModel)
             ->andReturn('App\\Views');
-        $modelNameProviderMock->shouldReceive('getModelName')
+        $modelNameProviderMock->shouldReceive('resolveModelName')
             ->once()
             ->with($templateModel)
             ->andReturn('SampleView');
@@ -89,9 +89,9 @@ class FileModelTemplateProviderTest extends TestCase
         // given
         vfsStream::setup('templates');
         $templateModel = Mockery::mock(TemplateModelInterface::class);
-        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceProviderInterface::class);
-        $modelNameProviderMock = Mockery::mock(ModelNameProviderInterface::class);
-        $provider = new FileModelTemplateProvider(
+        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceResolverInterface::class);
+        $modelNameProviderMock = Mockery::mock(ModelNameResolverInterface::class);
+        $provider = new FileModelTemplateResolver(
             'App\\Views',
             vfsStream::url('templates'),
             '.blade.php',
@@ -101,14 +101,14 @@ class FileModelTemplateProviderTest extends TestCase
         );
 
         // when
-        $result = fn() => $provider->getModelTemplate($templateModel);
+        $result = fn() => $provider->resolveModelTemplate($templateModel);
 
         // then
-        $modelNamespaceProviderMock->shouldReceive('getModelNamespace')
+        $modelNamespaceProviderMock->shouldReceive('resolveModelNamespace')
             ->once()
             ->with($templateModel)
             ->andReturn('App\\Views');
-        $modelNameProviderMock->shouldReceive('getModelName')
+        $modelNameProviderMock->shouldReceive('resolveModelName')
             ->once()
             ->with($templateModel)
             ->andReturn('SampleView');
@@ -124,9 +124,9 @@ class FileModelTemplateProviderTest extends TestCase
         // given
         vfsStream::setup('templates');
         $templateModel = Mockery::mock(TemplateModelInterface::class);
-        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceProviderInterface::class);
-        $modelNameProviderMock = Mockery::mock(ModelNameProviderInterface::class);
-        $provider = new FileModelTemplateProvider(
+        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceResolverInterface::class);
+        $modelNameProviderMock = Mockery::mock(ModelNameResolverInterface::class);
+        $provider = new FileModelTemplateResolver(
             'App\\Views',
             vfsStream::url('templates'),
             '.blade.php',
@@ -136,14 +136,14 @@ class FileModelTemplateProviderTest extends TestCase
         );
 
         // when
-        $result = fn() => $provider->getModelTemplate($templateModel);
+        $result = fn() => $provider->resolveModelTemplate($templateModel);
 
         // then
-        $modelNamespaceProviderMock->shouldReceive('getModelNamespace')
+        $modelNamespaceProviderMock->shouldReceive('resolveModelNamespace')
             ->once()
             ->with($templateModel)
             ->andReturn('App\\Views');
-        $modelNameProviderMock->shouldReceive('getModelName')
+        $modelNameProviderMock->shouldReceive('resolveModelName')
             ->once()
             ->with($templateModel)
             ->andReturn('SampleView');
@@ -159,9 +159,9 @@ class FileModelTemplateProviderTest extends TestCase
         // given
         vfsStream::setup('templates', null, ['some-camel-case-view.blade.php' => 'Camel Case Content']);
         $templateModel = Mockery::mock(TemplateModelInterface::class);
-        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceProviderInterface::class);
-        $modelNameProviderMock = Mockery::mock(ModelNameProviderInterface::class);
-        $provider = new FileModelTemplateProvider(
+        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceResolverInterface::class);
+        $modelNameProviderMock = Mockery::mock(ModelNameResolverInterface::class);
+        $provider = new FileModelTemplateResolver(
             'App\\Views',
             vfsStream::url('templates'),
             '.blade.php',
@@ -171,14 +171,14 @@ class FileModelTemplateProviderTest extends TestCase
         );
 
         // when
-        $result = fn() => $provider->getModelTemplate($templateModel);
+        $result = fn() => $provider->resolveModelTemplate($templateModel);
 
         // then
-        $modelNamespaceProviderMock->shouldReceive('getModelNamespace')
+        $modelNamespaceProviderMock->shouldReceive('resolveModelNamespace')
             ->once()
             ->with($templateModel)
             ->andReturn('App\\Views');
-        $modelNameProviderMock->shouldReceive('getModelName')
+        $modelNameProviderMock->shouldReceive('resolveModelName')
             ->once()
             ->with($templateModel)
             ->andReturn('SomeCamelCaseView');
@@ -194,9 +194,9 @@ class FileModelTemplateProviderTest extends TestCase
         // given
         vfsStream::setup('templates', null, ['some-camel-case-view.blade.php' => 'Camel Case Content']);
         $templateModel = Mockery::mock(TemplateModelInterface::class);
-        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceProviderInterface::class);
-        $modelNameProviderMock = Mockery::mock(ModelNameProviderInterface::class);
-        $provider = new FileModelTemplateProvider(
+        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceResolverInterface::class);
+        $modelNameProviderMock = Mockery::mock(ModelNameResolverInterface::class);
+        $provider = new FileModelTemplateResolver(
             'App\\Views',
             vfsStream::url('templates'),
             '.blade.php',
@@ -206,14 +206,14 @@ class FileModelTemplateProviderTest extends TestCase
         );
 
         // when
-        $result = fn() => $provider->getModelTemplate($templateModel);
+        $result = fn() => $provider->resolveModelTemplate($templateModel);
 
         // then
-        $modelNamespaceProviderMock->shouldReceive('getModelNamespace')
+        $modelNamespaceProviderMock->shouldReceive('resolveModelNamespace')
             ->once()
             ->with($templateModel)
             ->andReturn('App\\Views');
-        $modelNameProviderMock->shouldReceive('getModelName')
+        $modelNameProviderMock->shouldReceive('resolveModelName')
             ->once()
             ->with($templateModel)
             ->andReturn('SomeCamelCaseView');
@@ -229,9 +229,9 @@ class FileModelTemplateProviderTest extends TestCase
         // given
         vfsStream::setup('templates', null, ['admin/dashboard-view.blade.php' => 'Dashboard Content']);
         $templateModel = Mockery::mock(TemplateModelInterface::class);
-        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceProviderInterface::class);
-        $modelNameProviderMock = Mockery::mock(ModelNameProviderInterface::class);
-        $provider = new FileModelTemplateProvider(
+        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceResolverInterface::class);
+        $modelNameProviderMock = Mockery::mock(ModelNameResolverInterface::class);
+        $provider = new FileModelTemplateResolver(
             'App\\Views',
             vfsStream::url('templates'),
             '.blade.php',
@@ -241,14 +241,14 @@ class FileModelTemplateProviderTest extends TestCase
         );
 
         // when
-        $result = fn() => $provider->getModelTemplate($templateModel);
+        $result = fn() => $provider->resolveModelTemplate($templateModel);
 
         // then
-        $modelNamespaceProviderMock->shouldReceive('getModelNamespace')
+        $modelNamespaceProviderMock->shouldReceive('resolveModelNamespace')
             ->once()
             ->with($templateModel)
             ->andReturn('App\\Views\\Admin');
-        $modelNameProviderMock->shouldReceive('getModelName')
+        $modelNameProviderMock->shouldReceive('resolveModelName')
             ->once()
             ->with($templateModel)
             ->andReturn('DashboardView');
@@ -263,9 +263,9 @@ class FileModelTemplateProviderTest extends TestCase
         // given
         vfsStream::setup('templates', null, ['admin/dashboard-view.blade.php' => 'Dashboard Content']);
         $templateModel = Mockery::mock(TemplateModelInterface::class);
-        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceProviderInterface::class);
-        $modelNameProviderMock = Mockery::mock(ModelNameProviderInterface::class);
-        $provider = new FileModelTemplateProvider(
+        $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceResolverInterface::class);
+        $modelNameProviderMock = Mockery::mock(ModelNameResolverInterface::class);
+        $provider = new FileModelTemplateResolver(
             'App\\Views',
             vfsStream::url('templates'),
             '.blade.php',
@@ -275,14 +275,14 @@ class FileModelTemplateProviderTest extends TestCase
         );
 
         // when
-        $result = fn() => $provider->getModelTemplate($templateModel);
+        $result = fn() => $provider->resolveModelTemplate($templateModel);
 
         // then
-        $modelNamespaceProviderMock->shouldReceive('getModelNamespace')
+        $modelNamespaceProviderMock->shouldReceive('resolveModelNamespace')
             ->once()
             ->with($templateModel)
             ->andReturn('App\\Views\\Admin');
-        $modelNameProviderMock->shouldReceive('getModelName')
+        $modelNameProviderMock->shouldReceive('resolveModelName')
             ->once()
             ->with($templateModel)
             ->andReturn('DashboardView');

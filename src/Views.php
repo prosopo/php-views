@@ -7,12 +7,12 @@ namespace Prosopo\Views;
 use Closure;
 use Exception;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
-use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
+use Prosopo\Views\Interfaces\Model\ModelNamespaceResolverInterface;
 use Prosopo\Views\Interfaces\Model\ModelRendererInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 use Prosopo\Views\Interfaces\View\ViewNamespaceManagerInterface;
 use Prosopo\Views\Interfaces\View\ViewNamespaceModulesContainerInterface;
-use Prosopo\Views\PrivateClasses\Model\ModelNamespaceProvider;
+use Prosopo\Views\PrivateClasses\Model\ModelNamespaceResolver;
 use Prosopo\Views\PrivateClasses\Object\ObjectClassReader;
 use Prosopo\Views\PrivateClasses\View\ViewNamespace;
 use Prosopo\Views\PrivateClasses\View\ViewNamespaceModulesContainer;
@@ -27,7 +27,7 @@ final class Views implements ViewNamespaceManagerInterface, ModelFactoryInterfac
 {
     private string $namespaceNotFoundErrorMessage;
     private string $wrongModelErrorMessage;
-    private ModelNamespaceProviderInterface $modelNamespaceProvider;
+    private ModelNamespaceResolverInterface $modelNamespaceProvider;
     private ViewNamespaceModulesContainerInterface $namespaceModulesContainer;
 
     public function __construct(?ViewsConfig $config = null)
@@ -38,7 +38,7 @@ final class Views implements ViewNamespaceManagerInterface, ModelFactoryInterfac
 
         $modelNamespaceProvider = $config->getModelNamespaceProvider();
         $this->modelNamespaceProvider = null === $modelNamespaceProvider ?
-            new ModelNamespaceProvider(new ObjectClassReader()) :
+            new ModelNamespaceResolver(new ObjectClassReader()) :
             $modelNamespaceProvider;
 
         $namespaceModulesContainer = $config->getNamespaceModulesContainer();
@@ -50,25 +50,25 @@ final class Views implements ViewNamespaceManagerInterface, ModelFactoryInterfac
         $this->wrongModelErrorMessage = $config->getWrongModelErrorMessage();
     }
 
-    public function addNamespace(string $namespace, ViewNamespaceConfig $config): ViewNamespaceModules
+    public function registerNamespace(string $namespace, ViewNamespaceConfig $config): ViewNamespaceModules
     {
         $viewNamespace = $this->makeViewNamespace($namespace, $config);
 
         $viewNamespaceModules = $viewNamespace->getModules();
 
-        $this->namespaceModulesContainer->addNamespaceModules($namespace, $viewNamespaceModules);
+        $this->namespaceModulesContainer->registerNamespaceModules($namespace, $viewNamespaceModules);
 
         return $viewNamespaceModules;
     }
 
-    public function makeModel(string $modelClass)
+    public function createModel(string $modelClass)
     {
         if (false === $this->isModel($modelClass)) {
             throw $this->makeWrongModelException($modelClass);
         }
 
-        $modelNamespace = $this->modelNamespaceProvider->getModelNamespace($modelClass);
-        $namespaceModules = $this->namespaceModulesContainer->getNamespaceModulesByModelNamespace($modelNamespace);
+        $modelNamespace = $this->modelNamespaceProvider->resolveModelNamespace($modelClass);
+        $namespaceModules = $this->namespaceModulesContainer->resolveNamespaceModules($modelNamespace);
 
         if (null === $namespaceModules) {
             throw $this->makeNamespaceNotResolvedException($modelNamespace);
@@ -80,17 +80,17 @@ final class Views implements ViewNamespaceManagerInterface, ModelFactoryInterfac
             throw $this->makeNamespaceNotResolvedException($modelNamespace);
         }
 
-        return $modelFactory->makeModel($modelClass);
+        return $modelFactory->createModel($modelClass);
     }
 
-    public function renderModel($modelOrClass, Closure $setupCallback = null, bool $doPrint = false): string
+    public function renderModel($modelOrClass, Closure $setupModelCallback = null): string
     {
         if (false === $this->isModel($modelOrClass)) {
             throw $this->makeWrongModelException($modelOrClass);
         }
 
-        $modelNamespace = $this->modelNamespaceProvider->getModelNamespace($modelOrClass);
-        $namespaceModules = $this->namespaceModulesContainer->getNamespaceModulesByModelNamespace($modelNamespace);
+        $modelNamespace = $this->modelNamespaceProvider->resolveModelNamespace($modelOrClass);
+        $namespaceModules = $this->namespaceModulesContainer->resolveNamespaceModules($modelNamespace);
 
         if (null === $namespaceModules) {
             throw $this->makeNamespaceNotResolvedException($modelNamespace);
@@ -102,7 +102,7 @@ final class Views implements ViewNamespaceManagerInterface, ModelFactoryInterfac
             throw $this->makeNamespaceNotResolvedException($modelNamespace);
         }
 
-        return $modelRenderer->renderModel($modelOrClass, $setupCallback, $doPrint);
+        return $modelRenderer->renderModel($modelOrClass, $setupModelCallback);
     }
 
     protected function makeViewNamespace(string $namespace, ViewNamespaceConfig $config): ViewNamespace

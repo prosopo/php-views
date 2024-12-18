@@ -8,5 +8,5 @@ use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
 
 interface TemplateModelWithDefaultsInterface
 {
-    public function getDefaultsPropertyValueProvider(): PropertyValueProviderInterface;
+    public function getDefaultsProvider(): PropertyValueProviderInterface;
 }

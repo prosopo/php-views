@@ -15,7 +15,7 @@ use ReflectionProperty;
  */
 final class ObjectPropertyWriter implements ObjectPropertyWriterInterface
 {
-    public function setObjectPropertyValues(
+    public function assignPropertyValues(
         object $instance,
         PropertyValueProviderInterface $propertyValueProvider
     ): void {

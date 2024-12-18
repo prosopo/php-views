@@ -4,31 +4,31 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\Template;
 
-use Prosopo\Views\Interfaces\Model\ModelNameProviderInterface;
-use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
+use Prosopo\Views\Interfaces\Model\ModelNameResolverInterface;
+use Prosopo\Views\Interfaces\Model\ModelNamespaceResolverInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
-use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
+use Prosopo\Views\Interfaces\Template\ModelTemplateResolverInterface;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
  * We reserve the right to change its name and implementation.
  */
-final class FileModelTemplateProvider implements ModelTemplateProviderInterface
+final class FileModelTemplateResolver implements ModelTemplateResolverInterface
 {
     private string $templatesRootPath;
     private string $namespace;
     private string $extension;
     private bool $isFileBasedTemplate;
-    private ModelNameProviderInterface $modelNameProvider;
-    private ModelNamespaceProviderInterface $modelNamespaceProvider;
+    private ModelNameResolverInterface $modelNameProvider;
+    private ModelNamespaceResolverInterface $modelNamespaceProvider;
 
     public function __construct(
-        string $namespace,
-        string $templatesRootPath,
-        string $extension,
-        bool $isFileBasedTemplate,
-        ModelNamespaceProviderInterface $modelNamespaceProvider,
-        ModelNameProviderInterface $modelNameProvider
+        string                          $namespace,
+        string                          $templatesRootPath,
+        string                          $extension,
+        bool                            $isFileBasedTemplate,
+        ModelNamespaceResolverInterface $modelNamespaceProvider,
+        ModelNameResolverInterface      $modelNameProvider
     ) {
         $this->templatesRootPath = $templatesRootPath;
         $this->namespace = $namespace;
@@ -38,14 +38,14 @@ final class FileModelTemplateProvider implements ModelTemplateProviderInterface
         $this->modelNamespaceProvider = $modelNamespaceProvider;
     }
 
-    public function getModelTemplate(TemplateModelInterface $model): string
+    public function resolveModelTemplate(TemplateModelInterface $model): string
     {
-        $modelNamespace = $this->modelNamespaceProvider->getModelNamespace($model);
+        $modelNamespace = $this->modelNamespaceProvider->resolveModelNamespace($model);
 
         $relativeModelNamespace = substr($modelNamespace, strlen($this->namespace));
         $relativeModelNamespace = ltrim($relativeModelNamespace, '\\');
 
-        $modelName = $this->modelNameProvider->getModelName($model);
+        $modelName = $this->modelNameProvider->resolveModelName($model);
 
         $relativeTemplatePath = $this->getRelativeTemplatePath($relativeModelNamespace, $modelName);
 

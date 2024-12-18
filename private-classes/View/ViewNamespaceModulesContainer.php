@@ -19,7 +19,7 @@ class ViewNamespaceModulesContainer implements ViewNamespaceModulesContainerInte
         $this->viewNamespaceModules = [];
     }
 
-    public function addNamespaceModules(
+    public function registerNamespaceModules(
         string $namespace,
         ViewNamespaceModules $viewNamespaceModules
     ): void {
@@ -32,7 +32,7 @@ class ViewNamespaceModulesContainer implements ViewNamespaceModulesContainerInte
         });
     }
 
-    public function getNamespaceModulesByModelNamespace(string $modelNamespace): ?ViewNamespaceModules
+    public function resolveNamespaceModules(string $modelNamespace): ?ViewNamespaceModules
     {
         $matchedNamespaces = array_filter($this->viewNamespaceModules, function (
             ViewNamespaceModules $viewNamespaceModules,

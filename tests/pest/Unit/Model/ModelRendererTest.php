@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
-use Prosopo\Views\Interfaces\Template\ModelTemplateProviderInterface;
+use Prosopo\Views\Interfaces\Template\ModelTemplateResolverInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\PrivateClasses\Model\ModelRenderer;
 
@@ -20,7 +20,7 @@ class ModelRendererTest extends TestCase
         // given
         $templateRendererMock = Mockery::mock(TemplateRendererInterface::class);
         $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
-        $templateProviderMock = Mockery::mock(ModelTemplateProviderInterface::class);
+        $templateProviderMock = Mockery::mock(ModelTemplateResolverInterface::class);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
         $renderer = new ModelRenderer(
             $templateRendererMock,
@@ -36,7 +36,7 @@ class ModelRendererTest extends TestCase
             ->once()
             ->andReturn(['key' => 'value']);
 
-        $templateProviderMock->shouldReceive('getModelTemplate')
+        $templateProviderMock->shouldReceive('resolveModelTemplate')
             ->once()
             ->with($modelMock)
             ->andReturn('<div>{{ $key }}</div>');
@@ -58,7 +58,7 @@ class ModelRendererTest extends TestCase
         // given
         $templateRendererMock = Mockery::mock(TemplateRendererInterface::class);
         $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
-        $templateProviderMock = Mockery::mock(ModelTemplateProviderInterface::class);
+        $templateProviderMock = Mockery::mock(ModelTemplateResolverInterface::class);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
         $renderer = new ModelRenderer(
             $templateRendererMock,
@@ -70,7 +70,7 @@ class ModelRendererTest extends TestCase
         $result = fn() => $renderer->renderModel('ModelClass');
 
         // then
-        $modelFactoryMock->shouldReceive('makeModel')
+        $modelFactoryMock->shouldReceive('createModel')
             ->once()
             ->with('ModelClass')
             ->andReturn($modelMock);
@@ -79,7 +79,7 @@ class ModelRendererTest extends TestCase
             ->once()
             ->andReturn(['key' => 'value']);
 
-        $templateProviderMock->shouldReceive('getModelTemplate')
+        $templateProviderMock->shouldReceive('resolveModelTemplate')
             ->once()
             ->with($modelMock)
             ->andReturn('<div>{{ $key }}</div>');
@@ -100,7 +100,7 @@ class ModelRendererTest extends TestCase
         // given
         $templateRendererMock = Mockery::mock(TemplateRendererInterface::class);
         $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
-        $templateProviderMock = Mockery::mock(ModelTemplateProviderInterface::class);
+        $templateProviderMock = Mockery::mock(ModelTemplateResolverInterface::class);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
         $renderer = new ModelRenderer(
             $templateRendererMock,
@@ -115,7 +115,7 @@ class ModelRendererTest extends TestCase
         $result = fn()=>$renderer->renderModel('ModelClass', $setupCallback);
 
         // then
-        $modelFactoryMock->shouldReceive('makeModel')
+        $modelFactoryMock->shouldReceive('createModel')
             ->once()
             ->with('ModelClass')
             ->andReturn($modelMock);
@@ -124,7 +124,7 @@ class ModelRendererTest extends TestCase
             ->once()
             ->andReturn(['key' => 'modified_value']);
 
-        $templateProviderMock->shouldReceive('getModelTemplate')
+        $templateProviderMock->shouldReceive('resolveModelTemplate')
             ->once()
             ->with($modelMock)
             ->andReturn('<div>{{ $key }}</div>');
@@ -145,7 +145,7 @@ class ModelRendererTest extends TestCase
         // given
         $templateRendererMock = Mockery::mock(TemplateRendererInterface::class);
         $modelFactoryMock = Mockery::mock(ModelFactoryInterface::class);
-        $templateProviderMock = Mockery::mock(ModelTemplateProviderInterface::class);
+        $templateProviderMock = Mockery::mock(ModelTemplateResolverInterface::class);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
         $renderer = new ModelRenderer(
             $templateRendererMock,
@@ -161,7 +161,7 @@ class ModelRendererTest extends TestCase
             ->once()
             ->andReturn(['key' => 'value']);
 
-        $templateProviderMock->shouldReceive('getModelTemplate')
+        $templateProviderMock->shouldReceive('resolveModelTemplate')
             ->once()
             ->with($modelMock)
             ->andReturn('<div>{{ $key }}</div>');

@@ -29,7 +29,7 @@ class ObjectReaderTest extends TestCase
         };
 
         // when
-        $variables = $objectReader->getObjectVariables($testInstance);
+        $variables = $objectReader->extractObjectVariables($testInstance);
 
         // then
         $this->assertEquals([
@@ -50,7 +50,7 @@ class ObjectReaderTest extends TestCase
         };
 
         // when
-        $variables = $objectReader->getObjectVariables($testInstance);
+        $variables = $objectReader->extractObjectVariables($testInstance);
 
         // then
         $this->assertEquals([
@@ -72,7 +72,7 @@ class ObjectReaderTest extends TestCase
         };
 
         // when
-        $variables = $objectReader->getObjectVariables($testInstance);
+        $variables = $objectReader->extractObjectVariables($testInstance);
 
         // then
 

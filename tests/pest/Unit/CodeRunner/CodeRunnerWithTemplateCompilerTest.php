@@ -6,21 +6,21 @@ namespace Tests\Unit\CodeExecutor;
 
 use Mockery;
 use PHPUnit\Framework\TestCase;
-use Prosopo\Views\Interfaces\CodeExecutorInterface;
+use Prosopo\Views\Interfaces\CodeRunnerInterface;
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
-use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithTemplateCompilation;
+use Prosopo\Views\PrivateClasses\CodeRunner\CodeRunnerWithTemplateCompilation;
 
-class CodeExecutorWithTemplateCompilationTest extends TestCase
+class CodeRunnerWithTemplateCompilationTest extends TestCase
 {
     public function testExecutesCompiledTemplateCode(): void
     {
         // given
-        $codeExecutor = Mockery::mock(CodeExecutorInterface::class);
+        $codeExecutor = Mockery::mock(CodeRunnerInterface::class);
         $templateCompiler = Mockery::mock(TemplateCompilerInterface::class);
-        $contestant = new CodeExecutorWithTemplateCompilation($codeExecutor, $templateCompiler);
+        $contestant = new CodeRunnerWithTemplateCompilation($codeExecutor, $templateCompiler);
 
         // when
-        $executeCode = fn() => $contestant->executeCode('template code', ['arg1' => 'value1']);
+        $executeCode = fn() => $contestant->runCode('template code', ['arg1' => 'value1']);
 
         // then
         $templateCompiler->shouldReceive('compileTemplate')
@@ -28,7 +28,7 @@ class CodeExecutorWithTemplateCompilationTest extends TestCase
             ->with('template code')
             ->andReturn('compiled code');
 
-        $codeExecutor->shouldReceive('executeCode')
+        $codeExecutor->shouldReceive('runCode')
             ->once()
             ->with('compiled code', ['arg1' => 'value1']);
 
@@ -41,12 +41,12 @@ class CodeExecutorWithTemplateCompilationTest extends TestCase
     public function testHandlesEmptyTemplateCode(): void
     {
         // given
-        $codeExecutor = Mockery::mock(CodeExecutorInterface::class);
+        $codeExecutor = Mockery::mock(CodeRunnerInterface::class);
         $templateCompiler = Mockery::mock(TemplateCompilerInterface::class);
-        $contestant = new CodeExecutorWithTemplateCompilation($codeExecutor, $templateCompiler);
+        $contestant = new CodeRunnerWithTemplateCompilation($codeExecutor, $templateCompiler);
 
         // when
-        $executeCode = fn() => $contestant->executeCode('', []);
+        $executeCode = fn() => $contestant->runCode('', []);
 
         // then
         $templateCompiler->shouldReceive('compileTemplate')
@@ -54,7 +54,7 @@ class CodeExecutorWithTemplateCompilationTest extends TestCase
             ->with('')
             ->andReturn('');
 
-        $codeExecutor->shouldReceive('executeCode')
+        $codeExecutor->shouldReceive('runCode')
             ->once()
             ->with('', []);
 
@@ -67,12 +67,12 @@ class CodeExecutorWithTemplateCompilationTest extends TestCase
     public function testHandlesArgumentsCorrectly(): void
     {
         // given
-        $codeExecutor = Mockery::mock(CodeExecutorInterface::class);
+        $codeExecutor = Mockery::mock(CodeRunnerInterface::class);
         $templateCompiler = Mockery::mock(TemplateCompilerInterface::class);
-        $contestant = new CodeExecutorWithTemplateCompilation($codeExecutor, $templateCompiler);
+        $contestant = new CodeRunnerWithTemplateCompilation($codeExecutor, $templateCompiler);
 
         // when
-        $executeCode = fn() => $contestant->executeCode('template code with args', ['key1' => 'value1', 'key2' => 'value2']);
+        $executeCode = fn() => $contestant->runCode('template code with args', ['key1' => 'value1', 'key2' => 'value2']);
 
         // then
         $templateCompiler->shouldReceive('compileTemplate')
@@ -80,7 +80,7 @@ class CodeExecutorWithTemplateCompilationTest extends TestCase
             ->with('template code with args')
             ->andReturn('compiled code with args');
 
-        $codeExecutor->shouldReceive('executeCode')
+        $codeExecutor->shouldReceive('runCode')
             ->once()
             ->with('compiled code with args', ['key1' => 'value1', 'key2' => 'value2']);
 

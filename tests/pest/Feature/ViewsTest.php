@@ -43,7 +43,7 @@ class ViewsTest extends TestCase
         $views = new Views();
 
         // when
-        $views->addNamespace($modelNamespace, $namespaceConfig);
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
 
         $modelClass = $modelNamespace . '\\FirstModel';
         $model = new $modelClass();
@@ -83,7 +83,7 @@ class ViewsTest extends TestCase
         $views = new Views();
 
         // when
-        $views->addNamespace($modelNamespace, $namespaceConfig);
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
 
         $modelClass = $modelNamespace . '\\FirstModel';
         $model = new $modelClass();
@@ -116,10 +116,10 @@ class ViewsTest extends TestCase
         );
 
         // when
-        $views->addNamespace($modelNamespace, $namespaceConfig);
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
 
         $modelClass = $modelNamespace . '\\FirstModel';
-        $model = $views->makeModel($modelClass);
+        $model = $views->createModel($modelClass);
         $model->message = 'Hello World!';
 
         // then
@@ -150,7 +150,7 @@ class ViewsTest extends TestCase
         );
 
         // when
-        $views->addNamespace($modelNamespace, $namespaceConfig);
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
 
         $modelClass = $modelNamespace . '\\FirstModel';
 
@@ -187,7 +187,7 @@ class ViewsTest extends TestCase
         $views = new Views();
 
         // when
-        $views->addNamespace($modelNamespace, $namespaceConfig);
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
 
         $modelClass = $modelNamespace . '\\FirstModel';
         $model = new $modelClass();
@@ -227,7 +227,7 @@ class ViewsTest extends TestCase
         );
 
         // when
-        $views->addNamespace($modelNamespace, $namespaceConfig);
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
         $modelClass = $modelNamespace . '\\FirstModel';
         $rendered = $views->renderModel($modelClass, (function ($model) {
             $model->message = 'some data';
@@ -274,7 +274,7 @@ class ViewsTest extends TestCase
         );
 
         // when
-        $views->addNamespace($modelNamespace, $namespaceConfig);
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
         $modelClass = $modelNamespace . '\\FirstModel';
         $rendered = $views->renderModel($modelClass, (function ($model) {
             $model->message = 'some data';
@@ -314,7 +314,7 @@ class ViewsTest extends TestCase
         $views = new Views();
 
         // when
-        $views->addNamespace($namespace, $namespaceConfig);
+        $views->registerNamespace($namespace, $namespaceConfig);
 
         $modelClass = $innerModelNamespace . '\\FirstModel';
         $model = new $modelClass();
@@ -366,8 +366,8 @@ class ViewsTest extends TestCase
         $views = new Views();
 
         // when
-        $views->addNamespace($firstNamespace, $firstNamespaceConfig);
-        $views->addNamespace($secondNamespace, $secondNamespaceConfig);
+        $views->registerNamespace($firstNamespace, $firstNamespaceConfig);
+        $views->registerNamespace($secondNamespace, $secondNamespaceConfig);
 
         $firstModelClass = $firstNamespace . '\\FirstModel';
         $firstModel = new $firstModelClass();
@@ -409,7 +409,7 @@ class ViewsTest extends TestCase
         $views = new Views();
 
         // when
-        $views->addNamespace($modelNamespace, $namespaceConfig);
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
 
         $innerModelClass = $modelNamespace . '\\InnerModel';
         $topModelClass = $modelNamespace . '\\TopModel';
@@ -455,7 +455,7 @@ class ViewsTest extends TestCase
             ->setTemplatesRootPath(vfsStream::url('templates'))
             ->setTemplateFileExtension('.php');
 
-        $views->addNamespace($modelNamespace, $viewNamespaceConfig);
+        $views->registerNamespace($modelNamespace, $viewNamespaceConfig);
 
         $modelClass = $modelNamespace . '\\Pure';
         $model = new $modelClass();
@@ -499,8 +499,8 @@ class ViewsTest extends TestCase
         $views = new Views();
 
         // when
-        $views->addNamespace($firstNamespace, $firstNamespaceConfig);
-        $views->addNamespace($secondNamespace, $secondNamespaceConfig);
+        $views->registerNamespace($firstNamespace, $firstNamespaceConfig);
+        $views->registerNamespace($secondNamespace, $secondNamespaceConfig);
 
         $innerModelClass = $secondNamespace . '\\InnerModel';
         $topModelClass = $firstNamespace . '\\TopModel';
@@ -528,10 +528,10 @@ class ViewsTest extends TestCase
         );
 
         // when
-        $views->addNamespace($modelNamespace, $namespaceConfig);
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
 
         $modelClass = $modelNamespace . '\\FirstModel';
-        $model = $views->makeModel($modelClass);
+        $model = $views->createModel($modelClass);
 
         // then
         $this->assertSame($modelClass, get_class($model));
@@ -558,10 +558,10 @@ class ViewsTest extends TestCase
         );
 
         // when
-        $views->addNamespace($modelNamespace, $namespaceConfig);
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
 
         $modelClass = $modelNamespace . '\\FirstModel';
-        $model = $views->makeModel($modelClass);
+        $model = $views->createModel($modelClass);
 
         // then
         $this->assertSame($modelClass, get_class($model));
@@ -588,10 +588,10 @@ class ViewsTest extends TestCase
         );
 
         // when
-        $views->addNamespace($modelNamespace, $namespaceConfig);
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
 
         $modelClass = $modelNamespace . '\\FirstModel';
-        $model = $views->makeModel($modelClass);
+        $model = $views->createModel($modelClass);
 
         // then
         $this->assertSame('', $model->message);
@@ -618,10 +618,10 @@ class ViewsTest extends TestCase
         );
 
         // when
-        $views->addNamespace($modelNamespace, $namespaceConfig);
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
 
         $modelClass = $modelNamespace . '\\FirstModel';
-        $model = $views->makeModel($modelClass);
+        $model = $views->createModel($modelClass);
 
         // then
         $this->assertFalse(isset($model->message));
@@ -648,15 +648,15 @@ class ViewsTest extends TestCase
         $views = new Views();
 
         // when
-        $views->addNamespace($firstNamespace, $firstNamespaceConfig);
-        $views->addNamespace($secondNamespace, $secondNamespaceConfig);
+        $views->registerNamespace($firstNamespace, $firstNamespaceConfig);
+        $views->registerNamespace($secondNamespace, $secondNamespaceConfig);
 
         $firstModelClass = $firstNamespace . '\\FirstModel';
         $secondModelClass = $secondNamespace . '\\SecondModel';
 
         // then
-        $this->assertSame($firstModelClass, get_class($views->makeModel($firstModelClass)));
-        $this->assertSame($secondModelClass, get_class($views->makeModel($secondModelClass)));
+        $this->assertSame($firstModelClass, get_class($views->createModel($firstModelClass)));
+        $this->assertSame($secondModelClass, get_class($views->createModel($secondModelClass)));
     }
 
     /**

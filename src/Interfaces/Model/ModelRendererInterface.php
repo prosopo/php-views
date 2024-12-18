@@ -13,9 +13,9 @@ interface ModelRendererInterface
      * @template T of TemplateModelInterface
      *
      * @param T|class-string<T> $modelOrClass
-     * @param Closure(T):void|null $setupCallback
+     * @param Closure(T):void|null $setupModelCallback
      *
      * @throws Exception
      */
-    public function renderModel($modelOrClass, Closure $setupCallback = null, bool $doPrint = false): string;
+    public function renderModel($modelOrClass, Closure $setupModelCallback = null): string;
 }

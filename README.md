@@ -143,7 +143,7 @@ class AnyClass implements TemplateModelInterface {
 
 ## 2. Views
 
-The `Views` class provides the `addNamespace`, `makeModel` and `renderModel` methods. It acts as a
+The `Views` class provides the `registerNamespace`, `createModel` and `renderModel` methods. It acts as a
 namespace manager and brings together different namespace configurations.
 
 Each `ViewNamespace` has its own independent setup and set of modules. E.g. among these modules is the
@@ -183,7 +183,7 @@ $views = new Views();
 
 // 4. Add the root namespace of your Template Models
 
-$views->addNamespace('MyPackage\Views', $namespaceConfig);
+$views->registerNamespace('MyPackage\Views', $namespaceConfig);
 
 // Tip: you can have multiple namespaces, and mix their Models.
 ```
@@ -201,8 +201,6 @@ echo $views->renderModel(
         $employee->bonus = $bonus;
     }
 );
-
-// Tip: pass true to the third renderModel() argument to print it without echo.
 ```
 
 This approach enables a functional programming style when working with Models.
@@ -212,7 +210,7 @@ This approach enables a functional programming style when working with Models.
 When you need split creation, use the factory to create the model, and then render later when you need it.
 
 ```php
-$employee = $views->makeModel(EmployeeModel::class);
+$employee = $views->createModel(EmployeeModel::class);
 
 // ...
 
@@ -227,9 +225,9 @@ echo $views->renderModel($employee);
 // to customize the Model properties before rendering. 
 ```
 
-Advice: The `Views` class implements three interfaces: `ViewNamespaceManagerInterface` (for `addNamespace`),
+Advice: The `Views` class implements three interfaces: `ViewNamespaceManagerInterface` (for `registerNamespace`),
 `ModelFactoryInterface` (for
-`makeModel`), and `ModelRendererInterface` (for `renderModel`).
+`createModel`), and `ModelRendererInterface` (for `renderModel`).
 
 When passing the `Views` instance to your methods, use
 one of these interfaces as the argument type instead of the `Views` class itself.
@@ -239,7 +237,7 @@ you expect are accessible, promoting cleaner and more maintainable code.
 
 ### 2.4) Automated templates matching
 
-The built-in `ModelTemplateProvider` automatically matches templates based on the Model names and their relative
+The built-in `ModelTemplateResolver` automatically matches templates based on the Model names and their relative
 namespaces. This automates the process of associating templates with their corresponding Models.
 
 Example:
@@ -257,13 +255,13 @@ Example:
 **Naming Note:** Use dashes in template names, as camelCase in Model names is automatically converted to dash-separated
 names.
 
-> Tip: In case this approach doesn't work for your setup, you can override the `ModelTemplateProvider` module to
-> implement your own logic. In case the reason is the name-specific only, consider overriding the `ModelNameProvider`
+> Tip: In case this approach doesn't work for your setup, you can override the `ModelTemplateResolver` module to
+> implement your own logic. In case the reason is the name-specific only, consider overriding the `ModelNameResolver`
 > module instead.
 
 ### 2.5) Custom modules
 
-By default, the `addNamespace` class creates module instances for the namespace using classes from the current package.
+By default, the `registerNamespace` class creates module instances for the namespace using classes from the current package.
 
 If you need to override the default module behavior, you can define a custom implementation in the
 configuration and the package will use the specified implementation.
@@ -308,7 +306,7 @@ $views = new Views();
 
 // 4. Add the namespace (you can have multiple namespaces)
 
-$views->addNamespace('MyPackage\Views', $namespaceConfig);
+$views->registerNamespace('MyPackage\Views', $namespaceConfig);
 ```
 
 You can override any namespace module in the following way:
@@ -498,7 +496,7 @@ $viewNamespaceConfig
     ->setTemplatesRootPath(__DIR__ . './templates')
     ->setTemplateFileExtension('.php');
 
-$views->addNamespace('MyApp\Models', $viewNamespaceConfig);
+$views->registerNamespace('MyApp\Models', $viewNamespaceConfig);
 ```
 
 Now this namespace is configured to deal with plain PHP template files, while having all the package features, including

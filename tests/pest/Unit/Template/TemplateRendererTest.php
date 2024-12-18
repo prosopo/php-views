@@ -6,7 +6,7 @@ namespace Tests\Unit\Template;
 
 use Mockery;
 use PHPUnit\Framework\TestCase;
-use Prosopo\Views\Interfaces\CodeExecutorInterface;
+use Prosopo\Views\Interfaces\CodeRunnerInterface;
 use Prosopo\Views\PrivateClasses\Template\TemplateRenderer;
 
 class TemplateRendererTest extends TestCase
@@ -14,14 +14,14 @@ class TemplateRendererTest extends TestCase
     public function testRenderTemplateReturnsRenderedContent(): void
     {
         // given
-        $templateExecutor = Mockery::mock(CodeExecutorInterface::class);
+        $templateExecutor = Mockery::mock(CodeRunnerInterface::class);
         $renderer = new TemplateRenderer($templateExecutor);
 
         // when
         $result = fn() => $renderer->renderTemplate('<div>{{ $var }}</div>', ['var' => 'Test Content']);
 
         // then
-        $templateExecutor->shouldReceive('executeCode')
+        $templateExecutor->shouldReceive('runCode')
             ->once()
             ->with('<div>{{ $var }}</div>', ['var' => 'Test Content'])
             ->andReturnUsing(function () {
@@ -36,7 +36,7 @@ class TemplateRendererTest extends TestCase
     public function testRenderTemplateDoesNotPrintByDefault(): void
     {
         // given
-        $templateExecutor = Mockery::mock(CodeExecutorInterface::class);
+        $templateExecutor = Mockery::mock(CodeRunnerInterface::class);
         $renderer = new TemplateRenderer($templateExecutor);
 
         // when
@@ -45,7 +45,7 @@ class TemplateRendererTest extends TestCase
         $output = ob_get_clean();
 
         // then
-        $templateExecutor->shouldReceive('executeCode')
+        $templateExecutor->shouldReceive('runCode')
             ->once()
             ->with('<p>{{ $message }}</p>', ['message' => 'Hello, World!'])
             ->andReturnUsing(function () {
@@ -62,14 +62,14 @@ class TemplateRendererTest extends TestCase
     public function testRenderTemplatePrintsWhenDoPrintIsTrue(): void
     {
         // given
-        $templateExecutor = Mockery::mock(CodeExecutorInterface::class);
+        $templateExecutor = Mockery::mock(CodeRunnerInterface::class);
         $renderer = new TemplateRenderer($templateExecutor);
 
         // when
         $result = fn() => $renderer->renderTemplate('<h1>{{ $title }}</h1>', ['title' => 'Welcome'], true);
 
         // then
-        $templateExecutor->shouldReceive('executeCode')
+        $templateExecutor->shouldReceive('runCode')
             ->once()
             ->with('<h1>{{ $title }}</h1>', ['title' => 'Welcome'])
             ->andReturnUsing(function () {
@@ -90,14 +90,14 @@ class TemplateRendererTest extends TestCase
     public function testRenderTemplateHandlesEmptyTemplate(): void
     {
         // given
-        $templateExecutor = Mockery::mock(CodeExecutorInterface::class);
+        $templateExecutor = Mockery::mock(CodeRunnerInterface::class);
         $renderer = new TemplateRenderer($templateExecutor);
 
         // when
         $result = fn() => $renderer->renderTemplate('', []);
 
         // then
-        $templateExecutor->shouldReceive('executeCode')
+        $templateExecutor->shouldReceive('runCode')
             ->once()
             ->with('', [])
             ->andReturnUsing(function () {

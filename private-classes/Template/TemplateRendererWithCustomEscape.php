@@ -32,7 +32,7 @@ final class TemplateRendererWithCustomEscape implements TemplateRendererInterfac
         $this->escapeVariableName = $escapeVariableName;
     }
 
-    public function renderTemplate(string $template, array $variables = [], bool $doPrint = false): string
+    public function renderTemplate(string $template, array $variables = []): string
     {
         $variables = $this->setOutputEscapeCallback(
             $variables,
@@ -40,7 +40,7 @@ final class TemplateRendererWithCustomEscape implements TemplateRendererInterfac
             $this->customOutputEscapeCallback
         );
 
-        return $this->templateRenderer->renderTemplate($template, $variables, $doPrint);
+        return $this->templateRenderer->renderTemplate($template, $variables);
     }
 
     /**

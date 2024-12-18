@@ -47,10 +47,10 @@ abstract class TemplateModel implements TemplateModelInterface, TemplateModelWit
 
     public function getTemplateArguments(): array
     {
-        return $this->objectReader->getObjectVariables($this);
+        return $this->objectReader->extractObjectVariables($this);
     }
 
-    public function getDefaultsPropertyValueProvider(): PropertyValueProviderInterface
+    public function getDefaultsProvider(): PropertyValueProviderInterface
     {
         return $this->propertyValueProviderForDefaults;
     }

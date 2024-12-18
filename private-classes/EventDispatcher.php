@@ -64,14 +64,14 @@ final class EventDispatcher implements EventDispatcherInterface
         $this->eventListeners[$eventName] = $eventListeners;
     }
 
-    public function attachEventDetails(string $eventName, array $eventDetails): void
+    public function registerEventDetails(string $eventName, array $eventDetails): void
     {
         $eventDetails = array_merge($this->getEventDetails($eventName), $eventDetails);
 
         $this->eventDetails[$eventName] = $eventDetails;
     }
 
-    public function detachEventDetails(string $eventName, array $eventDetails): void
+    public function unregisterEventDetails(string $eventName, array $eventDetails): void
     {
         $eventDetails = array_diff_key($this->getEventDetails($eventName), $eventDetails);
 
