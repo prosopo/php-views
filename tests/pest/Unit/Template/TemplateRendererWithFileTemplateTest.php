@@ -28,7 +28,7 @@ class TemplateRendererWithFileTemplateTest extends TestCase
         // then
         $templateRendererMock->shouldReceive('renderTemplate')
             ->once()
-            ->with('<div>{{ $key }}</div>', ['key' => 'value'], false)
+            ->with('<div>{{ $key }}</div>', ['key' => 'value'])
             ->andReturn('<div>value</div>');
 
         $this->assertSame('<div>value</div>', $result());
@@ -51,35 +51,10 @@ class TemplateRendererWithFileTemplateTest extends TestCase
         // then
         $templateRendererMock->shouldReceive('renderTemplate')
             ->once()
-            ->with('', ['key' => 'value'], false)
+            ->with('', ['key' => 'value'])
             ->andReturn('');
 
         $this->assertSame('', $result());
-
-        // apply
-        Mockery::close();
-    }
-
-    public function testRenderTemplateHandlesDoPrintFlag(): void
-    {
-        // given
-        vfsStream::setup('templates', null, [
-            'template.blade.php' => '<div>{{ $key }}</div>',
-        ]);
-        $templateFilePath = vfsStream::url('templates/template.blade.php');
-        $templateRendererMock = Mockery::mock(TemplateRendererInterface::class);
-        $renderer = new TemplateRendererWithFileTemplate($templateRendererMock);
-
-        // when
-        $result = fn() => $renderer->renderTemplate($templateFilePath, ['key' => 'value'], true);
-
-        // then
-        $templateRendererMock->shouldReceive('renderTemplate')
-            ->once()
-            ->with('<div>{{ $key }}</div>', ['key' => 'value'], true)
-            ->andReturn('<div>value</div>');
-
-        $this->assertSame('<div>value</div>', $result());
 
         // apply
         Mockery::close();

@@ -6,7 +6,7 @@ namespace Prosopo\Views\Interfaces\Template;
 
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 
-interface ModelTemplateProviderInterface
+interface ModelTemplateResolverInterface
 {
-    public function getModelTemplate(TemplateModelInterface $model): string;
+    public function resolveModelTemplate(TemplateModelInterface $model): string;
 }

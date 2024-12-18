@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\Model;
 
-use Prosopo\Views\Interfaces\Model\ModelNameProviderInterface;
+use Prosopo\Views\Interfaces\Model\ModelNameResolverInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 use Prosopo\Views\PrivateClasses\Object\ObjectClassReader;
 
@@ -12,7 +12,7 @@ use Prosopo\Views\PrivateClasses\Object\ObjectClassReader;
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
  * We reserve the right to change its name and implementation.
  */
-final class ModelNameProvider implements ModelNameProviderInterface
+final class ModelNameResolver implements ModelNameResolverInterface
 {
     private ObjectClassReader $objectClassReader;
 
@@ -21,7 +21,7 @@ final class ModelNameProvider implements ModelNameProviderInterface
         $this->objectClassReader = $objectClassReader;
     }
 
-    public function getModelName(TemplateModelInterface $model): string
+    public function resolveModelName(TemplateModelInterface $model): string
     {
         $modelNamespaceWithClassName = $this->objectClassReader->getObjectClass($model) ;
 

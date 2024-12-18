@@ -27,17 +27,17 @@ final class TemplateRendererWithEventDetails implements TemplateRendererInterfac
         $this->eventName = $eventName;
     }
 
-    public function renderTemplate(string $template, array $variables = [], bool $doPrint = false): string
+    public function renderTemplate(string $template, array $variables = []): string
     {
         $eventDetails = [
             'template' => $template,
         ];
 
-        $this->eventDispatcher->attachEventDetails($this->eventName, $eventDetails);
+        $this->eventDispatcher->registerEventDetails($this->eventName, $eventDetails);
 
-        $response = $this->templateRenderer->renderTemplate($template, $variables, $doPrint);
+        $response = $this->templateRenderer->renderTemplate($template, $variables);
 
-        $this->eventDispatcher->detachEventDetails($this->eventName, $eventDetails);
+        $this->eventDispatcher->unregisterEventDetails($this->eventName, $eventDetails);
 
         return $response;
     }

@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Prosopo\Views;
 
-use Prosopo\Views\Interfaces\Model\ModelNamespaceProviderInterface;
+use Prosopo\Views\Interfaces\Model\ModelNamespaceResolverInterface;
 use Prosopo\Views\Interfaces\View\ViewNamespaceModulesContainerInterface;
 
 /**
  * This class is marked as a final to prevent anyone from extending it.
  * We reserve the right to change its private and protected methods, properties and introduce new public ones.
  */
-final class ViewsConfig
+final class ViewsManagerConfig
 {
     private string $namespaceNotFoundErrorMessage;
     private string $wrongModelErrorMessage;
-    private ?ModelNamespaceProviderInterface $modelNamespaceProvider;
+    private ?ModelNamespaceResolverInterface $modelNamespaceProvider;
     private ?ViewNamespaceModulesContainerInterface $namespaceModulesContainer;
 
     public function __construct()
@@ -38,7 +38,7 @@ final class ViewsConfig
         return $this->wrongModelErrorMessage;
     }
 
-    public function getModelNamespaceProvider(): ?ModelNamespaceProviderInterface
+    public function getModelNamespaceProvider(): ?ModelNamespaceResolverInterface
     {
         return $this->modelNamespaceProvider;
     }
@@ -64,7 +64,7 @@ final class ViewsConfig
         return $this;
     }
 
-    public function setModelNamespaceProvider(?ModelNamespaceProviderInterface $modelNamespaceProvider): self
+    public function setModelNamespaceProvider(?ModelNamespaceResolverInterface $modelNamespaceProvider): self
     {
         $this->modelNamespaceProvider = $modelNamespaceProvider;
 

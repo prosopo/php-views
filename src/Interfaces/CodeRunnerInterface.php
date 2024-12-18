@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\Interfaces;
 
-interface CodeExecutorInterface
+interface CodeRunnerInterface
 {
     /**
      * @param array<string,mixed> $arguments
      */
-    public function executeCode(string $code, array $arguments = []): void;
+    public function runCode(string $code, array $arguments = []): void;
 }

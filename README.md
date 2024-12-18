@@ -1,17 +1,17 @@
 # PHP Views
 
 Blazing fast PHP Views with model-driven approach, multi-namespace support and
-built-in [Blade](https://laravel.com/docs/11.x/blade) implementation as a default template engine.
+custom [Blade](https://laravel.com/docs/11.x/blade) implementation as a default template engine.
 
 ### Benefits
 
-* Zero Dependencies: Lightweight and easy to integrate into any project.
-* Wide Compatibility: PHP 7.4+, 8.0+
-* Adherence to the [SOLID principles](https://en.wikipedia.org/wiki/SOLID): The architecture allows you to easily
+* **Blazing fast:** Outperforms the original Laravel Blade (see the [Benchmark section](#4-benchmark)).
+* **Zero Dependencies:** Lightweight and easy to integrate into any project.
+* **Wide Compatibility:** PHP 7.4+, 8.0+
+* **Adherence to the [SOLID principles](https://en.wikipedia.org/wiki/SOLID):** The architecture allows you to easily
   override any module to meet specific requirements.
-* Namespace Support: Manage different templates seamlessly under a unified structure.
-* Test Coverage: Covered by [Pest](https://pestphp.com/) Unit and Feature tests.
-* Static Analysis: Checked by [PHPStan](https://phpstan.org/).
+* **Namespace Support**: Manage different templates seamlessly under a unified structure.
+* **Reliable**: Covered by [Pest](https://pestphp.com/) tests and checked by [PHPStan](https://phpstan.org/).
 
 ### Flexible Usage
 
@@ -25,13 +25,23 @@ You're free to use the package in your own way:
 
 ## Table of Contents
 
-- [1. Model-driven approach](#1-model-driven-approach)
-- [2. Views](#2-views)
-- [3. View Renderer](#3-view-renderer)
-- [4. Contribution](#4-contribution)
-- [5. Credits](#5-credits)
+- [1. Installation](#1-installation)
+- [2. Model-driven approach](#2-model-driven-approach)
+- [3. Views Manager](#3-views-manager)
+- [4. View Renderer](#4-view-renderer)
+- [5. Benchmark](#5-benchmark)
+- [6. Contribution](#6-contribution)
+- [7. Credits](#7-credits)
 
-## 1. Model-driven approach
+## 1. Installation
+
+`composer require prosopo/views`
+
+Don't forget to include the composer autoloader in your app:
+
+`require __DIR__ . '/vendor/autoload.php';`
+
+## 2. Model-driven approach
 
 Similar to many frameworks, such as Laravel, this package embraces a model-driven approach to templates. Each template
 is paired with its own Model, where the Model's public properties and methods act as arguments available within the
@@ -42,10 +52,10 @@ Model class:
 ```php
 namespace MyPackage\Views;
 
+use Prosopo\Views\BaseTemplateModel;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
-use Prosopo\Views\TemplateModel;
 
-class EmployeeTemplateModel extends TemplateModel
+class EmployeeTemplateModel extends BaseTemplateModel
 {
     public int $salary;
     public int $bonus;
@@ -67,6 +77,7 @@ Model template (Blade is used in this example):
 <p>
 Your month income is {{ $total() }}, 
 from which {{ $salary }} is a salary, and {{ $bonus }} is a bonus.
+Est. taxes: {{ $innerModel->taxes($salary) }}
 </p>
 
 {!! $innerModel !!}
@@ -76,7 +87,7 @@ from which {{ $salary }} is a salary, and {{ $bonus }} is a bonus.
 {!! $company !!}
 ```
 
-### 1.2) Benefits of the model-driven approach
+### 2.1) Benefits of the model-driven approach
 
 1. Typed variables: Eliminate the hassle of type matching and renaming associated with array-driven variables.
 2. Reduced Routine: During object creation, public fields of the model without default values are automatically
@@ -86,11 +97,20 @@ from which {{ $salary }} is a salary, and {{ $bonus }} is a bonus.
    maintain
    flexibility and avoid specifying the exact component.
 
-The `TemplateModel` class implements the `TemplateModelInterface`. During rendering, any inner objects that also
-implement
-`TemplateModelInterface` will be automatically rendered and passed into the template as strings.
+By default, inner models are passed to templates as objects, enabling you to call their public methods directly. For
+example:
 
-### 1.3) Custom property defaults
+`{{ $$innerModel->calc($localVar) }}`.
+
+The `BaseTemplateModel` class overrides the `__toString()` method, allowing inner models to be rendered as strings using
+echo statements, which supports HTML output. For instance:
+
+`{!! $innerModel !!}`
+
+If you prefer, you can configure the `ViewsManager` to pass models as strings instead of objects. Refer to the `
+ViewsManager` section for details.
+
+### 2.2) Custom property defaults
 
 Note: In the `TemplateModel` class, in order to satisfy the Model factory, the constructor is marked as final. If you
 need to
@@ -99,15 +119,16 @@ set custom default values, consider using one of the following approaches:
 ```php
 namespace MyPackage\Views;
 
-use Prosopo\Views\TemplateModel;
+use Prosopo\Views\BaseTemplateModel;
 
-class EmployeeTemplateModel extends TemplateModel
+class EmployeeTemplateModel extends BaseTemplateModel
 {
     // approach for plain field types.
     public int $varWithCustomDefaultValue = 'custom default value';
     public Company $company;
 
-    protected function setCustomDefaults(){
+    protected function setCustomDefaults(): void
+    {
         // approach for object field types.
         $this->company = new Company();
     }
@@ -120,7 +141,7 @@ class EmployeeTemplateModel extends TemplateModel
 > automatically resolved
 > while object creation by your application's DI system.
 
-### 1.4) Custom Model implementation (advanced usage)
+### 2.3) Custom Model implementation (advanced usage)
 
 The only requirement for a Model is to implement the `TemplateModelInterface`. This means you can transform any class
 into a Model without needing to extend a specific base class, or even define public properties:
@@ -130,31 +151,44 @@ namespace MyPackage\Views;
 
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
 
-class AnyClass implements TemplateModelInterface {  
-     public function getTemplateArguments(): array {
+class AnyClass implements TemplateModelInterface
+{
+    public function getTemplateArguments(): array
+    {
         // you can fill out arguments from any source or define manually.
         return [
-           'name' => 'value',
+            'name' => 'value',
         ];
-     }
+    }
 }
 ```
 
-## 2. Views
+Note: If you plan to define inner models, remember that the default `__toString()` implementation is not provided. You
+will need to either implement it yourself or enable the option to pass models as strings in the `ViewsManager`
+configuration:
 
-The `Views` class provides the `addNamespace`, `makeModel` and `renderModel` methods. It acts as a
+```php
+$namespaceConfig->setModelsAsStringsInTemplates(true);
+```
+
+When this option is enabled, the renderer will automatically convert objects implementing `TemplateModelInterface` into
+strings before passing them to the template.
+
+## 3. Views Manager
+
+The `ViewsManager` class provides the `registerNamespace`, `createModel` and `renderModel` methods. It acts as a
 namespace manager and brings together different namespace configurations.
 
 Each `ViewNamespace` has its own independent setup and set of modules. E.g. among these modules is the
 `ModelTemplateProvider`, which automates the process of linking models to their
 corresponding templates.
 
-### 2.1) Setup
+### 3.1) Setup
 
 ```php
 use Prosopo\Views\View\ViewNamespaceConfig;
 use Prosopo\Views\View\ViewTemplateRenderer;
-use Prosopo\Views\Views;
+use Prosopo\Views\ViewsManager;
 
 // 1. Make the Template Renderer.
 // (By default it uses the built-in Blade, but you can connect any)
@@ -170,7 +204,9 @@ $namespaceConfig = (new ViewNamespaceConfig($viewTemplateRenderer))
     // optional setting:
     ->setTemplateErrorHandler(function (array $eventDetails) {
         // logging, notifying, whatever.
-    });
+    })
+    // this option enables inner models rendering before passing them into the template
+    ->setModelsAsStringsInTemplates(true);
 
 // (This line is necessary only if you defined the templateErrorHandler)
 $namespaceConfig->getModules()
@@ -178,40 +214,38 @@ $namespaceConfig->getModules()
 
 // 3. Make the Views instance:
 
-$views = new Views();
+$viewsManager = new ViewsManager();
 
 // 4. Add the root namespace of your Template Models
 
-$views->addNamespace('MyPackage\Views', $namespaceConfig);
+$viewsManager->registerNamespace('MyPackage\Views', $namespaceConfig);
 
 // Tip: you can have multiple namespaces, and mix their Models.
 ```
 
-### 2.2) Single-step Model creation and rendering
+### 3.2) Single-step Model creation and rendering
 
 You can create, set values, and render a Model in a single step using the callback argument of the `renderView` method,
 as shown below:
 
 ```php
-echo $views->renderModel(
+echo $viewsManager->renderModel(
     EmployeeModel::class,
     function (EmployeeModel $employee) use ($salary, $bonus) {
         $employee->salary = $salary;
         $employee->bonus = $bonus;
     }
 );
-
-// Tip: pass true to the third renderModel() argument to print it without echo.
 ```
 
 This approach enables a functional programming style when working with Models.
 
-### 2.3) Multi-step creation and rendering
+### 3.3) Multi-step creation and rendering
 
 When you need split creation, use the factory to create the model, and then render later when you need it.
 
 ```php
-$employee = $views->makeModel(EmployeeModel::class);
+$employee = $viewsManager->createModel(EmployeeModel::class);
 
 // ...
 
@@ -226,19 +260,18 @@ echo $views->renderModel($employee);
 // to customize the Model properties before rendering. 
 ```
 
-Advice: The `Views` class implements three interfaces: `ViewNamespaceManagerInterface` (for `addNamespace`),
-`ModelFactoryInterface` (for
-`makeModel`), and `ModelRendererInterface` (for `renderModel`).
+Advice: The `ViewsManager` class implements three interfaces: `ViewNamespaceManagerInterface` (for `registerNamespace`),
+`ModelFactoryInterface` (for `createModel`), and `ModelRendererInterface` (for `renderModel`).
 
-When passing the `Views` instance to your methods, use
-one of these interfaces as the argument type instead of the `Views` class itself.
+When passing the `ViewsManager` instance to your methods, use one of these interfaces as the argument type instead of
+the `ViewsManager` class itself.
 
-This approach ensures that only the specific actions
-you expect are accessible, promoting cleaner and more maintainable code.
+This approach ensures that only the specific actions you expect are accessible, promoting cleaner and more maintainable
+code.
 
-### 2.4) Automated templates matching
+### 3.4) Automated templates matching
 
-The built-in `ModelTemplateProvider` automatically matches templates based on the Model names and their relative
+The built-in `ModelTemplateResolver` automatically matches templates based on the Model names and their relative
 namespaces. This automates the process of associating templates with their corresponding Models.
 
 Example:
@@ -256,13 +289,14 @@ Example:
 **Naming Note:** Use dashes in template names, as camelCase in Model names is automatically converted to dash-separated
 names.
 
-> Tip: In case this approach doesn't work for your setup, you can override the `ModelTemplateProvider` module to
-> implement your own logic. In case the reason is the name-specific only, consider overriding the `ModelNameProvider`
+> Tip: In case this approach doesn't work for your setup, you can override the `ModelTemplateResolver` module to
+> implement your own logic. In case the reason is the name-specific only, consider overriding the `ModelNameResolver`
 > module instead.
 
-### 2.5) Custom modules
+### 3.5) Custom modules
 
-By default, the `addNamespace` class creates module instances for the namespace using classes from the current package.
+By default, the `registerNamespace` class creates module instances for the namespace using classes from the current
+package.
 
 If you need to override the default module behavior, you can define a custom implementation in the
 configuration and the package will use the specified implementation.
@@ -276,7 +310,7 @@ configuration and the package will use the specified implementation.
 
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\View\ViewNamespaceConfig;
-use Prosopo\Views\Views;
+use Prosopo\Views\ViewsManager;
 
 class TwigDecorator implements TemplateRendererInterface
 {
@@ -287,9 +321,9 @@ class TwigDecorator implements TemplateRendererInterface
         // todo init Twig or another engine.
     }
 
-    public function renderTemplate(string $template, array $variables, bool $doPrint = false): string
+    public function renderTemplate(string $template, array $variables = []): string
     {
-        return $this->twig->render($template, $variables, $doPrint);
+        return $this->twig->render($template, $variables);
     }
 }
 
@@ -303,11 +337,11 @@ $namespaceConfig = (new ViewNamespaceConfig($twigDecorator))
 
 // 3. Make the Views:
 
-$views = new Views();
+$viewsManager = new ViewsManager();
 
 // 4. Add the namespace (you can have multiple namespaces)
 
-$views->addNamespace('MyPackage\Views', $namespaceConfig);
+$viewsManager->registerNamespace('MyPackage\Views', $namespaceConfig);
 ```
 
 You can override any namespace module in the following way:
@@ -321,9 +355,10 @@ $namespaceConfig->getModules()
 > Note: The package includes only the Blade implementation. If you wish to use a different template engine,
 > like Twig, you need to install its Composer package and create a facade object, as demonstrated above.
 
-### 2.6) Namespace mixing
+### 3.6) Namespace mixing
 
-> Fun Fact: The `Views` class not only supporting multiple namespaces, but also enabling you to use Models from one
+> Fun Fact: The `ViewsManager` class not only supporting multiple namespaces, but also enabling you to use Models from
+> one
 > namespace within another, preserving their individual setup.
 
 Example of multi-namespace usage:
@@ -335,13 +370,13 @@ Additionally, you have a namespace for Twig templates, with a `Popup` model and 
 Here’s the cool part: you can safely use `Button` as a property of the `Popup` model. The package will first render the
 `Button` using Twig, converting it to a string, and then pass it seamlessly into the Blade template of the `Popup`.
 
-## 3. View Renderer
+## 4. View Renderer
 
 `ViewTemplateRenderer` is the class responsible for rendering templates in this package. By default, it integrates the
 Blade compiler, but it is fully customizable. You can replace the Blade compiler with your own implementation or use a
 simple stub to enable support for plain PHP template files.
 
-### 3.1) Built-in Blade integration
+### 4.1) Built-in Blade integration
 
 [Blade](https://laravel.com/docs/11.x/blade) is an elegant and powerful template engine originally designed
 for [Laravel](https://laravel.com/).
@@ -378,7 +413,7 @@ However, we chose not to adopt this approach for several reasons:
 
 Thanks to great Blade's conceptual design, our compiler implementation required fewer than 200 lines of code.
 
-### 3.2) View Renderer setup
+### 4.2) View Renderer setup
 
 ```php
 use Prosopo\Views\View\ViewTemplateRenderer;
@@ -398,7 +433,7 @@ use Prosopo\Views\View\ViewTemplateRenderer;
 use Prosopo\Views\View\ViewTemplateRendererConfig;
 
 $viewRendererConfig = new ViewTemplateRendererConfig();
-$viewRendererConfig->setIsFileBasedTemplate(false);
+$viewRendererConfig->setFileBasedTemplates(false);
 
 $viewTemplateRenderer = new ViewTemplateRenderer($viewRendererConfig);
 
@@ -412,11 +447,10 @@ echo $viewTemplateRenderer->renderTemplate('@if($var)The variable is set.@endif'
 > means that even if you can't or don't want to use the model-driven approach, you can still utilize it as an
 > independent Blade compiler.
 
-### 3.3) Available View Renderer settings
+### 4.3) Available View Renderer settings
 
 The `ViewTemplateRenderer` supports a variety of settings that let you customize features such as
-escaping,
-error handling, and more:
+escaping, error handling, and more:
 
 ```php
 use Prosopo\Views\View\ViewTemplateRenderer;
@@ -425,7 +459,7 @@ use Prosopo\Views\View\ViewTemplateRendererConfig;
 $viewRendererConfig = (new ViewTemplateRendererConfig())
 // By default, the Renderer expect a file name.
 // Set to false if to work with strings
-    ->setIsFileBasedTemplate(true)
+    ->setFileBasedTemplates(true)
     ->setTemplateErrorHandler(function (array $eventDetails): void {
         // Can be used for logging, notifying, etc.
     })
@@ -455,7 +489,7 @@ $viewRendererConfig = (new ViewTemplateRendererConfig())
 $viewTemplateRenderer = new ViewTemplateRenderer($viewRendererConfig);
 ```
 
-### 3.4) Custom View Renderer modules
+### 4.4) Custom View Renderer modules
 
 By default, the `ViewTemplateRenderer` creates module instances using classes from the current package, including the
 Blade compiler.
@@ -472,7 +506,7 @@ use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
 use Prosopo\Views\View\ViewNamespaceConfig;
 use Prosopo\Views\View\ViewTemplateRenderer;
 use Prosopo\Views\View\ViewTemplateRendererConfig;
-use Prosopo\Views\Views;
+use Prosopo\Views\ViewsManager;
 
 class CompilerStubForPlainPhpSupport implements TemplateCompilerInterface
 {
@@ -490,26 +524,55 @@ $viewTemplateRendererConfig->getModules()
 
 $viewTemplateRenderer = new ViewTemplateRenderer($viewTemplateRendererConfig);
 
-$views = new Views();
+$views = new ViewsManager();
 
 $viewNamespaceConfig = new ViewNamespaceConfig($viewTemplateRenderer);
 $viewNamespaceConfig
     ->setTemplatesRootPath(__DIR__ . './templates')
     ->setTemplateFileExtension('.php');
 
-$views->addNamespace('MyApp\Models', $viewNamespaceConfig);
+$views->registerNamespace('MyApp\Models', $viewNamespaceConfig);
 ```
 
 Now this namespace is configured to deal with plain PHP template files, while having all the package features, including
 model-driven approach and template error handling.
 
-## 4. Contribution
+## 5. Benchmark
+
+We conducted a [PHP performance benchmark](https://github.com/prosopo/php-views/blob/main/benchmark/src/Benchmark.php)
+to compare this package with the Laravel's Blade (mocked using [jenssegers/blade](https://github.com/jenssegers/blade))
+and [Twig](https://twig.symfony.com/). Here are the results for 1000x renders:
+
+| Contestant                             | First Rendering, MS | Cached Rendering, MS |
+|----------------------------------------|---------------------|----------------------|
+| `prosopo/views` (without models)       | 19.75               | 19.75 (no cache atm) |
+| `prosopo/views` (with models)          | 43.78               | 43.78 (no cache atm) |
+| `illuminate/view` (Blade from Laravel) | 181.24              | 56.77 ms             |
+| `twig/twig`                            | 441.13              | 9.47 ms              |
+
+We used the following package versions:
+
+* [illuminate/view](https://packagist.org/packages/illuminate/view) `11.7.0`
+* [twig/twig](https://packagist.org/packages/twig/twig) `3.17.1`
+* [jenssegers/blade](https://packagist.org/packages/jenssegers/blade) `2.0.1`
+
+Since the [benchmark](https://github.com/prosopo/php-views/blob/main/benchmark/src/Benchmark.php) is included in this
+repository, you can easily run it locally to verify the results.
+
+1. `git clone https://github.com/prosopo/php-views.git`
+2. `composer install; cd benchmark; composer install`
+3. `php benchmark {1000}` - pass your renders count
+
+We encourage you to enhance the benchmark further - feel free to make it more advanced and submit a pull request. We're
+happy to review and accept contributions! 🚀
+
+## 6. Contribution
 
 We would be excited if you decide to contribute! Please read
 the [for-devs.md](https://github.com/prosopo/php-views/blob/main/for-devs.md) file for project guidelines and
 agreements.
 
-## 5. Credits
+## 7. Credits
 
 This package was created by [Maxim Akimov](https://github.com/light-source/) during the development of
 the [WordPress integration for Prosopo Procaptcha](https://wordpress.org/plugins/prosopo-procaptcha/).

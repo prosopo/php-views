@@ -8,7 +8,7 @@ use Prosopo\Views\View\ViewNamespaceModules;
 
 interface ViewNamespaceModulesContainerInterface
 {
-    public function addNamespaceModules(string $namespace, ViewNamespaceModules $viewNamespaceModules): void;
+    public function registerNamespaceModules(string $namespace, ViewNamespaceModules $viewNamespaceModules): void;
 
-    public function getNamespaceModulesByModelNamespace(string $modelNamespace): ?ViewNamespaceModules;
+    public function resolveNamespaceModules(string $modelNamespace): ?ViewNamespaceModules;
 }

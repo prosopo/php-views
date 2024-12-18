@@ -7,30 +7,30 @@ namespace Tests\Unit\CodeExecutor;
 use Error;
 use Exception;
 use Mockery;
-use Prosopo\Views\Interfaces\CodeExecutorInterface;
+use Prosopo\Views\Interfaces\CodeRunnerInterface;
 use Prosopo\Views\Interfaces\EventDispatcherInterface;
-use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithErrorHandler;
+use Prosopo\Views\PrivateClasses\CodeRunner\CodeRunnerWithErrorHandler;
 use Tests\TestCase;
 use Throwable;
 
-class CodeExecutorWithErrorHandlerTest extends TestCase
+class CodeRunnerWithErrorHandlerTest extends TestCase
 {
     public function testNotCallsDispatcherWithoutReason(): void
     {
         // given
-        $codeExecutor = Mockery::mock(CodeExecutorInterface::class);
+        $codeExecutor = Mockery::mock(CodeRunnerInterface::class);
         $eventDispatcher = Mockery::mock(EventDispatcherInterface::class);
-        $contestant = new CodeExecutorWithErrorHandler(
+        $contestant = new CodeRunnerWithErrorHandler(
             $codeExecutor,
             $eventDispatcher,
             'error'
         );
 
         // when
-        $executeCode = fn() => $contestant->executeCode('correct code', ['var' => 1]);
+        $executeCode = fn() => $contestant->runCode('correct code', ['var' => 1]);
 
         // then
-        $codeExecutor->shouldReceive('executeCode')
+        $codeExecutor->shouldReceive('runCode')
             ->once();
         $eventDispatcher->shouldNotReceive('dispatchEvent');
 
@@ -58,19 +58,19 @@ class CodeExecutorWithErrorHandlerTest extends TestCase
     protected function testCallsDispatcher(?Throwable $error, bool $isWarning = false): void
     {
         // given
-        $codeExecutor = Mockery::mock(CodeExecutorInterface::class);
+        $codeExecutor = Mockery::mock(CodeRunnerInterface::class);
         $eventDispatcher = Mockery::mock(EventDispatcherInterface::class);
-        $contestant = new CodeExecutorWithErrorHandler(
+        $contestant = new CodeRunnerWithErrorHandler(
             $codeExecutor,
             $eventDispatcher,
             'errorEventName'
         );
 
         // when
-        $executeCode = fn() => $contestant->executeCode('wrong code', ['var' => 1]);
+        $executeCode = fn() => $contestant->runCode('wrong code', ['var' => 1]);
 
         // then
-         $executorRule = $codeExecutor->shouldReceive('executeCode')
+         $executorRule = $codeExecutor->shouldReceive('runCode')
             ->once();
 
         if (null !== $error) {

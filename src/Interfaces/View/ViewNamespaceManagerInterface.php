@@ -9,5 +9,5 @@ use Prosopo\Views\View\ViewNamespaceModules;
 
 interface ViewNamespaceManagerInterface
 {
-    public function addNamespace(string $namespace, ViewNamespaceConfig $config): ViewNamespaceModules;
+    public function registerNamespace(string $namespace, ViewNamespaceConfig $config): ViewNamespaceModules;
 }

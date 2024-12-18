@@ -6,22 +6,22 @@ namespace Tests\Unit\CodeExecutor;
 
 use Mockery;
 use PHPUnit\Framework\TestCase;
-use Prosopo\Views\Interfaces\CodeExecutorInterface;
-use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithGlobalArguments;
+use Prosopo\Views\Interfaces\CodeRunnerInterface;
+use Prosopo\Views\PrivateClasses\CodeRunner\CodeRunnerWithGlobalArguments;
 
-class CodeExecutorWithGlobalArgumentsTest extends TestCase
+class CodeRunnerWithGlobalArgumentsTest extends TestCase
 {
     public function testMergesGlobalAndProvidedArgumentsBeforeExecutingCode(): void
     {
         // given
-        $codeExecutor = Mockery::mock(CodeExecutorInterface::class);
-        $executor = new CodeExecutorWithGlobalArguments($codeExecutor, ['globalKey' => 'globalValue']);
+        $codeExecutor = Mockery::mock(CodeRunnerInterface::class);
+        $executor = new CodeRunnerWithGlobalArguments($codeExecutor, ['globalKey' => 'globalValue']);
 
         // when
-        $executeCode = fn() => $executor->executeCode('sample code', ['key' => 'value']);
+        $executeCode = fn() => $executor->runCode('sample code', ['key' => 'value']);
 
         // then
-        $codeExecutor->shouldReceive('executeCode')
+        $codeExecutor->shouldReceive('runCode')
             ->once()
             ->with('sample code', [
                 'globalKey' => 'globalValue',
@@ -37,14 +37,14 @@ class CodeExecutorWithGlobalArgumentsTest extends TestCase
     public function testUsesOnlyGlobalArgumentsWhenNoAdditionalArgumentsAreProvided(): void
     {
         // given
-        $codeExecutor = Mockery::mock(CodeExecutorInterface::class);
-        $executor = new CodeExecutorWithGlobalArguments($codeExecutor, ['globalKey' => 'globalValue']);
+        $codeExecutor = Mockery::mock(CodeRunnerInterface::class);
+        $executor = new CodeRunnerWithGlobalArguments($codeExecutor, ['globalKey' => 'globalValue']);
 
         // when
-        $executeCode = fn() => $executor->executeCode('sample code', []);
+        $executeCode = fn() => $executor->runCode('sample code', []);
 
         // then
-        $codeExecutor->shouldReceive('executeCode')
+        $codeExecutor->shouldReceive('runCode')
             ->once()
             ->with('sample code', [
                 'globalKey' => 'globalValue',
@@ -59,14 +59,14 @@ class CodeExecutorWithGlobalArgumentsTest extends TestCase
     public function testOverridesGlobalArgumentsWithProvidedArgumentsIfKeysOverlap(): void
     {
         // given
-        $codeExecutor = Mockery::mock(CodeExecutorInterface::class);
-        $executor = new CodeExecutorWithGlobalArguments($codeExecutor, ['key' => 'globalValue']);
+        $codeExecutor = Mockery::mock(CodeRunnerInterface::class);
+        $executor = new CodeRunnerWithGlobalArguments($codeExecutor, ['key' => 'globalValue']);
 
         // when
-        $executeCode = fn() => $executor->executeCode('sample code', ['key' => 'providedValue']);
+        $executeCode = fn() => $executor->runCode('sample code', ['key' => 'providedValue']);
 
         // then
-        $codeExecutor->shouldReceive('executeCode')
+        $codeExecutor->shouldReceive('runCode')
             ->once()
             ->with('sample code', [
                 'key' => 'providedValue',

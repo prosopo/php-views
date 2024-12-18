@@ -7,7 +7,7 @@ namespace Tests\Unit\Model;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
-use Prosopo\Views\PrivateClasses\Model\ModelNameProvider;
+use Prosopo\Views\PrivateClasses\Model\ModelNameResolver;
 use Prosopo\Views\PrivateClasses\Object\ObjectClassReader;
 
 class ModelNameProviderTest extends TestCase
@@ -16,11 +16,11 @@ class ModelNameProviderTest extends TestCase
     {
         // given
         $objectClassReaderMock = Mockery::mock(ObjectClassReader::class);
-        $provider = new ModelNameProvider($objectClassReaderMock);
+        $provider = new ModelNameResolver($objectClassReaderMock);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
 
         // when
-        $getModelName = fn()=> $provider->getModelName($modelMock);
+        $getModelName = fn()=> $provider->resolveModelName($modelMock);
 
         // then
         $objectClassReaderMock
@@ -37,11 +37,11 @@ class ModelNameProviderTest extends TestCase
     {
         // given
         $objectClassReaderMock = Mockery::mock(ObjectClassReader::class);
-        $provider = new ModelNameProvider($objectClassReaderMock);
+        $provider = new ModelNameResolver($objectClassReaderMock);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
 
         // when
-        $getModelNamespace = fn()=> $provider->getModelName($modelMock);
+        $getModelNamespace = fn()=> $provider->resolveModelName($modelMock);
 
         // then
         $objectClassReaderMock
@@ -58,11 +58,11 @@ class ModelNameProviderTest extends TestCase
     {
         // given
         $objectClassReaderMock = Mockery::mock(ObjectClassReader::class);
-        $provider = new ModelNameProvider($objectClassReaderMock);
+        $provider = new ModelNameResolver($objectClassReaderMock);
         $modelMock = Mockery::mock(TemplateModelInterface::class);
 
         // when
-        $getModelNamespace = fn()=> $provider->getModelName($modelMock);
+        $getModelNamespace = fn()=> $provider->resolveModelName($modelMock);
 
         // then
         $objectClassReaderMock

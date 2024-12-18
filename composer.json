@@ -1,4 +1,21 @@
 {
+  "name": "prosopo/views",
+  "description": "Blazing fast Views with model-driven approach, multi-namespace support and custom Blade implementation as a default template engine.",
+  "homepage": "https://github.com/prosopo/php-views",
+  "keywords": [
+    "Views",
+    "templates",
+    "models",
+    "Blade",
+    "Twig"
+  ],
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Maxim Akimov",
+      "homepage": "https://github.com/light-source/"
+    }
+  ],
   "require": {
     "php": "^7.4|^8.0"
   },

@@ -17,5 +17,5 @@ interface ModelFactoryInterface
      *
      * @throws Exception
      */
-    public function makeModel(string $modelClass);
+    public function createModel(string $modelClass);
 }

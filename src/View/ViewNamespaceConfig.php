@@ -14,7 +14,8 @@ final class ViewNamespaceConfig
 {
     private string $templatesRootPath;
     private string $templateFileExtension;
-    private bool $isFileBasedTemplate;
+    private bool $fileBasedTemplates;
+    private bool $modelsAsStringsInTemplates;
     /**
      * @var callable(array<string,mixed> $eventDetails): void|null
      */
@@ -31,7 +32,8 @@ final class ViewNamespaceConfig
     {
         $this->templatesRootPath = '';
         $this->templateFileExtension = '';
-        $this->isFileBasedTemplate = true;
+        $this->fileBasedTemplates = true;
+        $this->modelsAsStringsInTemplates = false;
         $this->templateErrorHandler = null;
         $this->defaultPropertyValues = array(
             'array'  => array(),
@@ -57,9 +59,14 @@ final class ViewNamespaceConfig
         return $this->templateFileExtension;
     }
 
-    public function isFileBasedTemplate(): bool
+    public function fileBasedTemplates(): bool
     {
-        return $this->isFileBasedTemplate;
+        return $this->fileBasedTemplates;
+    }
+
+    public function modelsAsStringsInTemplates(): bool
+    {
+        return $this->modelsAsStringsInTemplates;
     }
 
     /**
@@ -104,9 +111,16 @@ final class ViewNamespaceConfig
         return $this;
     }
 
-    public function setIsFileBasedTemplate(bool $isFileBasedTemplate): self
+    public function setFileBasedTemplates(bool $fileBasedTemplates): self
     {
-        $this->isFileBasedTemplate = $isFileBasedTemplate;
+        $this->fileBasedTemplates = $fileBasedTemplates;
+
+        return $this;
+    }
+
+    public function setModelsAsStringsInTemplates(bool $modelsAsStringsInTemplates): self
+    {
+        $this->modelsAsStringsInTemplates = $modelsAsStringsInTemplates;
 
         return $this;
     }

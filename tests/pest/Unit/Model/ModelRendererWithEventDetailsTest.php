@@ -25,18 +25,18 @@ class ModelRendererWithEventDetailsTest extends TestCase
         $result = fn()=>$renderer->renderModel($modelMock);
 
         // then
-        $eventDispatcherMock->shouldReceive('attachEventDetails')
+        $eventDispatcherMock->shouldReceive('registerEventDetails')
             ->once()
-            ->with('render_event', ['viewClass' => get_class($modelMock)]);
+            ->with('render_event', ['modelClass' => get_class($modelMock)]);
 
         $viewRendererMock->shouldReceive('renderModel')
             ->once()
-            ->with($modelMock, null, false)
+            ->with($modelMock, null)
             ->andReturn('<div>Rendered View</div>');
 
-        $eventDispatcherMock->shouldReceive('detachEventDetails')
+        $eventDispatcherMock->shouldReceive('unregisterEventDetails')
             ->once()
-            ->with('render_event', ['viewClass' => get_class($modelMock)]);
+            ->with('render_event', ['modelClass' => get_class($modelMock)]);
 
         $this->assertSame('<div>Rendered View</div>', $result());
 
@@ -55,18 +55,18 @@ class ModelRendererWithEventDetailsTest extends TestCase
         $result = fn()=> $renderer->renderModel('TestModelClass');
 
         // then
-        $eventDispatcherMock->shouldReceive('attachEventDetails')
+        $eventDispatcherMock->shouldReceive('registerEventDetails')
             ->once()
-            ->with('render_event', ['viewClass' => 'TestModelClass']);
+            ->with('render_event', ['modelClass' => 'TestModelClass']);
 
         $viewRendererMock->shouldReceive('renderModel')
             ->once()
-            ->with('TestModelClass', null, false)
+            ->with('TestModelClass', null)
             ->andReturn('<div>Rendered Model</div>');
 
-        $eventDispatcherMock->shouldReceive('detachEventDetails')
+        $eventDispatcherMock->shouldReceive('unregisterEventDetails')
             ->once()
-            ->with('render_event', ['viewClass' => 'TestModelClass']);
+            ->with('render_event', ['modelClass' => 'TestModelClass']);
 
         $this->assertSame('<div>Rendered Model</div>', $result());
 
@@ -92,52 +92,20 @@ class ModelRendererWithEventDetailsTest extends TestCase
         $result = fn()=>$renderer->renderModel($modelMock, $setupCallback);
 
         // then
-        $eventDispatcherMock->shouldReceive('attachEventDetails')
+        $eventDispatcherMock->shouldReceive('registerEventDetails')
             ->once()
-            ->with('render_event', ['viewClass' => get_class($modelMock)]);
+            ->with('render_event', ['modelClass' => get_class($modelMock)]);
 
         $viewRendererMock->shouldReceive('renderModel')
             ->once()
-            ->with($modelMock, $setupCallback, false)
+            ->with($modelMock, $setupCallback)
             ->andReturn('<div>Modified View</div>');
 
-        $eventDispatcherMock->shouldReceive('detachEventDetails')
+        $eventDispatcherMock->shouldReceive('unregisterEventDetails')
             ->once()
-            ->with('render_event', ['viewClass' => get_class($modelMock)]);
+            ->with('render_event', ['modelClass' => get_class($modelMock)]);
 
         $this->assertSame('<div>Modified View</div>', $result());
-
-        // apply
-        Mockery::close();
-    }
-
-    public function testRenderModelHandlesDoPrintFlag(): void
-    {
-        // given
-        $viewRendererMock = Mockery::mock(ModelRendererInterface::class);
-        $eventDispatcherMock = Mockery::mock(EventDispatcherInterface::class);
-        $modelMock = new class {
-        };
-        $renderer = new ModelRendererWithEventDetails($viewRendererMock, $eventDispatcherMock, 'render_event');
-
-        // when
-        $renderModel = fn()=>$renderer->renderModel($modelMock, null, true);
-
-        // then
-        $eventDispatcherMock->shouldReceive('attachEventDetails')
-            ->once()
-            ->with('render_event', ['viewClass' => get_class($modelMock)]);
-
-        $viewRendererMock->shouldReceive('renderModel')
-            ->once()
-            ->with($modelMock, null, true)
-            ->andReturn('<div>Printed View</div>');
-
-        $eventDispatcherMock->shouldReceive('detachEventDetails')
-            ->once()
-            ->with('render_event', ['viewClass' => get_class($modelMock)]);
-
-        $this->assertSame('<div>Printed View</div>', $renderModel());
 
         // apply
         Mockery::close();

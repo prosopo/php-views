@@ -40,7 +40,7 @@ class TemplateRendererWithModelsRenderTest extends TestCase
                 'key1' => 'value1',
                 'key2' => '<div>Rendered Model</div>',
                 'key3' => ['nestedKey' => '<div>Rendered Model</div>'],
-            ], false)
+            ])
             ->andReturn('<div>Final Rendered Output</div>');
 
         $this->assertEquals('<div>Final Rendered Output</div>', $result());
@@ -80,7 +80,7 @@ class TemplateRendererWithModelsRenderTest extends TestCase
                 'key2' => 123,
                 'key3' => ['nestedKey' => 'string'],
                 'key4' => $nonModelObject,
-            ], false)
+            ])
             ->andReturn('<div>Final Rendered Output</div>');
 
         $this->assertEquals('<div>Final Rendered Output</div>', $result());

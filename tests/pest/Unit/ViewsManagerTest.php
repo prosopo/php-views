@@ -6,17 +6,17 @@ namespace Tests\Unit;
 
 use Exception;
 use PHPUnit\Framework\TestCase;
-use Prosopo\Views\Views;
+use Prosopo\Views\ViewsManager;
 
-class ViewsTest extends TestCase
+class ViewsManagerTest extends TestCase
 {
     public function testMakeModelThrowsExceptionForMissingClass(): void
     {
         // given
-        $views = new Views();
+        $views = new ViewsManager();
 
         // when
-        $makeModel = fn()=> $views->makeModel('MissingClass');
+        $makeModel = fn()=> $views->createModel('MissingClass');
 
         // then
         $this->expectException(Exception::class);
@@ -28,10 +28,10 @@ class ViewsTest extends TestCase
     public function testMakeModelThrowsExceptionForClassThatNotImplementTemplateModelInterface(): void
     {
         // given
-        $views = new Views();
+        $views = new ViewsManager();
 
         // when
-        $makeModel = fn()=> $views->makeModel(get_class($this));
+        $makeModel = fn()=> $views->createModel(get_class($this));
 
         // then
         $this->expectException(Exception::class);
@@ -43,7 +43,7 @@ class ViewsTest extends TestCase
     public function testRenderThrowsExceptionForMissingClass(): void
     {
         // given
-        $views = new Views();
+        $views = new ViewsManager();
 
         // when
         $makeModel = fn()=> $views->renderModel('MissingClass');
@@ -58,7 +58,7 @@ class ViewsTest extends TestCase
     public function testRenderThrowsExceptionForClassThatNotImplementTemplateModelInterface(): void
     {
         // given
-        $views = new Views();
+        $views = new ViewsManager();
 
         // when
         $makeModel = fn()=> $views->renderModel(get_class($this));
@@ -73,7 +73,7 @@ class ViewsTest extends TestCase
     public function testRenderThrowsExceptionForInstanceThatNotImplementTemplateModelInterface(): void
     {
         // given
-        $views = new Views();
+        $views = new ViewsManager();
 
         // when
         $makeModel = fn()=> $views->renderModel($this);

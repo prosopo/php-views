@@ -20,10 +20,10 @@ class ViewNamespacesContainerTest extends TestCase
         $container = new ViewNamespaceModulesContainer();
 
         // when
-        $container->addNamespaceModules('App\\Package\\Specific', $viewNamespaceModules);
+        $container->registerNamespaceModules('App\\Package\\Specific', $viewNamespaceModules);
 
         // then
-        $resolvedModules = $container->getNamespaceModulesByModelNamespace('App\\Package\\Specific\\Model');
+        $resolvedModules = $container->resolveNamespaceModules('App\\Package\\Specific\\Model');
 
         $this->assertSame(
             $viewNamespaceModules,
@@ -42,11 +42,11 @@ class ViewNamespacesContainerTest extends TestCase
         $container = new ViewNamespaceModulesContainer();
 
         // when
-        $container->addNamespaceModules('App\\Package', $shortNamespaceModules);
-        $container->addNamespaceModules('App\\Package\\Specific', $longNamespaceModules);
+        $container->registerNamespaceModules('App\\Package', $shortNamespaceModules);
+        $container->registerNamespaceModules('App\\Package\\Specific', $longNamespaceModules);
 
         // then
-        $resolvedModules = $container->getNamespaceModulesByModelNamespace('App\\Package\\Specific\\Model');
+        $resolvedModules = $container->resolveNamespaceModules('App\\Package\\Specific\\Model');
 
         $this->assertSame(
             $longNamespaceModules,
@@ -64,10 +64,10 @@ class ViewNamespacesContainerTest extends TestCase
         $container = new ViewNamespaceModulesContainer();
 
         // when
-        $container->addNamespaceModules('App\\Package\\Specific', $viewNamespaceModules);
+        $container->registerNamespaceModules('App\\Package\\Specific', $viewNamespaceModules);
 
         // then
-        $resolvedModules = $container->getNamespaceModulesByModelNamespace('Another\\Package');
+        $resolvedModules = $container->resolveNamespaceModules('Another\\Package');
 
         $this->assertNull(
             $resolvedModules

@@ -10,7 +10,7 @@ namespace Prosopo\Views\View;
  */
 final class ViewTemplateRendererConfig
 {
-    private bool $isFileBasedTemplate;
+    private bool $fileBasedTemplates;
     private string $escapeVariableName;
     private string $templateErrorEventName;
     /**
@@ -35,7 +35,7 @@ final class ViewTemplateRendererConfig
 
     public function __construct()
     {
-        $this->isFileBasedTemplate = true;
+        $this->fileBasedTemplates = true;
         $this->escapeVariableName = 'escape';
         $this->templateErrorEventName = 'template_error';
         $this->globalVariables = [];
@@ -49,9 +49,9 @@ final class ViewTemplateRendererConfig
 
     //// Getters:
 
-    public function isFileBasedTemplate(): bool
+    public function fileBasedTemplates(): bool
     {
-        return $this->isFileBasedTemplate;
+        return $this->fileBasedTemplates;
     }
 
     /**
@@ -103,9 +103,9 @@ final class ViewTemplateRendererConfig
 
     //// Setters:
 
-    public function setIsFileBasedTemplate(bool $isFileBasedTemplate): self
+    public function setFileBasedTemplates(bool $fileBasedTemplates): self
     {
-        $this->isFileBasedTemplate = $isFileBasedTemplate;
+        $this->fileBasedTemplates = $fileBasedTemplates;
 
         return $this;
     }

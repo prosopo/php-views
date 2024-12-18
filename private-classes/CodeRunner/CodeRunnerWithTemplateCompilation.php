@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-namespace Prosopo\Views\PrivateClasses\CodeExecutor;
+namespace Prosopo\Views\PrivateClasses\CodeRunner;
 
-use Prosopo\Views\Interfaces\CodeExecutorInterface;
+use Prosopo\Views\Interfaces\CodeRunnerInterface;
 use Prosopo\Views\Interfaces\Template\TemplateCompilerInterface;
 
 /**
  * This class is marked as a final and placed under the 'Private' namespace to prevent anyone from using it directly.
  * We reserve the right to change its name and implementation.
  */
-final class CodeExecutorWithTemplateCompilation implements CodeExecutorInterface
+final class CodeRunnerWithTemplateCompilation implements CodeRunnerInterface
 {
-    private CodeExecutorInterface $codeExecutor;
+    private CodeRunnerInterface $codeExecutor;
     private TemplateCompilerInterface $templateCompiler;
 
-    public function __construct(CodeExecutorInterface $codeExecutor, TemplateCompilerInterface $templateCompiler)
+    public function __construct(CodeRunnerInterface $codeExecutor, TemplateCompilerInterface $templateCompiler)
     {
         $this->codeExecutor = $codeExecutor;
         $this->templateCompiler = $templateCompiler;
     }
 
-    public function executeCode(string $code, array $arguments = []): void
+    public function runCode(string $code, array $arguments = []): void
     {
         $compiledCode = $this->templateCompiler->compileTemplate($code);
 
-        $this->codeExecutor->executeCode($compiledCode, $arguments);
+        $this->codeExecutor->runCode($compiledCode, $arguments);
     }
 }

@@ -9,5 +9,5 @@ interface ObjectReaderInterface
     /**
      * @return array<string,mixed> name => value (or callback)
      */
-    public function getObjectVariables(object $instance): array;
+    public function extractObjectVariables(object $instance): array;
 }

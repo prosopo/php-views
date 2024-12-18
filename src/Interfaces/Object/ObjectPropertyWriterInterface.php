@@ -6,8 +6,5 @@ namespace Prosopo\Views\Interfaces\Object;
 
 interface ObjectPropertyWriterInterface
 {
-    public function setObjectPropertyValues(
-        object $instance,
-        PropertyValueProviderInterface $propertyValueProvider
-    ): void;
+    public function assignPropertyValues(object $instance, PropertyValueProviderInterface $propertyValueProvider): void;
 }

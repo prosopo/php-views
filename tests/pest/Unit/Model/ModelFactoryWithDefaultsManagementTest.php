@@ -31,25 +31,25 @@ class ModelFactoryWithDefaultsManagementTest extends TestCase
         );
 
         // when
-        $result = fn() =>$factory->makeModel('ModelClass');
+        $result = fn() =>$factory->createModel('ModelClass');
 
         // then
-        $modelFactoryMock->shouldReceive('makeModel')
+        $modelFactoryMock->shouldReceive('createModel')
             ->once()
             ->with('ModelClass')
             ->andReturn($modelWithDefaultsMock);
 
         $modelWithDefaultsMock
-            ->shouldReceive('getDefaultsPropertyValueProvider')
+            ->shouldReceive('getDefaultPropertyValueProvider')
             ->once()
             ->andReturn($propertyValueProviderMock);
 
-        $objectReaderMock->shouldReceive('getObjectVariables')
+        $objectReaderMock->shouldReceive('extractObjectVariables')
             ->once()
             ->with($modelWithDefaultsMock)
             ->andReturn([]);
 
-        $objectPropertyWriterMock->shouldReceive('setObjectPropertyValues')
+        $objectPropertyWriterMock->shouldReceive('assignPropertyValues')
             ->once()
             ->with($modelWithDefaultsMock, $propertyValueProviderMock);
 
@@ -73,10 +73,10 @@ class ModelFactoryWithDefaultsManagementTest extends TestCase
         );
 
         // when
-        $result = fn() =>$factory->makeModel('ModelClass');
+        $result = fn() =>$factory->createModel('ModelClass');
 
         // then
-        $modelFactoryMock->shouldReceive('makeModel')
+        $modelFactoryMock->shouldReceive('createModel')
             ->once()
             ->with('ModelClass')
             ->andReturn($modelMock);
@@ -104,53 +104,53 @@ class ModelFactoryWithDefaultsManagementTest extends TestCase
         );
 
         // when
-        $result = fn()=>$factory->makeModel('ModelClass');
+        $result = fn()=>$factory->createModel('ModelClass');
 
         // then
-        $modelFactoryMock->shouldReceive('makeModel')
+        $modelFactoryMock->shouldReceive('createModel')
             ->once()
             ->with('ModelClass')
             ->andReturn($mainModelMock);
 
         $mainModelMock
-            ->shouldReceive('getDefaultsPropertyValueProvider')
+            ->shouldReceive('getDefaultPropertyValueProvider')
             ->once()
             ->andReturn($propertyValueProviderMock);
 
-        $objectReaderMock->shouldReceive('getObjectVariables')
+        $objectReaderMock->shouldReceive('extractObjectVariables')
             ->once()
             ->with($mainModelMock)
             ->andReturn(['inner1' => $innerModelMock1, 'inner2' => $innerModelMock2]);
 
-        $objectPropertyWriterMock->shouldReceive('setObjectPropertyValues')
+        $objectPropertyWriterMock->shouldReceive('assignPropertyValues')
             ->once()
             ->with($mainModelMock, $propertyValueProviderMock);
 
         $innerModelMock1
-            ->shouldReceive('getDefaultsPropertyValueProvider')
+            ->shouldReceive('getDefaultPropertyValueProvider')
             ->once()
             ->andReturn($propertyValueProviderMock);
 
-        $objectReaderMock->shouldReceive('getObjectVariables')
+        $objectReaderMock->shouldReceive('extractObjectVariables')
             ->once()
             ->with($innerModelMock1)
             ->andReturn([]);
 
-        $objectPropertyWriterMock->shouldReceive('setObjectPropertyValues')
+        $objectPropertyWriterMock->shouldReceive('assignPropertyValues')
             ->once()
             ->with($innerModelMock1, $propertyValueProviderMock);
 
         $innerModelMock2
-            ->shouldReceive('getDefaultsPropertyValueProvider')
+            ->shouldReceive('getDefaultPropertyValueProvider')
             ->once()
             ->andReturn($propertyValueProviderMock);
 
-        $objectReaderMock->shouldReceive('getObjectVariables')
+        $objectReaderMock->shouldReceive('extractObjectVariables')
             ->once()
             ->with($innerModelMock2)
             ->andReturn([]);
 
-        $objectPropertyWriterMock->shouldReceive('setObjectPropertyValues')
+        $objectPropertyWriterMock->shouldReceive('assignPropertyValues')
             ->once()
             ->with($innerModelMock2, $propertyValueProviderMock);
 
@@ -176,25 +176,25 @@ class ModelFactoryWithDefaultsManagementTest extends TestCase
         );
 
         // when
-        $result = fn()=>$factory->makeModel('ModelClass');
+        $result = fn()=>$factory->createModel('ModelClass');
 
         // then
-        $modelFactoryMock->shouldReceive('makeModel')
+        $modelFactoryMock->shouldReceive('createModel')
             ->once()
             ->with('ModelClass')
             ->andReturn($mainModelMock);
 
         $mainModelMock
-            ->shouldReceive('getDefaultsPropertyValueProvider')
+            ->shouldReceive('getDefaultPropertyValueProvider')
             ->once()
             ->andReturn($propertyValueProviderMock);
 
-        $objectReaderMock->shouldReceive('getObjectVariables')
+        $objectReaderMock->shouldReceive('extractObjectVariables')
             ->once()
             ->with($mainModelMock)
             ->andReturn(['inner1' => $innerModelMock1,]);
 
-        $objectPropertyWriterMock->shouldReceive('setObjectPropertyValues')
+        $objectPropertyWriterMock->shouldReceive('assignPropertyValues')
             ->once()
             ->with($mainModelMock, $propertyValueProviderMock);
 

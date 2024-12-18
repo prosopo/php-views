@@ -6,10 +6,10 @@ namespace Prosopo\Views\View;
 
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\PrivateClasses\Blade\BladeCompiler;
-use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithErrorHandler;
-use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithGlobalArguments;
-use Prosopo\Views\PrivateClasses\CodeExecutor\CodeExecutorWithTemplateCompilation;
-use Prosopo\Views\PrivateClasses\CodeExecutor\PhpCodeExecutor;
+use Prosopo\Views\PrivateClasses\CodeRunner\CodeRunnerWithErrorHandler;
+use Prosopo\Views\PrivateClasses\CodeRunner\CodeRunnerWithGlobalArguments;
+use Prosopo\Views\PrivateClasses\CodeRunner\CodeRunnerWithTemplateCompilation;
+use Prosopo\Views\PrivateClasses\CodeRunner\PhpCodeRunner;
 use Prosopo\Views\PrivateClasses\EventDispatcher;
 use Prosopo\Views\PrivateClasses\Template\TemplateRenderer;
 use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithCustomEscape;
@@ -53,19 +53,19 @@ final class ViewTemplateRenderer implements TemplateRendererInterface
 
         $codeExecutor = $modules->getCodeExecutor();
         $codeExecutor = null === $codeExecutor ?
-            new PhpCodeExecutor() :
+            new PhpCodeRunner() :
             $codeExecutor;
 
-        $codeExecutor = new CodeExecutorWithErrorHandler($codeExecutor, $eventDispatcher, $errorEventName);
-        $codeExecutor = new CodeExecutorWithGlobalArguments($codeExecutor, $config->getGlobalVariables());
-        $codeExecutor = new CodeExecutorWithTemplateCompilation($codeExecutor, $templateCompiler);
+        $codeExecutor = new CodeRunnerWithErrorHandler($codeExecutor, $eventDispatcher, $errorEventName);
+        $codeExecutor = new CodeRunnerWithGlobalArguments($codeExecutor, $config->getGlobalVariables());
+        $codeExecutor = new CodeRunnerWithTemplateCompilation($codeExecutor, $templateCompiler);
 
         $templateRenderer = $modules->getTemplateRenderer();
         $templateRenderer = null === $templateRenderer ?
             new TemplateRenderer($codeExecutor) :
             $templateRenderer;
 
-        if (true === $config->isFileBasedTemplate()) {
+        if (true === $config->fileBasedTemplates()) {
             $templateRenderer = new TemplateRendererWithFileTemplate($templateRenderer);
         }
 
@@ -85,9 +85,9 @@ final class ViewTemplateRenderer implements TemplateRendererInterface
         $this->templateRenderer = $templateRenderer;
     }
 
-    public function renderTemplate(string $template, array $variables = [], bool $doPrint = false): string
+    public function renderTemplate(string $template, array $variables = []): string
     {
-        return $this->templateRenderer->renderTemplate($template, $variables, $doPrint);
+        return $this->templateRenderer->renderTemplate($template, $variables);
     }
 
     public function getModules(): ViewTemplateRendererModules

@@ -16,12 +16,12 @@ use Prosopo\Views\PrivateClasses\Object\{ObjectClassReader,
     PropertyValueProviderForNullable};
 use Prosopo\Views\PrivateClasses\Model\{ModelFactory,
     ModelFactoryWithDefaultsManagement,
-    ModelNameProvider,
-    ModelNamespaceProvider,
+    ModelNameResolver,
+    ModelNamespaceResolver,
     ModelRenderer,
     ModelRendererWithEventDetails};
 use Prosopo\Views\PrivateClasses\EventDispatcher;
-use Prosopo\Views\PrivateClasses\Template\FileModelTemplateProvider;
+use Prosopo\Views\PrivateClasses\Template\FileModelTemplateResolver;
 use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithModelsRender;
 use Prosopo\Views\View\ViewNamespaceConfig;
 use Prosopo\Views\View\ViewNamespaceModules;
@@ -71,27 +71,27 @@ final class ViewNamespace
             new ObjectPropertyWriter() :
             $objectPropertyWriter;
 
-        $modelNamespaceProvider = $modules->getModelNamespaceProvider();
+        $modelNamespaceProvider = $modules->getModelNamespaceResolver();
         $modelNamespaceProvider = null === $modelNamespaceProvider ?
-            new ModelNamespaceProvider(new ObjectClassReader()) :
+            new ModelNamespaceResolver(new ObjectClassReader()) :
             $modelNamespaceProvider;
 
-        $modelNameProvider = $modules->getModelNameProvider();
+        $modelNameProvider = $modules->getModelNameResolver();
         $modelNameProvider = null === $modelNameProvider ?
-            new ModelNameProvider(new ObjectClassReader()) :
+            new ModelNameResolver(new ObjectClassReader()) :
             $modelNameProvider;
 
-        $templateProvider = $modules->getModelTemplateProvider();
-        $templateProvider = null === $templateProvider ?
-            new FileModelTemplateProvider(
+        $modelTemplateResolver = $modules->getModelTemplateResolver();
+        $modelTemplateResolver = null === $modelTemplateResolver ?
+            new FileModelTemplateResolver(
                 $namespace,
                 $config->getTemplatesRootPath(),
                 $config->getTemplateFileExtension(),
-                $config->isFileBasedTemplate(),
+                $config->fileBasedTemplates(),
                 $modelNamespaceProvider,
                 $modelNameProvider
             ) :
-            $templateProvider;
+            $modelTemplateResolver;
 
         $propertyValueProvider = $modules->getPropertyValueProvider();
         $propertyValueProvider = null === $propertyValueProvider ?
@@ -112,13 +112,25 @@ final class ViewNamespace
 
         // Without null check - templateRenderer is a mandatory module.
         $templateRenderer = $modules->getTemplateRenderer();
-        $templateRenderer = new TemplateRendererWithModelsRender($templateRenderer, $modelRendererWithNamespace);
+        $templateRendererWithModelsRender = new TemplateRendererWithModelsRender(
+            $templateRenderer,
+            $modelRendererWithNamespace
+        );
 
-        //// 2. Real Factory and Renderer creation (used in the Views class):
+        if (true === $config->modelsAsStringsInTemplates()) {
+            $templateRenderer = $templateRendererWithModelsRender;
+        }
+
+        //// 2. Real Factory and Renderer creation (used in the ViewsManager class):
 
         $realModelFactory = $modules->getModelFactory();
         $realModelFactory = null === $realModelFactory ?
-            new ModelFactory($objectReader, $propertyValueProvider) :
+            new ModelFactory(
+                $objectReader,
+                $propertyValueProvider,
+                $modelTemplateResolver,
+                $templateRendererWithModelsRender
+            ) :
             $realModelFactory;
 
         $realModelFactory = new ModelFactoryWithDefaultsManagement(
@@ -133,7 +145,7 @@ final class ViewNamespace
             new ModelRenderer(
                 $templateRenderer,
                 $modelFactoryWithNamespaces,
-                $templateProvider
+                $modelTemplateResolver
             ) :
             $realModelRenderer;
 
@@ -148,12 +160,12 @@ final class ViewNamespace
         $modules->setEventDispatcher($eventDispatcher)
                 ->setObjectReader($objectReader)
                 ->setObjectPropertyWriter($objectPropertyWriter)
-                ->setModelTemplateProvider($templateProvider)
+                ->setModelTemplateResolver($modelTemplateResolver)
                 ->setPropertyValueProvider($propertyValueProvider)
                 ->setModelFactory($realModelFactory)
                 ->setModelRenderer($realModelRenderer)
-                ->setModelNamespaceProvider($modelNamespaceProvider)
-                ->setModelNameProvider($modelNameProvider);
+                ->setModelNamespaceResolver($modelNamespaceProvider)
+                ->setModelNameResolver($modelNameProvider);
 
         $this->modules = $modules;
     }

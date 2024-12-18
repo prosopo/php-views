@@ -29,9 +29,9 @@ final class ModelFactoryWithDefaultsManagement implements ModelFactoryInterface
         $this->objectPropertyWriter = $objectPropertyWriter;
     }
 
-    public function makeModel(string $modelClass)
+    public function createModel(string $modelClass)
     {
-        $model = $this->modelFactory->makeModel($modelClass);
+        $model = $this->modelFactory->createModel($modelClass);
 
         if (true === ($model instanceof TemplateModelWithDefaultsInterface)) {
             $this->setDefaultValuesRecursively($model);
@@ -42,12 +42,12 @@ final class ModelFactoryWithDefaultsManagement implements ModelFactoryInterface
 
     protected function setDefaultValuesRecursively(TemplateModelWithDefaultsInterface $modelWithDefaults): void
     {
-        $defaultsPropertyValueProvider = $modelWithDefaults->getDefaultsPropertyValueProvider();
+        $defaultsPropertyValueProvider = $modelWithDefaults->getDefaultPropertyValueProvider();
 
-        $this->objectPropertyWriter->setObjectPropertyValues($modelWithDefaults, $defaultsPropertyValueProvider);
+        $this->objectPropertyWriter->assignPropertyValues($modelWithDefaults, $defaultsPropertyValueProvider);
 
         $innerModelsWithDefaults = $this->getInnerModels(
-            $this->objectPropertyReader->getObjectVariables($modelWithDefaults)
+            $this->objectPropertyReader->extractObjectVariables($modelWithDefaults)
         );
 
         array_map(function (TemplateModelWithDefaultsInterface $innerModelWithDefaults) {
