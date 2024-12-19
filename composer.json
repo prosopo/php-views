@@ -1,6 +1,6 @@
 {
   "name": "prosopo/views",
-  "description": "Blazing fast Views with model-driven approach, multi-namespace support and custom Blade implementation as a default template engine.",
+  "description": "Blazing fast Views with model-driven approach, Blade and multi-namespace support.",
   "homepage": "https://github.com/prosopo/php-views",
   "keywords": [
     "Views",

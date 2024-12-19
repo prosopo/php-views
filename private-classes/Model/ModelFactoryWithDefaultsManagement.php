@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\Model;
 
+use Closure;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelWithDefaultsInterface;
 use Prosopo\Views\Interfaces\Object\ObjectPropertyWriterInterface;
@@ -29,7 +30,7 @@ final class ModelFactoryWithDefaultsManagement implements ModelFactoryInterface
         $this->objectPropertyWriter = $objectPropertyWriter;
     }
 
-    public function createModel(string $modelClass)
+    public function createModel(string $modelClass, ?Closure $setupModelCallback = null)
     {
         $model = $this->modelFactory->createModel($modelClass);
 

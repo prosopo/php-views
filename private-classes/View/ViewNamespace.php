@@ -15,6 +15,7 @@ use Prosopo\Views\PrivateClasses\Object\{ObjectClassReader,
     PropertyValueProviderForNullable};
 use Prosopo\Views\PrivateClasses\Model\{ModelFactory,
     ModelFactoryWithDefaultsManagement,
+    ModelFactoryWithSetupCallback,
     ModelNameResolver,
     ModelNamespaceResolver,
     ModelRenderer,
@@ -138,6 +139,8 @@ final class ViewNamespace
             $objectReader,
             $objectPropertyWriter
         );
+
+        $realModelFactory = new ModelFactoryWithSetupCallback($realModelFactory);
 
         $realModelRenderer = $modules->getModelRenderer();
         $realModelRenderer = null === $realModelRenderer ?

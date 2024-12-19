@@ -28,7 +28,7 @@ final class ModelRendererWithEventDetails implements ModelRendererInterface
         $this->eventName = $eventName;
     }
 
-    public function renderModel($modelOrClass, Closure $setupModelCallback = null): string
+    public function renderModel($modelOrClass, ?Closure $setupModelCallback = null): string
     {
         $modelClass = true === is_string($modelOrClass) ?
             $modelOrClass :

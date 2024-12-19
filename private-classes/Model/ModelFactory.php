@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\Model;
 
+use Closure;
 use Prosopo\Views\Interfaces\Model\ModelFactoryInterface;
 use Prosopo\Views\Interfaces\Object\ObjectReaderInterface;
 use Prosopo\Views\Interfaces\Object\PropertyValueProviderInterface;
@@ -33,7 +34,7 @@ final class ModelFactory implements ModelFactoryInterface
         $this->templateRenderer = $templateRenderer;
     }
 
-    public function createModel(string $modelClass)
+    public function createModel(string $modelClass, ?Closure $setupModelCallback = null)
     {
         return new $modelClass(
             $this->objectReader,
