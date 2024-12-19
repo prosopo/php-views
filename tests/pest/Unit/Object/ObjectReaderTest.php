@@ -81,4 +81,22 @@ class ObjectReaderTest extends TestCase
             'someMethod' => [$testInstance, 'someMethod'],
         ], $variables);
     }
+
+    public function testExcludesNotInitializedProperties(): void
+    {
+        // given
+        $objectReader = new ObjectReader();
+        $testInstance = new class {
+            public int $typedProperty = 1;
+            public int $typedButNotInitializedProperty;
+        };
+
+        // when
+        $variables = $objectReader->extractObjectVariables($testInstance);
+
+        // then
+        $this->assertEquals([
+            'typedProperty' => 1,
+        ], $variables);
+    }
 }

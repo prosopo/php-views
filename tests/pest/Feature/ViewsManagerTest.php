@@ -919,6 +919,36 @@ class ViewsManagerTest extends TestCase
         $this->assertFalse(isset($model->message));
     }
 
+    public function testMakeModelNotSetDefaultsForInnerInterfacedModel(): void
+    {
+        // given
+        $bladeRenderer = new ViewTemplateRenderer();
+        $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
+        $views = new ViewsManager();
+
+        $modelNamespace = $this->defineRealModelClass(
+            __METHOD__,
+            'FirstModel',
+            [
+                [
+                    'name' => 'inner',
+                    'type' => '\\' . TemplateModelInterface::class,
+                    'visibility' => 'public',
+                ]
+            ],
+            true
+        );
+
+        // when
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
+
+        $modelClass = $modelNamespace . '\\FirstModel';
+        $model = $views->createModel($modelClass);
+
+        // then
+        $this->assertFalse(isset($model->inner));
+    }
+
     public function testMakeModelSupportsDifferentNamespaces(): void
     {
         // given
