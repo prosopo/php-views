@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use Closure;
 use org\bovigo\vfs\vfsStream;
 use ParseError;
 use PHPUnit\Framework\TestCase;
@@ -517,6 +518,52 @@ class ViewsManagerTest extends TestCase
         $this->assertSame('Hey inner!', $viewsManager->renderModel($topModel));
     }
 
+    public function testRenderPassesArrayOfInnerModelsAsObjects(): void
+    {
+        // given
+        vfsStream::setup('top', null, [
+            'folder1' => ['top-model.blade.php' => 'Hey {{ true === is_object($inners[0])? "inner object!": "string" }}'],
+            'folder2' => [ 'inner-model.blade.php' => 'inner!'],
+        ]);
+        $bladeRenderer = new ViewTemplateRenderer();
+        $firstNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
+            ->setTemplatesRootPath(vfsStream::url('top/folder1'))
+            ->setTemplateFileExtension('.blade.php');
+        $secondNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
+            ->setTemplatesRootPath(vfsStream::url('top/folder2'))
+            ->setTemplateFileExtension('.blade.php');
+        $secondNamespace = $this->defineRealModelClass(
+            __METHOD__ . '__second',
+            'InnerModel',
+            [],
+            false
+        );
+        $firstNamespace = $this->defineRealModelClass(
+            __METHOD__,
+            'TopModel',
+            [
+                [
+                    'name' => 'inners',
+                    'visibility' => 'public',
+                ]
+            ],
+            false
+        );
+        $views = new ViewsManager();
+
+        // when
+        $views->registerNamespace($firstNamespace, $firstNamespaceConfig);
+        $views->registerNamespace($secondNamespace, $secondNamespaceConfig);
+
+        $innerModelClass = $secondNamespace . '\\InnerModel';
+        $topModelClass = $firstNamespace . '\\TopModel';
+        $topModel = new $topModelClass();
+        $topModel->inners = [new $innerModelClass()];
+
+        // then
+        $this->assertSame('Hey inner object!', $views->renderModel($topModel));
+    }
+
     public function testRenderPassesInnerModelsAsStringsWhenFlagIsSet(): void
     {
         // given
@@ -559,6 +606,53 @@ class ViewsManagerTest extends TestCase
         $topModelClass = $firstNamespace . '\\TopModel';
         $topModel = new $topModelClass();
         $topModel->inner = new $innerModelClass();
+
+        // then
+        $this->assertSame('Hey inner!', $views->renderModel($topModel));
+    }
+
+    public function testRenderPassesArrayOfInnerModelsAsStringsWhenFlagIsSet(): void
+    {
+        // given
+        vfsStream::setup('top', null, [
+            'folder1' => ['top-model.blade.php' => 'Hey @foreach ($inners as $inner){!! $inner !!}@endforeach'],
+            'folder2' => [ 'inner-model.blade.php' => 'inner!'],
+        ]);
+        $bladeRenderer = new ViewTemplateRenderer();
+        $firstNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
+            ->setTemplatesRootPath(vfsStream::url('top/folder1'))
+            ->setTemplateFileExtension('.blade.php')
+            ->setModelsAsStringsInTemplates(true);
+        $secondNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer))
+            ->setTemplatesRootPath(vfsStream::url('top/folder2'))
+            ->setTemplateFileExtension('.blade.php');
+        $secondNamespace = $this->defineRealModelClass(
+            __METHOD__ . '__second',
+            'InnerModel',
+            [],
+            false
+        );
+        $firstNamespace = $this->defineRealModelClass(
+            __METHOD__,
+            'TopModel',
+            [
+                [
+                    'name' => 'inners',
+                    'visibility' => 'public',
+                ]
+            ],
+            false
+        );
+        $views = new ViewsManager();
+
+        // when
+        $views->registerNamespace($firstNamespace, $firstNamespaceConfig);
+        $views->registerNamespace($secondNamespace, $secondNamespaceConfig);
+
+        $innerModelClass = $secondNamespace . '\\InnerModel';
+        $topModelClass = $firstNamespace . '\\TopModel';
+        $topModel = new $topModelClass();
+        $topModel->inners = [new $innerModelClass()];
 
         // then
         $this->assertSame('Hey inner!', $views->renderModel($topModel));
@@ -733,6 +827,38 @@ class ViewsManagerTest extends TestCase
         $this->assertSame($modelClass, get_class($model));
     }
 
+    public function testMakeModelCallsSetupCallback(): void
+    {
+        // given
+        $bladeRenderer = new ViewTemplateRenderer();
+        $namespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
+        $views = new ViewsManager();
+
+        $modelNamespace = $this->defineRealModelClass(
+            __METHOD__,
+            'FirstModel',
+            [
+                [
+                    'name' => 'message',
+                    'type' => 'string',
+                    'visibility' => 'public',
+                ]
+            ],
+            false
+        );
+
+        // when
+        $views->registerNamespace($modelNamespace, $namespaceConfig);
+
+        $modelClass = $modelNamespace . '\\FirstModel';
+        $model = $views->createModel($modelClass, function (object $model) {
+            $model->message = 'Hello World!';
+        });
+
+        // then
+        $this->assertSame("Hello World!", $model->message);
+    }
+
     public function testMakeModelSetsDefaultsForModelsThatExtendBaseClass(): void
     {
         // given
@@ -800,7 +926,7 @@ class ViewsManagerTest extends TestCase
 
         $firstNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
         $firstNamespaceConfig->getModules()->setModelFactory(new class implements ModelFactoryInterface{
-            public function createModel(string $modelClass): object
+            public function createModel(string $modelClass, ?Closure $setupModelCallback = null): object
             {
                 $model = new $modelClass();
 
@@ -812,7 +938,7 @@ class ViewsManagerTest extends TestCase
 
         $secondNamespaceConfig = (new ViewNamespaceConfig($bladeRenderer));
         $secondNamespaceConfig->getModules()->setModelFactory(new class implements ModelFactoryInterface{
-            public function createModel(string $modelClass): object
+            public function createModel(string $modelClass, ?Closure $setupModelCallback = null): object
             {
                 $model = new $modelClass();
 
@@ -869,7 +995,7 @@ class ViewsManagerTest extends TestCase
         $firstNamespaceConfig
             ->getModules()
             ->setModelFactory(new class implements ModelFactoryInterface{
-                public function createModel(string $modelClass): object
+                public function createModel(string $modelClass, ?Closure $setupModelCallback = null): object
                 {
                     $model = new $modelClass();
 

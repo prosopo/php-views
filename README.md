@@ -256,8 +256,8 @@ $employee->bonus = $bonus;
 
 echo $views->renderModel($employee);
 
-// Tip: you can still pass the callback as the second renderModel() argument
-// to customize the Model properties before rendering. 
+// Tip: you can pass the callback as the second argument for both createModel() and renderModel() models
+// to customize the Model properties before returning/rendering. 
 ```
 
 **References Advice**
@@ -884,14 +884,15 @@ model-driven approach and template error handling.
 
 ## 6. Contribution
 
-We would be excited if you decide to contribute! Please read
-the [for-devs.md](https://github.com/prosopo/php-views/blob/main/for-devs.md) file for project guidelines and
+We would be excited if you decide to contribute 🤝
+
+Please read the [for-devs.md](https://github.com/prosopo/php-views/blob/main/for-devs.md) file for project guidelines and
 agreements.
 
 ## 7. Credits
 
 This package was created by [Maxim Akimov](https://github.com/light-source/) during the development of
-the [WordPress integration for Prosopo Procaptcha](https://wordpress.org/plugins/prosopo-procaptcha/).
+the [WordPress integration for Prosopo Procaptcha](https://github.com/prosopo/procaptcha-wordpress-plugin).
 
 [Procaptcha](https://prosopo.io/) is a privacy-friendly and cost-effective alternative to Google reCaptcha.
 
