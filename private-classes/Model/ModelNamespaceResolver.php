@@ -22,7 +22,7 @@ final class ModelNamespaceResolver implements ModelNamespaceResolverInterface
 
     public function resolveModelNamespace($modelOrClass): string
     {
-        $modelNamespaceWithClassName = false === is_string($modelOrClass) ?
+        $modelNamespaceWithClassName = ! is_string($modelOrClass) ?
             $this->objectClassReader->getObjectClass($modelOrClass) :
             $modelOrClass;
 

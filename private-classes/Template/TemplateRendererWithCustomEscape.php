@@ -80,17 +80,17 @@ final class TemplateRendererWithCustomEscape implements TemplateRendererInterfac
     protected function caseToString($value): string
     {
         if (
-            true === is_string($value) ||
-            true === is_numeric($value)
+             is_string($value) ||
+            is_numeric($value)
         ) {
-            return (string)$value;
+            return (string) $value;
         }
 
         if (
-            true === is_object($value) &&
+             is_object($value) &&
             method_exists($value, '__toString')
         ) {
-            return (string)$value;
+            return (string) $value;
         }
 
         return '';

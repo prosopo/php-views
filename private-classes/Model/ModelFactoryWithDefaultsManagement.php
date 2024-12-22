@@ -34,7 +34,7 @@ final class ModelFactoryWithDefaultsManagement implements ModelFactoryInterface
     {
         $model = $this->modelFactory->createModel($modelClass);
 
-        if (true === ($model instanceof TemplateModelWithDefaultsInterface)) {
+        if ($model instanceof TemplateModelWithDefaultsInterface) {
             $this->setDefaultValuesRecursively($model);
         }
 
@@ -64,7 +64,7 @@ final class ModelFactoryWithDefaultsManagement implements ModelFactoryInterface
     protected function getInnerModels(array $variables): array
     {
         return array_filter($variables, function ($item) {
-            return true === ($item instanceof TemplateModelWithDefaultsInterface) ;
+            return $item instanceof TemplateModelWithDefaultsInterface ;
         });
     }
 }

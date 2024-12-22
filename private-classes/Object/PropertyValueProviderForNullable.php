@@ -22,18 +22,19 @@ final class PropertyValueProviderForNullable implements PropertyValueProviderInt
 
     public function supportsProperty(ReflectionProperty $property): bool
     {
-        if (true === $this->propertyValueProvider->supportsProperty($property)) {
+        if ($this->propertyValueProvider->supportsProperty($property)) {
             return true;
         }
 
         $type = $property->getType();
 
-        return null !== $type && true === $type->allowsNull();
+        return null !== $type &&
+            $type->allowsNull();
     }
 
     public function getPropertyValue(ReflectionProperty $property)
     {
-        if (true === $this->propertyValueProvider->supportsProperty($property)) {
+        if ($this->propertyValueProvider->supportsProperty($property)) {
             return $this->propertyValueProvider->getPropertyValue($property);
         }
 

@@ -55,11 +55,11 @@ final class TemplateRendererWithModelsRender implements TemplateRendererInterfac
      */
     protected function renderIfModel($item)
     {
-        if (true === ( $item instanceof TemplateModelInterface )) {
+        if ($item instanceof TemplateModelInterface) {
             $item = $this->modelRenderer->renderModel($item);
         } elseif (
-            true === is_array($item) &&
-            false === is_callable($item)
+             is_array($item) &&
+            ! is_callable($item)
         ) {
             // @phpstan-ignore-next-line
             $item = $this->renderModels($item);

@@ -24,7 +24,7 @@ final class ObjectPropertyWriter implements ObjectPropertyWriterInterface
 
         array_map(
             function (ReflectionProperty $reflectionProperty) use ($instance, $propertyValueProvider) {
-                if (true === $reflectionProperty->isInitialized($instance)) {
+                if ($reflectionProperty->isInitialized($instance)) {
                     return;
                 }
 
@@ -55,7 +55,7 @@ final class ObjectPropertyWriter implements ObjectPropertyWriterInterface
         PropertyValueProviderInterface $propertyValueProvider,
         ReflectionProperty $reflectionProperty
     ): bool {
-        if (false === $propertyValueProvider->supportsProperty($reflectionProperty)) {
+        if (! $propertyValueProvider->supportsProperty($reflectionProperty)) {
             return false;
         }
 
