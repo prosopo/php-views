@@ -227,7 +227,7 @@ class FileModelTemplateProviderTest extends TestCase
     public function testGetTemplateHandlesNestedNamespaces(): void
     {
         // given
-        vfsStream::setup('templates', null, ['admin/dashboard-view.blade.php' => 'Dashboard Content']);
+        vfsStream::setup('templates', null, ['Admin/dashboard-view.blade.php' => 'Dashboard Content']);
         $templateModel = Mockery::mock(TemplateModelInterface::class);
         $modelNamespaceProviderMock = Mockery::mock(ModelNamespaceResolverInterface::class);
         $modelNameProviderMock = Mockery::mock(ModelNameResolverInterface::class);
@@ -287,7 +287,7 @@ class FileModelTemplateProviderTest extends TestCase
             ->with($templateModel)
             ->andReturn('DashboardView');
 
-        $this->assertSame(vfsStream::url('templates/admin/dashboard-view.blade.php'), $result());
+        $this->assertSame(vfsStream::url('templates/Admin/dashboard-view.blade.php'), $result());
 
         // apply
         Mockery::close();

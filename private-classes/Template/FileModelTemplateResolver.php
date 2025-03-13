@@ -80,8 +80,8 @@ final class FileModelTemplateResolver implements ModelTemplateResolverInterface
         $relativeTemplatePath = $relativeModelPath;
         $relativeTemplatePath .= '' !== $relativeTemplatePath ? DIRECTORY_SEPARATOR
             : '';
-        $relativeTemplatePath .= $modelName;
+        $relativeTemplatePath .= strtolower($modelName);
 
-        return strtolower($relativeTemplatePath);
+        return $relativeTemplatePath;
     }
 }
