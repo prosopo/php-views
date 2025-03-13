@@ -26,6 +26,6 @@ final class TemplateRenderer implements TemplateRendererInterface
 
         $this->codeExecutor->runCode($template, $variables);
 
-        return (string)ob_get_clean();
+        return (string) ob_get_clean();
     }
 }

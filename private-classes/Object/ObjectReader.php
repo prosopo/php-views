@@ -100,7 +100,7 @@ final class ObjectReader implements ObjectReaderInterface
             function (array $variableValues, ReflectionProperty $reflection_property) use ($instance) {
                 // make sure the property is initialized.
                 // Otherwise, we'll get "must not be accessed before initialization" error.
-                if (true === $reflection_property->isInitialized($instance)) {
+                if ($reflection_property->isInitialized($instance)) {
                     $variableValues[ $reflection_property->getName() ] = $reflection_property->getValue($instance);
                 }
 

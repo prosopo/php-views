@@ -83,7 +83,7 @@ final class EventDispatcher implements EventDispatcherInterface
      */
     protected function getEventDetails(string $eventName): array
     {
-        return true === key_exists($eventName, $this->eventDetails) ?
+        return key_exists($eventName, $this->eventDetails) ?
             $this->eventDetails[$eventName] :
             [];
     }
@@ -93,7 +93,7 @@ final class EventDispatcher implements EventDispatcherInterface
      */
     protected function getEventListeners(string $eventName): array
     {
-        return true === key_exists($eventName, $this->eventListeners) ?
+        return key_exists($eventName, $this->eventListeners) ?
             $this->eventListeners[$eventName] :
             [];
     }

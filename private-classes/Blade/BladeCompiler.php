@@ -70,7 +70,7 @@ final class BladeCompiler implements TemplateCompilerInterface
     // Removes all parts like: "{{--Comment--}}".
     protected function removeComments(string $template): string
     {
-        return (string)preg_replace('/{{--[\s\S]*?--}}/', '', $template);
+        return (string) preg_replace('/{{--[\s\S]*?--}}/', '', $template);
     }
 
     protected function replaceOpeningEcho(string $template, string $escape_callback_name): string
@@ -100,7 +100,7 @@ final class BladeCompiler implements TemplateCompilerInterface
         $regex = $this->getRegexForTagWithBrackets($tag);
         $replacement = sprintf('<?php %s( $1 ): ?>', $tag);
 
-        return (string)preg_replace($regex, $replacement, $template);
+        return (string) preg_replace($regex, $replacement, $template);
     }
 
     protected function replaceClosingLoops(string $template): string
@@ -133,7 +133,7 @@ final class BladeCompiler implements TemplateCompilerInterface
 
     protected function replaceUseDirective(string $template): string
     {
-        return (string)preg_replace('/@use\s*\((["\'])(.*?)\1\)/s', '<?php use $2; ?>', $template);
+        return (string) preg_replace('/@use\s*\((["\'])(.*?)\1\)/s', '<?php use $2; ?>', $template);
     }
 
     protected function replaceSelectedDirective(string $template): string
@@ -142,7 +142,7 @@ final class BladeCompiler implements TemplateCompilerInterface
 
         $replacement = '<?php if ( $1 ) echo "selected=\"\""; ?>';
 
-        return (string)preg_replace($regex, $replacement, $template);
+        return (string) preg_replace($regex, $replacement, $template);
     }
 
     protected function replaceCheckedDirective(string $template): string
@@ -151,7 +151,7 @@ final class BladeCompiler implements TemplateCompilerInterface
 
         $replacement = '<?php if ( $1 ) echo "checked=\"\""; ?>';
 
-        return (string)preg_replace($regex, $replacement, $template);
+        return (string) preg_replace($regex, $replacement, $template);
     }
 
     protected function replaceSwitchDirectives(string $template): string
@@ -161,7 +161,7 @@ final class BladeCompiler implements TemplateCompilerInterface
         // 1. remove space between @switch and the first "case",
         // otherwise it'll case an error (spaces are threat as unexpected HTML).
         $regex = '/@switch\s*\((.*)\)\s*<\?php/';
-        $template = (string)preg_replace($regex, '<?php switch($1): ?><?php', $template);
+        $template = (string) preg_replace($regex, '<?php switch($1): ?><?php', $template);
 
         $template = str_replace('@break', '<?php break; ?>', $template);
         $template = str_replace('@default', '<?php default: ?>', $template);
@@ -176,7 +176,7 @@ final class BladeCompiler implements TemplateCompilerInterface
         $regex = '/@class\s*\((\[.*])\)/s';
         $replacement = $this->getCodeForConditionClasses($escape_callback_name);
 
-        return (string)preg_replace($regex, $replacement, $template);
+        return (string) preg_replace($regex, $replacement, $template);
     }
 
     protected function getCodeForConditionClasses(string $escape_callback_name): string

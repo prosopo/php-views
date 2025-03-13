@@ -3,3 +3,5 @@ parameters:
     paths:
         - ../src
         - ../private-classes
+includes:
+    - vendor/phpstan/phpstan-strict-rules/rules.neon

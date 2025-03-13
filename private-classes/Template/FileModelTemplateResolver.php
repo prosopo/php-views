@@ -52,14 +52,14 @@ final class FileModelTemplateResolver implements ModelTemplateResolverInterface
 
         $absoluteTemplatePath = $this->getAbsoluteTemplatePath($relativeTemplatePath);
 
-        return true === $this->isFileBasedTemplate ?
+        return  $this->isFileBasedTemplate ?
             $absoluteTemplatePath :
             $this->getFileContent($absoluteTemplatePath);
     }
 
     protected function getFileContent(string $file): string
     {
-        if (false === file_exists($file)) {
+        if (! file_exists($file)) {
             return '';
         }
 
@@ -75,13 +75,13 @@ final class FileModelTemplateResolver implements ModelTemplateResolverInterface
     protected function getRelativeTemplatePath(string $relativeModelNamespace, string $modelName): string
     {
         $relativeModelPath = str_replace('\\', DIRECTORY_SEPARATOR, $relativeModelNamespace);
-        $modelName = (string)preg_replace('/([a-z])([A-Z])/', '$1-$2', $modelName);
+        $modelName = (string) preg_replace('/([a-z])([A-Z])/', '$1-$2', $modelName);
 
         $relativeTemplatePath = $relativeModelPath;
         $relativeTemplatePath .= '' !== $relativeTemplatePath ? DIRECTORY_SEPARATOR
             : '';
-        $relativeTemplatePath .= $modelName;
+        $relativeTemplatePath .= strtolower($modelName);
 
-        return strtolower($relativeTemplatePath);
+        return $relativeTemplatePath;
     }
 }

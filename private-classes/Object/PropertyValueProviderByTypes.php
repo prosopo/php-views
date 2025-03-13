@@ -30,24 +30,24 @@ final class PropertyValueProviderByTypes implements PropertyValueProviderInterfa
 
     public function supportsProperty(ReflectionProperty $property): bool
     {
-        if (true === $this->propertyValueProvider->supportsProperty($property)) {
+        if ($this->propertyValueProvider->supportsProperty($property)) {
             return true;
         }
 
         $type = $this->getPropertyType($property);
 
-        return true === key_exists($type, $this->valuesByType);
+        return key_exists($type, $this->valuesByType);
     }
 
     public function getPropertyValue(ReflectionProperty $property)
     {
-        if (true === $this->propertyValueProvider->supportsProperty($property)) {
+        if ($this->propertyValueProvider->supportsProperty($property)) {
             return $this->propertyValueProvider->getPropertyValue($property);
         }
 
         $type = $this->getPropertyType($property);
 
-        return true === key_exists($type, $this->valuesByType) ?
+        return key_exists($type, $this->valuesByType) ?
         $this->valuesByType[$type] :
         null;
     }

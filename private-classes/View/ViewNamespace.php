@@ -117,7 +117,7 @@ final class ViewNamespace
             $modelRendererWithNamespace
         );
 
-        if (true === $config->modelsAsStringsInTemplates()) {
+        if ($config->modelsAsStringsInTemplates()) {
             $templateRenderer = $templateRendererWithModelsRender;
         }
 

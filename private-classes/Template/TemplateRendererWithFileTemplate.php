@@ -28,10 +28,10 @@ final class TemplateRendererWithFileTemplate implements TemplateRendererInterfac
 
     protected function getFileContent(string $file): string
     {
-        if (false === file_exists($file)) {
+        if (! file_exists($file)) {
             return '';
         }
 
-        return (string)file_get_contents($file);
+        return (string) file_get_contents($file);
     }
 }
