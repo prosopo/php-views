@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Prosopo\Views\PrivateClasses\Template;
 
+use Prosopo\Views\Interfaces\Template\FileTemplateContentProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 
 /**
@@ -12,26 +13,21 @@ use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
  */
 final class TemplateRendererWithFileTemplate implements TemplateRendererInterface
 {
+    private FileTemplateContentProviderInterface $fileTemplateContentProvider;
     private TemplateRendererInterface $templateRenderer;
 
-    public function __construct(TemplateRendererInterface $templateRenderer)
-    {
+    public function __construct(
+        FileTemplateContentProviderInterface $fileTemplateContentProvider,
+        TemplateRendererInterface $templateRenderer
+    ) {
+        $this->fileTemplateContentProvider = $fileTemplateContentProvider;
         $this->templateRenderer = $templateRenderer;
     }
 
     public function renderTemplate(string $template, array $variables = []): string
     {
-        $template = $this->getFileContent($template);
+        $template = $this->fileTemplateContentProvider->getFileTemplateContent($template);
 
         return $this->templateRenderer->renderTemplate($template, $variables);
-    }
-
-    protected function getFileContent(string $file): string
-    {
-        if (! file_exists($file)) {
-            return '';
-        }
-
-        return (string) file_get_contents($file);
     }
 }

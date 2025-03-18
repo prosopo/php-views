@@ -7,6 +7,7 @@ namespace Tests\Unit\Template;
 use Mockery;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
+use Prosopo\Views\Interfaces\Template\FileTemplateContentProviderInterface;
 use Prosopo\Views\Interfaces\Template\TemplateRendererInterface;
 use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithFileTemplate;
 
@@ -20,12 +21,17 @@ class TemplateRendererWithFileTemplateTest extends TestCase
         ]);
         $templateFilePath = vfsStream::url('templates/template.blade.php');
         $templateRendererMock = Mockery::mock(TemplateRendererInterface::class);
-        $renderer = new TemplateRendererWithFileTemplate($templateRendererMock);
+        $fileTemplateContentProviderMock = Mockery::mock(FileTemplateContentProviderInterface::class);
+        $renderer = new TemplateRendererWithFileTemplate($fileTemplateContentProviderMock, $templateRendererMock);
 
         // when
         $result = fn()=> $renderer->renderTemplate($templateFilePath, ['key' => 'value']);
 
         // then
+        $fileTemplateContentProviderMock->shouldReceive('getFileTemplateContent')
+            ->once()
+            ->andReturn('<div>{{ $key }}</div>');
+
         $templateRendererMock->shouldReceive('renderTemplate')
             ->once()
             ->with('<div>{{ $key }}</div>', ['key' => 'value'])
@@ -43,12 +49,17 @@ class TemplateRendererWithFileTemplateTest extends TestCase
         vfsStream::setup('templates');
         $missingTemplateFilePath = vfsStream::url('templates/missing-template.blade.php');
         $templateRendererMock = Mockery::mock(TemplateRendererInterface::class);
-        $renderer = new TemplateRendererWithFileTemplate($templateRendererMock);
+        $fileTemplateContentProviderMock = Mockery::mock(FileTemplateContentProviderInterface::class);
+        $renderer = new TemplateRendererWithFileTemplate($fileTemplateContentProviderMock, $templateRendererMock);
 
         // when
         $result = fn() => $renderer->renderTemplate($missingTemplateFilePath, ['key' => 'value']);
 
         // then
+        $fileTemplateContentProviderMock->shouldReceive('getFileTemplateContent')
+            ->once()
+            ->andReturn('');
+
         $templateRendererMock->shouldReceive('renderTemplate')
             ->once()
             ->with('', ['key' => 'value'])

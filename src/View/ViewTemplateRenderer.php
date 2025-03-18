@@ -11,6 +11,7 @@ use Prosopo\Views\PrivateClasses\CodeRunner\CodeRunnerWithGlobalArguments;
 use Prosopo\Views\PrivateClasses\CodeRunner\CodeRunnerWithTemplateCompilation;
 use Prosopo\Views\PrivateClasses\CodeRunner\PhpCodeRunner;
 use Prosopo\Views\PrivateClasses\EventDispatcher;
+use Prosopo\Views\PrivateClasses\Template\FileTemplateContentProvider;
 use Prosopo\Views\PrivateClasses\Template\TemplateRenderer;
 use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithCustomEscape;
 use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithEventDetails;
@@ -66,7 +67,12 @@ final class ViewTemplateRenderer implements TemplateRendererInterface
             $templateRenderer;
 
         if ($config->fileBasedTemplates()) {
-            $templateRenderer = new TemplateRendererWithFileTemplate($templateRenderer);
+            $fileTemplateContentProvider = new FileTemplateContentProvider(
+                $errorEventName,
+                $eventDispatcher,
+            );
+
+            $templateRenderer = new TemplateRendererWithFileTemplate($fileTemplateContentProvider, $templateRenderer);
         }
 
         $templateRenderer = new TemplateRendererWithCustomEscape(

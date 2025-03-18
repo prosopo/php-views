@@ -22,6 +22,7 @@ use Prosopo\Views\PrivateClasses\Model\{ModelFactory,
     ModelRendererWithEventDetails};
 use Prosopo\Views\PrivateClasses\EventDispatcher;
 use Prosopo\Views\PrivateClasses\Template\FileModelTemplateResolver;
+use Prosopo\Views\PrivateClasses\Template\FileTemplateContentProvider;
 use Prosopo\Views\PrivateClasses\Template\TemplateRendererWithModelsRender;
 use Prosopo\Views\View\ViewNamespaceConfig;
 use Prosopo\Views\View\ViewNamespaceModules;
@@ -81,6 +82,11 @@ final class ViewNamespace
             new ModelNameResolver(new ObjectClassReader()) :
             $modelNameProvider;
 
+        $fileTemplateContentProvider = new FileTemplateContentProvider(
+            $templateErrorEventName,
+            $eventDispatcher,
+        );
+
         $modelTemplateResolver = $modules->getModelTemplateResolver();
         $modelTemplateResolver = null === $modelTemplateResolver ?
             new FileModelTemplateResolver(
@@ -88,6 +94,7 @@ final class ViewNamespace
                 $config->getTemplatesRootPath(),
                 $config->getTemplateFileExtension(),
                 $config->fileBasedTemplates(),
+                $fileTemplateContentProvider,
                 $modelNamespaceProvider,
                 $modelNameProvider
             ) :
