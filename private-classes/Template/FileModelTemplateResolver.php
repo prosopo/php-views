@@ -7,6 +7,7 @@ namespace Prosopo\Views\PrivateClasses\Template;
 use Prosopo\Views\Interfaces\Model\ModelNameResolverInterface;
 use Prosopo\Views\Interfaces\Model\ModelNamespaceResolverInterface;
 use Prosopo\Views\Interfaces\Model\TemplateModelInterface;
+use Prosopo\Views\Interfaces\Template\FileTemplateContentProviderInterface;
 use Prosopo\Views\Interfaces\Template\ModelTemplateResolverInterface;
 
 /**
@@ -19,6 +20,7 @@ final class FileModelTemplateResolver implements ModelTemplateResolverInterface
     private string $namespace;
     private string $extension;
     private bool $isFileBasedTemplate;
+    private FileTemplateContentProviderInterface $fileTemplateContentProvider;
     private ModelNameResolverInterface $modelNameProvider;
     private ModelNamespaceResolverInterface $modelNamespaceProvider;
 
@@ -27,12 +29,15 @@ final class FileModelTemplateResolver implements ModelTemplateResolverInterface
         string $templatesRootPath,
         string $extension,
         bool $isFileBasedTemplate,
+        FileTemplateContentProviderInterface $fileTemplateContentProvider,
         ModelNamespaceResolverInterface $modelNamespaceProvider,
         ModelNameResolverInterface $modelNameProvider
     ) {
         $this->templatesRootPath = $templatesRootPath;
         $this->namespace = $namespace;
         $this->extension = $extension;
+
+        $this->fileTemplateContentProvider = $fileTemplateContentProvider;
         $this->isFileBasedTemplate = $isFileBasedTemplate;
         $this->modelNameProvider = $modelNameProvider;
         $this->modelNamespaceProvider = $modelNamespaceProvider;
@@ -49,22 +54,11 @@ final class FileModelTemplateResolver implements ModelTemplateResolverInterface
 
         $relativeTemplatePath = $this->getRelativeTemplatePath($relativeModelNamespace, $modelName);
 
-
         $absoluteTemplatePath = $this->getAbsoluteTemplatePath($relativeTemplatePath);
 
-        return  $this->isFileBasedTemplate ?
+        return $this->isFileBasedTemplate ?
             $absoluteTemplatePath :
-            $this->getFileContent($absoluteTemplatePath);
-    }
-
-    protected function getFileContent(string $file): string
-    {
-        if (! file_exists($file)) {
-            return '';
-        }
-
-        // @phpcs:ignore
-        return (string)file_get_contents($file);
+            $this->fileTemplateContentProvider->getFileTemplateContent($absoluteTemplatePath);
     }
 
     protected function getAbsoluteTemplatePath(string $relativeTemplatePath): string
